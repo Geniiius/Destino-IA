@@ -1,0 +1,8 @@
+{
+  "name": "Destino IA - Atelier Interactif",
+  "description": "Plateforme d'atelier interactive avec synchronisation en temps réel pour la formation à l'IA générative.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
