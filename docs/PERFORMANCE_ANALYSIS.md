@@ -8,13 +8,13 @@
 
 ### 🎯 Problèmes critiques identifiés
 
-| Priorité | Problème | Impact | Temps fix |
-|----------|----------|--------|-----------|
-| 🔴 **P0** | Re-renders cascade dans `useGallery` | 100+ re-renders/seconde | 2h |
-| 🔴 **P0** | Images non optimisées (5MB chacune) | Upload 30-60s en 3G | 3h |
-| 🟡 **P1** | Requêtes N+1 dans galerie | 50× requêtes inutiles | 1h |
-| 🟡 **P1** | PDF processing bloque UI | Freeze 5-10s | 4h |
-| 🟢 **P2** | Pas de memoization composants | CPU élevé sur animation | 2h |
+| Priorité  | Problème                             | Impact                  | Temps fix |
+| --------- | ------------------------------------ | ----------------------- | --------- |
+| 🔴 **P0** | Re-renders cascade dans `useGallery` | 100+ re-renders/seconde | 2h        |
+| 🔴 **P0** | Images non optimisées (5MB chacune)  | Upload 30-60s en 3G     | 3h        |
+| 🟡 **P1** | Requêtes N+1 dans galerie            | 50× requêtes inutiles   | 1h        |
+| 🟡 **P1** | PDF processing bloque UI             | Freeze 5-10s            | 4h        |
+| 🟢 **P2** | Pas de memoization composants        | CPU élevé sur animation | 2h        |
 
 ---
 
@@ -52,6 +52,7 @@ useEffect(() => {
 ```
 
 **Impact mesuré**:
+
 - **Avant**: 150-300 re-renders lors d'un nouvel upload (tous les participants re-render)
 - **Coût CPU**: ~40-60% CPU sur machines low-end
 - **UX**: Galerie "laggy", images qui "sautent"
@@ -60,45 +61,42 @@ useEffect(() => {
 
 ```typescript
 // ✅ SOLUTION: Memoization + Updates atomiques
-import { useMemo, useCallback, memo } from 'react';
+import { useMemo, useCallback, memo } from "react";
 
 // 1. Memoize le channel pour éviter re-création
-const channelConfig = useMemo(() => ({
-  sessionId,
-  exerciseId,
-}), [sessionId, exerciseId]);
+const channelConfig = useMemo(
+  () => ({
+    sessionId,
+    exerciseId,
+  }),
+  [sessionId, exerciseId]
+);
 
 useEffect(() => {
   if (!supabase) return;
 
   const channel = supabase
     .channel(`exercise_submissions:${channelConfig.sessionId}`)
-    .on('postgres_changes', 
-      { event: 'INSERT', /* ... */ },
-      (payload) => {
-        const newSubmission = payload.new as ExerciseSubmission;
-        
-        // ✅ Ne re-fetch PAS tout, ajoute juste le nouveau
-        if (newSubmission.exercise_id === exerciseId) {
-          setSubmissions(prev => {
-            // Éviter duplicates
-            if (prev.some(s => s.id === newSubmission.id)) return prev;
-            return [newSubmission, ...prev];
-          });
-        }
+    .on("postgres_changes", { event: "INSERT" /* ... */ }, (payload) => {
+      const newSubmission = payload.new as ExerciseSubmission;
+
+      // ✅ Ne re-fetch PAS tout, ajoute juste le nouveau
+      if (newSubmission.exercise_id === exerciseId) {
+        setSubmissions((prev) => {
+          // Éviter duplicates
+          if (prev.some((s) => s.id === newSubmission.id)) return prev;
+          return [newSubmission, ...prev];
+        });
       }
-    )
-    .on('postgres_changes',
-      { event: 'UPDATE', /* ... */ },
-      (payload) => {
-        const updated = payload.new as ExerciseSubmission;
-        
-        // ✅ Update atomique d'un seul élément
-        setSubmissions(prev => 
-          prev.map(sub => sub.id === updated.id ? updated : sub)
-        );
-      }
-    )
+    })
+    .on("postgres_changes", { event: "UPDATE" /* ... */ }, (payload) => {
+      const updated = payload.new as ExerciseSubmission;
+
+      // ✅ Update atomique d'un seul élément
+      setSubmissions((prev) =>
+        prev.map((sub) => (sub.id === updated.id ? updated : sub))
+      );
+    })
     .subscribe();
 
   return () => {
@@ -107,7 +105,8 @@ useEffect(() => {
 }, [channelConfig, exerciseId]); // Dépendances optimisées
 ```
 
-**Gain attendu**: 
+**Gain attendu**:
+
 - **70-80% moins de re-renders** (40-60 au lieu de 150-300)
 - **Latence UI**: <50ms (vs 200-500ms avant)
 - **CPU**: -50% d'utilisation
@@ -123,7 +122,7 @@ useEffect(() => {
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
   {displayedSubmissions.map((submission) => (
     <div key={submission.id} /* ... */>
-      <img 
+      <img
         src={submission.image_url}
         alt={`Creación de ${submission.participant_name}`}
         className="w-full h-full object-cover"
@@ -133,7 +132,8 @@ useEffect(() => {
 </div>
 ```
 
-**Impact**: 
+**Impact**:
+
 - Avec 50 images, chaque update provoque 50 re-renders
 - Smooth animations impossibles
 
@@ -141,7 +141,7 @@ useEffect(() => {
 
 ```typescript
 // ✅ SOLUTION: Composant memoizé + loading lazy
-import { memo } from 'react';
+import { memo } from "react";
 
 interface SubmissionCardProps {
   submission: ExerciseSubmission;
@@ -149,39 +149,42 @@ interface SubmissionCardProps {
   onSelect: (submission: ExerciseSubmission) => void;
 }
 
-const SubmissionCard = memo<SubmissionCardProps>(({ 
-  submission, 
-  isMySubmission, 
-  onSelect 
-}) => {
-  return (
-    <div 
-      className="relative group cursor-pointer"
-      onClick={() => onSelect(submission)}
-    >
-      <img
-        src={submission.image_url}
-        alt={`Creación de ${submission.participant_name}`}
-        loading="lazy" // ✅ Lazy loading natif
-        decoding="async" // ✅ Décoding asynchrone
-        className="w-full h-full object-cover"
-      />
-      {/* ... reste du contenu ... */}
-    </div>
-  );
-}, (prevProps, nextProps) => {
-  // ✅ Custom comparison pour éviter re-renders inutiles
-  return (
-    prevProps.submission.id === nextProps.submission.id &&
-    prevProps.submission.is_favorite === nextProps.submission.is_favorite &&
-    prevProps.isMySubmission === nextProps.isMySubmission
-  );
-});
+const SubmissionCard = memo<SubmissionCardProps>(
+  ({ submission, isMySubmission, onSelect }) => {
+    return (
+      <div
+        className="relative group cursor-pointer"
+        onClick={() => onSelect(submission)}
+      >
+        <img
+          src={submission.image_url}
+          alt={`Creación de ${submission.participant_name}`}
+          loading="lazy" // ✅ Lazy loading natif
+          decoding="async" // ✅ Décoding asynchrone
+          className="w-full h-full object-cover"
+        />
+        {/* ... reste du contenu ... */}
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    // ✅ Custom comparison pour éviter re-renders inutiles
+    return (
+      prevProps.submission.id === nextProps.submission.id &&
+      prevProps.submission.is_favorite === nextProps.submission.is_favorite &&
+      prevProps.isMySubmission === nextProps.isMySubmission
+    );
+  }
+);
 
-SubmissionCard.displayName = 'SubmissionCard';
+SubmissionCard.displayName = "SubmissionCard";
 
 // Dans GalleryView
-export const GalleryView: React.FC<GalleryViewProps> = ({ /* ... */ }) => {
+export const GalleryView: React.FC<GalleryViewProps> = (
+  {
+    /* ... */
+  }
+) => {
   const handleSelect = useCallback((submission: ExerciseSubmission) => {
     setSelectedImage(submission);
   }, []);
@@ -201,7 +204,8 @@ export const GalleryView: React.FC<GalleryViewProps> = ({ /* ... */ }) => {
 };
 ```
 
-**Gain attendu**: 
+**Gain attendu**:
+
 - **90% moins de re-renders** pour les images non modifiées
 - **FPS**: 60 fps constant (vs 20-30 fps avant)
 
@@ -220,25 +224,28 @@ export async function getExerciseSubmissions(
   exerciseId: string
 ): Promise<ExerciseSubmission[]> {
   const { data, error } = await supabase
-    .from('exercise_submissions')
-    .select(`
+    .from("exercise_submissions")
+    .select(
+      `
       *,
       participant:participants(name, email)
-    `) // ⚠️ Join implicite lent
-    .eq('session_id', sessionId)
-    .eq('exercise_id', exerciseId)
-    .order('submitted_at', { ascending: false });
+    `
+    ) // ⚠️ Join implicite lent
+    .eq("session_id", sessionId)
+    .eq("exercise_id", exerciseId)
+    .order("submitted_at", { ascending: false });
 
   // ⚠️ Mapping supplémentaire coûteux
   return data.map((submission: any) => ({
     ...submission,
-    participant_name: submission.participant?.name || 'Anónimo',
-    participant_email: submission.participant?.email || '',
+    participant_name: submission.participant?.name || "Anónimo",
+    participant_email: submission.participant?.email || "",
   }));
 }
 ```
 
 **Mesure de performance**:
+
 ```sql
 -- Test avec 100 submissions
 EXPLAIN ANALYZE
@@ -257,12 +264,12 @@ AND es.exercise_id = 'exercise-1';
 
 ```sql
 -- ✅ SOLUTION 1: Créer index composite
-CREATE INDEX idx_submissions_session_exercise_submitted 
+CREATE INDEX idx_submissions_session_exercise_submitted
 ON exercise_submissions(session_id, exercise_id, submitted_at DESC);
 
 -- ✅ SOLUTION 2: Index sur foreign key
-CREATE INDEX idx_submissions_participant 
-ON exercise_submissions(participant_id) 
+CREATE INDEX idx_submissions_participant
+ON exercise_submissions(participant_id)
 WHERE participant_id IS NOT NULL;
 
 -- Résultat APRÈS:
@@ -277,36 +284,37 @@ export async function getExerciseSubmissions(
   exerciseId: string
 ): Promise<ExerciseSubmission[]> {
   const { data, error } = await supabase
-    .from('exercise_submissions')
-    .select('*') // ✅ Sélectionner uniquement ce dont on a besoin
-    .eq('session_id', sessionId)
-    .eq('exercise_id', exerciseId)
-    .order('submitted_at', { ascending: false })
+    .from("exercise_submissions")
+    .select("*") // ✅ Sélectionner uniquement ce dont on a besoin
+    .eq("session_id", sessionId)
+    .eq("exercise_id", exerciseId)
+    .order("submitted_at", { ascending: false })
     .limit(50); // ✅ Limiter les résultats
 
   if (error) throw error;
 
   // ✅ Fetch participants en batch (1 seule requête)
-  const participantIds = [...new Set(data.map(s => s.participant_id))];
+  const participantIds = [...new Set(data.map((s) => s.participant_id))];
   const { data: participants } = await supabase
-    .from('participants')
-    .select('id, name, email')
-    .in('id', participantIds);
+    .from("participants")
+    .select("id, name, email")
+    .in("id", participantIds);
 
-  const participantMap = new Map(
-    participants?.map(p => [p.id, p]) || []
-  );
+  const participantMap = new Map(participants?.map((p) => [p.id, p]) || []);
 
   // ✅ Mapping efficace avec Map
-  return data.map(submission => ({
+  return data.map((submission) => ({
     ...submission,
-    participant_name: participantMap.get(submission.participant_id)?.name || 'Anónimo',
-    participant_email: participantMap.get(submission.participant_id)?.email || '',
+    participant_name:
+      participantMap.get(submission.participant_id)?.name || "Anónimo",
+    participant_email:
+      participantMap.get(submission.participant_id)?.email || "",
   }));
 }
 ```
 
 **Gain attendu**:
+
 - **Query time**: 2-5ms (vs 45ms avant) = **90% plus rapide**
 - **Charge DB**: -80% de load
 - **UX**: Galerie se charge instantanément
@@ -323,7 +331,7 @@ export async function getExerciseStats(
   sessionId: string,
   exerciseId: string
 ): Promise<ExerciseStats> {
-  const { data, error } = await supabase.rpc('get_exercise_stats', {
+  const { data, error } = await supabase.rpc("get_exercise_stats", {
     p_session_id: sessionId,
     p_exercise_id: exerciseId,
   }); // ⚠️ Appel serveur à chaque toggle favorite
@@ -336,7 +344,10 @@ export async function getExerciseStats(
 
 ```typescript
 // ✅ SOLUTION: Cache simple en mémoire avec invalidation
-const statsCache = new Map<string, { stats: ExerciseStats; timestamp: number }>();
+const statsCache = new Map<
+  string,
+  { stats: ExerciseStats; timestamp: number }
+>();
 const CACHE_TTL = 10000; // 10 secondes
 
 export async function getExerciseStats(
@@ -353,7 +364,7 @@ export async function getExerciseStats(
   }
 
   // Fetch depuis DB
-  const { data, error } = await supabase.rpc('get_exercise_stats', {
+  const { data, error } = await supabase.rpc("get_exercise_stats", {
     p_session_id: sessionId,
     p_exercise_id: exerciseId,
   });
@@ -377,23 +388,27 @@ export function invalidateStatsCache(sessionId: string, exerciseId: string) {
 
 ```typescript
 // Dans useGallery.ts - Invalider après modification
-const toggleFavoriteHandler = useCallback(async (submissionId, isFavorite) => {
-  await submissionsService.toggleFavorite(submissionId, isFavorite);
-  
-  // ✅ Invalider cache pour forcer refresh
-  submissionsService.invalidateStatsCache(sessionId, exerciseId);
-  
-  // ✅ Fetch avec cache invalidé
-  const statsData = await submissionsService.getExerciseStats(
-    sessionId,
-    exerciseId,
-    true // forceRefresh
-  );
-  setStats(statsData);
-}, [sessionId, exerciseId]);
+const toggleFavoriteHandler = useCallback(
+  async (submissionId, isFavorite) => {
+    await submissionsService.toggleFavorite(submissionId, isFavorite);
+
+    // ✅ Invalider cache pour forcer refresh
+    submissionsService.invalidateStatsCache(sessionId, exerciseId);
+
+    // ✅ Fetch avec cache invalidé
+    const statsData = await submissionsService.getExerciseStats(
+      sessionId,
+      exerciseId,
+      true // forceRefresh
+    );
+    setStats(statsData);
+  },
+  [sessionId, exerciseId]
+);
 ```
 
 **Gain attendu**:
+
 - **90% moins de requêtes DB** pour stats
 - **Latence UI**: Instantanée pour affichage stats
 - **Load DB**: -85%
@@ -418,13 +433,16 @@ export async function uploadImageToStorage(
   // ⚠️ Pas de compression, upload du fichier tel quel
   const { data, error } = await supabase.storage
     .from(STORAGE_BUCKET)
-    .upload(filename, file, { /* ... */ });
-  
+    .upload(filename, file, {
+      /* ... */
+    });
+
   return urlData.publicUrl;
 }
 ```
 
 **Impact mesuré**:
+
 - **Taille moyenne**: 2-5 MB par image
 - **Upload 3G**: 30-60 secondes
 - **Upload WiFi lent**: 10-20 secondes
@@ -435,7 +453,7 @@ export async function uploadImageToStorage(
 ```typescript
 // ✅ SOLUTION: Compression avant upload
 async function compressImage(
-  file: File, 
+  file: File,
   maxWidth: number = 1920,
   quality: number = 0.85
 ): Promise<Blob> {
@@ -448,8 +466,8 @@ async function compressImage(
     };
 
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
 
       // ✅ Calculer dimensions proportionnelles
       let { width, height } = img;
@@ -463,16 +481,16 @@ async function compressImage(
 
       // ✅ Dessiner avec antialiasing
       ctx!.imageSmoothingEnabled = true;
-      ctx!.imageSmoothingQuality = 'high';
+      ctx!.imageSmoothingQuality = "high";
       ctx!.drawImage(img, 0, 0, width, height);
 
       // ✅ Convertir en JPEG optimisé
       canvas.toBlob(
         (blob) => {
           if (blob) resolve(blob);
-          else reject(new Error('Compression failed'));
+          else reject(new Error("Compression failed"));
         },
-        'image/jpeg',
+        "image/jpeg",
         quality
       );
     };
@@ -499,7 +517,7 @@ export async function uploadImageToStorage(
   onProgress?: (progress: number) => void
 ): Promise<{ imageUrl: string; thumbnailUrl: string }> {
   const supabase = getSupabaseClient();
-  if (!supabase) throw new Error('Supabase no configurado');
+  if (!supabase) throw new Error("Supabase no configurado");
 
   // ✅ Valider et compresser en parallèle
   const [compressed, thumbnail] = await Promise.all([
@@ -511,26 +529,27 @@ export async function uploadImageToStorage(
 
   // ✅ Upload les deux versions
   const timestamp = Date.now();
-  const ext = 'jpg';
+  const ext = "jpg";
   const basePath = `${sessionId}/${exerciseId}/${participantId}-${timestamp}`;
 
   const [mainUpload, thumbUpload] = await Promise.all([
     supabase.storage
       .from(STORAGE_BUCKET)
       .upload(`${basePath}.${ext}`, compressed, {
-        cacheControl: '3600',
+        cacheControl: "3600",
         upsert: false,
       }),
     supabase.storage
       .from(STORAGE_BUCKET)
       .upload(`${basePath}_thumb.${ext}`, thumbnail, {
-        cacheControl: '86400', // Cache plus long pour thumbnails
+        cacheControl: "86400", // Cache plus long pour thumbnails
         upsert: false,
       }),
   ]);
 
   if (mainUpload.error) throw mainUpload.error;
-  if (thumbUpload.error) console.warn('Thumbnail upload failed:', thumbUpload.error);
+  if (thumbUpload.error)
+    console.warn("Thumbnail upload failed:", thumbUpload.error);
 
   if (onProgress) onProgress(100);
 
@@ -553,7 +572,7 @@ export async function uploadImageToStorage(
 
 ```sql
 -- Ajouter colonne pour thumbnail
-ALTER TABLE exercise_submissions 
+ALTER TABLE exercise_submissions
 ADD COLUMN image_thumbnail_url TEXT;
 ```
 
@@ -571,6 +590,7 @@ ADD COLUMN image_thumbnail_url TEXT;
 ```
 
 **Gain attendu**:
+
 - **Taille images**: 200-500 KB (vs 2-5 MB) = **85-90% de réduction**
 - **Upload 3G**: 3-8 secondes (vs 30-60s) = **80-90% plus rapide**
 - **Bandwidth**: 25 MB total (vs 250 MB) = **90% d'économie**
@@ -595,16 +615,16 @@ const extractPagesFromPDF = async (file: File): Promise<PDFPage[]> => {
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const textContent = await page.getTextContent();
-    
+
     // ⚠️ Canvas rendering synchrone
     const viewport = page.getViewport({ scale: 2.0 });
     const canvas = document.createElement("canvas");
     canvas.width = viewport.width;
     canvas.height = viewport.height;
-    
+
     await page.render({ canvasContext: context, viewport }).promise;
     const imageUrl = canvas.toDataURL("image/jpeg", 0.85); // ⚠️ Bloquant
-    
+
     pages.push({ title, content, imageUrl });
   }
 
@@ -613,6 +633,7 @@ const extractPagesFromPDF = async (file: File): Promise<PDFPage[]> => {
 ```
 
 **Impact mesuré**:
+
 - **PDF 10 pages**: 3-5 secondes de freeze
 - **PDF 50 pages**: 15-30 secondes de freeze total
 - **UX**: Application non réactive, utilisateur pense que ça a crashé
@@ -622,43 +643,51 @@ const extractPagesFromPDF = async (file: File): Promise<PDFPage[]> => {
 ```typescript
 // ✅ SOLUTION 1: Créer un Web Worker
 // Fichier: public/pdf-worker.js
-self.addEventListener('message', async (e) => {
+self.addEventListener("message", async (e) => {
   const { action, data } = e.data;
 
-  if (action === 'PROCESS_PDF') {
+  if (action === "PROCESS_PDF") {
     try {
-      importScripts('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
-      
+      importScripts(
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"
+      );
+
       const pdfjsLib = self.pdfjsLib;
-      const pdf = await pdfjsLib.getDocument({ data: data.arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: data.arrayBuffer })
+        .promise;
       const pages = [];
 
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        const pageText = textContent.items.map(item => item.str).join(' ').trim();
+        const pageText = textContent.items
+          .map((item) => item.str)
+          .join(" ")
+          .trim();
 
         // Extraire métadonnées sans canvas
-        const lines = pageText.split(/\s{2,}/).filter(l => l.trim().length > 0);
+        const lines = pageText
+          .split(/\s{2,}/)
+          .filter((l) => l.trim().length > 0);
         const title = lines[0]?.substring(0, 100) || `Slide ${i}`;
-        const content = lines.slice(1).join(' ').substring(0, 500);
+        const content = lines.slice(1).join(" ").substring(0, 500);
 
         pages.push({ title, content, pageNumber: i });
-        
+
         // ✅ Progressions incrémentales
         self.postMessage({
-          type: 'PROGRESS',
+          type: "PROGRESS",
           progress: (i / pdf.numPages) * 100,
         });
       }
 
       self.postMessage({
-        type: 'SUCCESS',
+        type: "SUCCESS",
         pages,
       });
     } catch (error) {
       self.postMessage({
-        type: 'ERROR',
+        type: "ERROR",
         error: error.message,
       });
     }
@@ -670,11 +699,11 @@ self.addEventListener('message', async (e) => {
 // ✅ SOLUTION 2: Utiliser le Worker dans le hook
 const extractPagesFromPDF = async (file: File): Promise<PDFPage[]> => {
   return new Promise((resolve, reject) => {
-    const worker = new Worker('/pdf-worker.js');
-    
+    const worker = new Worker("/pdf-worker.js");
+
     file.arrayBuffer().then((arrayBuffer) => {
       worker.postMessage({
-        action: 'PROCESS_PDF',
+        action: "PROCESS_PDF",
         data: { arrayBuffer },
       });
 
@@ -682,16 +711,16 @@ const extractPagesFromPDF = async (file: File): Promise<PDFPage[]> => {
         const { type, pages, progress, error } = e.data;
 
         switch (type) {
-          case 'PROGRESS':
+          case "PROGRESS":
             console.log(`PDF Processing: ${progress.toFixed(0)}%`);
             break;
 
-          case 'SUCCESS':
+          case "SUCCESS":
             worker.terminate();
             resolve(pages);
             break;
 
-          case 'ERROR':
+          case "ERROR":
             worker.terminate();
             reject(new Error(error));
             break;
@@ -729,14 +758,16 @@ const extractPagesFromPDF = async (file: File): Promise<PDFPage[]> => {
           const textContent = await page.getTextContent();
           const pageText = textContent.items
             .map((item: any) => item.str)
-            .join(' ')
+            .join(" ")
             .trim();
 
-          const lines = pageText.split(/\s{2,}/).filter(l => l.trim().length > 0);
+          const lines = pageText
+            .split(/\s{2,}/)
+            .filter((l) => l.trim().length > 0);
           const title = lines[0]?.substring(0, 100) || `Slide ${j}`;
-          const content = lines.slice(1).join(' ').substring(0, 500);
+          const content = lines.slice(1).join(" ").substring(0, 500);
 
-          return { title, content, imageUrl: '' }; // Pas de canvas pour performance
+          return { title, content, imageUrl: "" }; // Pas de canvas pour performance
         })
       );
     }
@@ -746,7 +777,7 @@ const extractPagesFromPDF = async (file: File): Promise<PDFPage[]> => {
     pages.push(...chunkPages);
 
     // ✅ Laisser UI respirer entre les chunks
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
   }
 
   return pages;
@@ -754,6 +785,7 @@ const extractPagesFromPDF = async (file: File): Promise<PDFPage[]> => {
 ```
 
 **Gain attendu**:
+
 - **UI freeze**: 0 secondes (vs 15-30s) = **Interface toujours réactive**
 - **Processing time**: Même durée mais non-bloquant
 - **UX**: L'utilisateur peut continuer à naviguer pendant le processing
@@ -766,7 +798,7 @@ const extractPagesFromPDF = async (file: File): Promise<PDFPage[]> => {
 
 ```typescript
 // Dans useGallery.ts
-import { useDebounce } from '@/hooks/useDebounce';
+import { useDebounce } from "@/hooks/useDebounce";
 
 // ✅ Debounce pour éviter trop de requêtes stats
 const debouncedExerciseId = useDebounce(exerciseId, 500);
@@ -801,7 +833,7 @@ const useLazyImage = (src: string) => {
           }
         });
       },
-      { rootMargin: '50px' } // Précharger 50px avant d'être visible
+      { rootMargin: "50px" } // Précharger 50px avant d'être visible
     );
 
     if (imgRef.current) {
@@ -817,11 +849,11 @@ const useLazyImage = (src: string) => {
 // Utilisation dans GalleryView
 const { imageSrc, imgRef } = useLazyImage(submission.image_thumbnail_url);
 
-<img 
+<img
   ref={imgRef}
-  src={imageSrc || 'data:image/svg+xml,...'} // Placeholder SVG
+  src={imageSrc || "data:image/svg+xml,..."} // Placeholder SVG
   alt="..."
-/>
+/>;
 ```
 
 **Gain**: -70% de bandwidth initial, chargement progressif
@@ -834,9 +866,13 @@ const { imageSrc, imgRef } = useLazyImage(submission.image_thumbnail_url);
 // ✅ Installer react-window
 // npm install react-window
 
-import { FixedSizeGrid as Grid } from 'react-window';
+import { FixedSizeGrid as Grid } from "react-window";
 
-const GalleryGrid = ({ submissions }: { submissions: ExerciseSubmission[] }) => {
+const GalleryGrid = ({
+  submissions,
+}: {
+  submissions: ExerciseSubmission[];
+}) => {
   const COLUMN_COUNT = 3;
   const ROW_HEIGHT = 250;
 
@@ -876,15 +912,15 @@ const GalleryGrid = ({ submissions }: { submissions: ExerciseSubmission[] }) => 
 
 ### Gains Mesurables par Priorité
 
-| Optimisation | Priorité | Temps dev | Gain Performance | Gain UX |
-|--------------|----------|-----------|------------------|---------|
-| **Re-renders cascade** | 🔴 P0 | 2h | CPU -50%, Re-renders -70% | ⭐⭐⭐⭐⭐ |
-| **Images compression** | 🔴 P0 | 3h | Upload -85%, Bandwidth -90% | ⭐⭐⭐⭐⭐ |
-| **Index DB composites** | 🟡 P1 | 1h | Query -90%, Load -80% | ⭐⭐⭐⭐ |
-| **Cache stats** | 🟡 P1 | 1h | Requêtes -90% | ⭐⭐⭐ |
-| **Web Worker PDF** | 🟡 P1 | 4h | UI freeze 0s | ⭐⭐⭐⭐ |
-| **Memoization composants** | 🟢 P2 | 2h | FPS +50%, CPU -30% | ⭐⭐⭐ |
-| **Lazy loading avancé** | 🟢 P2 | 1h | Bandwidth initial -70% | ⭐⭐⭐ |
+| Optimisation               | Priorité | Temps dev | Gain Performance            | Gain UX    |
+| -------------------------- | -------- | --------- | --------------------------- | ---------- |
+| **Re-renders cascade**     | 🔴 P0    | 2h        | CPU -50%, Re-renders -70%   | ⭐⭐⭐⭐⭐ |
+| **Images compression**     | 🔴 P0    | 3h        | Upload -85%, Bandwidth -90% | ⭐⭐⭐⭐⭐ |
+| **Index DB composites**    | 🟡 P1    | 1h        | Query -90%, Load -80%       | ⭐⭐⭐⭐   |
+| **Cache stats**            | 🟡 P1    | 1h        | Requêtes -90%               | ⭐⭐⭐     |
+| **Web Worker PDF**         | 🟡 P1    | 4h        | UI freeze 0s                | ⭐⭐⭐⭐   |
+| **Memoization composants** | 🟢 P2    | 2h        | FPS +50%, CPU -30%          | ⭐⭐⭐     |
+| **Lazy loading avancé**    | 🟢 P2    | 1h        | Bandwidth initial -70%      | ⭐⭐⭐     |
 
 ### Budget Temps Total
 
@@ -901,12 +937,14 @@ const GalleryGrid = ({ submissions }: { submissions: ExerciseSubmission[] }) => 
 ### Sprint 1 (Jour 1 - 5h)
 
 #### Matin (3h)
+
 1. ✅ **Images compression** (3h)
    - Implémenter `compressImage()` et `generateThumbnail()`
    - Mettre à jour `uploadImageToStorage()`
    - Ajouter colonne `image_thumbnail_url` en DB
 
 #### Après-midi (2h)
+
 2. ✅ **Re-renders cascade** (2h)
    - Optimiser `useGallery` avec `useMemo` et updates atomiques
    - Tester avec 50 participants simulés
@@ -918,7 +956,9 @@ const GalleryGrid = ({ submissions }: { submissions: ExerciseSubmission[] }) => 
 ### Sprint 2 (Jour 2 - 6h)
 
 #### Matin (2h)
+
 3. ✅ **Index DB** (1h)
+
    - Exécuter les migrations SQL
    - Tester performance queries
 
@@ -927,6 +967,7 @@ const GalleryGrid = ({ submissions }: { submissions: ExerciseSubmission[] }) => 
    - Ajouter invalidation sur mutations
 
 #### Après-midi (4h)
+
 5. ✅ **Web Worker PDF** (4h)
    - Créer `pdf-worker.js`
    - Intégrer dans `useSlideGeneration`
@@ -939,6 +980,7 @@ const GalleryGrid = ({ submissions }: { submissions: ExerciseSubmission[] }) => 
 ### Sprint 3 (Jour 3 - 3h) - Optionnel
 
 6. ✅ **Memoization composants** (2h)
+
    - Créer `SubmissionCard` memoizé
    - Refactor `GalleryView`
 
@@ -964,7 +1006,7 @@ const measurePerformance = (label: string, fn: () => void) => {
 };
 
 // Exemple d'utilisation
-measurePerformance('Galerie Load', () => {
+measurePerformance("Galerie Load", () => {
   loadSubmissions();
 });
 ```
@@ -972,6 +1014,7 @@ measurePerformance('Galerie Load', () => {
 ### Checklist de Tests
 
 #### Avant Optimisations
+
 - [ ] Mesurer temps de chargement galerie (50 images)
 - [ ] Compter re-renders lors d'un nouvel upload
 - [ ] Mesurer temps upload image 2MB en 3G simulé
@@ -979,6 +1022,7 @@ measurePerformance('Galerie Load', () => {
 - [ ] FPS pendant scroll de la galerie
 
 #### Après Optimisations
+
 - [ ] Temps chargement galerie < 500ms
 - [ ] Re-renders < 50 lors d'upload
 - [ ] Upload image < 8 secondes en 3G
@@ -998,15 +1042,15 @@ measurePerformance('Galerie Load', () => {
 
 ### ROI par Optimisation
 
-| Optimisation | Coût dev | Bénéfice utilisateur | ROI |
-|--------------|----------|---------------------|-----|
-| Images compression | 3h | Upload 85% plus rapide | ⭐⭐⭐⭐⭐ |
-| Re-renders fixes | 2h | UI fluide, pas de lag | ⭐⭐⭐⭐⭐ |
-| Index DB | 1h | Galerie instantanée | ⭐⭐⭐⭐⭐ |
-| Cache stats | 1h | Moins de latence | ⭐⭐⭐⭐ |
-| Web Worker PDF | 4h | Pas de freeze | ⭐⭐⭐⭐ |
-| Memoization | 2h | Meilleur FPS | ⭐⭐⭐ |
-| Lazy loading | 1h | Chargement progressif | ⭐⭐⭐ |
+| Optimisation       | Coût dev | Bénéfice utilisateur   | ROI        |
+| ------------------ | -------- | ---------------------- | ---------- |
+| Images compression | 3h       | Upload 85% plus rapide | ⭐⭐⭐⭐⭐ |
+| Re-renders fixes   | 2h       | UI fluide, pas de lag  | ⭐⭐⭐⭐⭐ |
+| Index DB           | 1h       | Galerie instantanée    | ⭐⭐⭐⭐⭐ |
+| Cache stats        | 1h       | Moins de latence       | ⭐⭐⭐⭐   |
+| Web Worker PDF     | 4h       | Pas de freeze          | ⭐⭐⭐⭐   |
+| Memoization        | 2h       | Meilleur FPS           | ⭐⭐⭐     |
+| Lazy loading       | 1h       | Chargement progressif  | ⭐⭐⭐     |
 
 ### Recommandation Finale
 

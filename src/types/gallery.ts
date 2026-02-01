@@ -1,43 +1,87 @@
 /**
- * Types pour le système de galerie collaborative
+ * @file types/gallery.ts
+ * @description Types pour le système de galerie d'images/vidéos
  */
 
-export interface ExerciseSubmission {
+/**
+ * Type de média dans la galerie
+ */
+export type MediaType = "image" | "video";
+
+/**
+ * Statut de traitement du média
+ */
+export type MediaStatus = "uploading" | "processing" | "ready" | "error";
+
+/**
+ * Média dans la galerie
+ */
+export interface GalleryImage {
   id: string;
-  session_id: string;
-  participant_id: string;
-  exercise_id: string;
-  image_url: string;
-  image_thumbnail_url: string | null;
-  is_favorite: boolean;
-  submitted_at: string;
-  updated_at: string;
-  // Données dénormalisées pour l'affichage
-  participant_name?: string;
-  participant_email?: string;
+  url: string;
+  thumbnailUrl?: string;
+  type: MediaType;
+  participantId: string;
+  participantName: string;
+  exerciseId: string;
+  exerciseName?: string;
+  prompt?: string;
+  metadata?: {
+    width?: number;
+    height?: number;
+    duration?: number;
+    size?: number;
+    format?: string;
+  };
+  status: MediaStatus;
+  createdAt: string;
+  updatedAt?: string;
 }
 
-export interface GalleryBroadcastState {
-  id: string;
-  session_id: string;
-  is_broadcasting: boolean;
-  broadcast_mode: 'all' | 'favorites' | 'single';
-  broadcast_exercise_id: string | null;
-  broadcast_submission_id: string | null;
-  started_at: string | null;
-  updated_at: string;
+/**
+ * État global de la galerie
+ */
+export interface GalleryState {
+  images: GalleryImage[];
+  isLoading: boolean;
+  error: string | null;
+  selectedImage: GalleryImage | null;
+  filters: {
+    exerciseId?: string;
+    participantId?: string;
+    type?: MediaType;
+    status?: MediaStatus;
+  };
 }
 
-export interface ExerciseStats {
-  exercise_id: string;
-  total_submissions: number;
-  total_favorites: number;
-  last_submission_at: string | null;
+/**
+ * Paramètres pour charger la galerie
+ */
+export interface LoadGalleryParams {
+  sessionId?: string;
+  exerciseId?: string;
+  participantId?: string;
+  limit?: number;
+  offset?: number;
 }
 
-export interface SubmissionUploadProgress {
+/**
+ * Paramètres pour uploader un média
+ */
+export interface UploadMediaParams {
   file: File;
-  progress: number; // 0-100
-  status: 'uploading' | 'success' | 'error';
+  participantId: string;
+  participantName: string;
+  exerciseId: string;
+  prompt?: string;
+  metadata?: GalleryImage["metadata"];
+}
+
+/**
+ * Résultat d'upload
+ */
+export interface UploadMediaResult {
+  success: boolean;
+  image?: GalleryImage;
   error?: string;
 }

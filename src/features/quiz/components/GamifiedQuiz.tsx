@@ -10,7 +10,7 @@
  * - Pantalla de resultados con estadísticas
  */
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Trophy,
   Star,
@@ -56,239 +56,150 @@ interface QuizState {
 }
 
 // ============================================
-// QUIZ DATA - Preguntas RCTF
+// QUIZ DATA - Dominando el Prompt: La Estructura de 5 Pasos
 // ============================================
 
 const QUIZ_QUESTIONS: QuizQuestion[] = [
-  // Preguntas sobre ROL (R)
   {
     id: 1,
-    question: "¿Qué representa la 'R' en la metodología RCTF?",
-    options: ["Resultado", "Rol", "Respuesta", "Recurso"],
+    question: "¿Cuál prompt generará MEJORES resultados?",
+    options: [
+      "Hazme una foto de una playa bonita con palmeras y el mar azul",
+      "Actúa como fotógrafo de viajes. Para promocionar un resort en Maldivas. Playa cristalina con palmeras al amanecer, sensación de paraíso exclusivo. Estilo cinematográfico, colores vibrantes. Formato 16:9.",
+    ],
     correctAnswer: 1,
     explanation:
-      "La 'R' representa el ROL que debe asumir la IA para responder de manera especializada.",
-    category: "R",
+      "El Prompt B usa los 5 elementos de la fórmula: ROL + OBJETIVO + ESCENA/EMOCIÓN + ESTILO + SALIDA",
+    category: "General",
     difficulty: "easy",
     points: 100,
   },
   {
     id: 2,
-    question: "¿Cuál es el propósito principal de definir un ROL en un prompt?",
-    options: [
-      "Hacer el prompt más largo",
-      "Dar personalidad a la IA",
-      "Orientar la respuesta hacia una perspectiva experta específica",
-      "Limitar las respuestas de la IA",
-    ],
+    question: "¿Cuál es el PRIMER elemento de la estructura de 5 pasos?",
+    options: ["Objetivo", "Escena + Emoción", "ROL", "Estilo Visual"],
     correctAnswer: 2,
     explanation:
-      "El ROL orienta a la IA para que responda desde una perspectiva experta específica, mejorando la calidad y relevancia de la respuesta.",
+      "El ROL define QUIÉN es la IA: director creativo, fotógrafo, experto en publicidad...",
     category: "R",
-    difficulty: "medium",
-    points: 150,
-  },
-  {
-    id: 3,
-    question: "¿Cuál de estos es el MEJOR ejemplo de un ROL bien definido?",
-    options: [
-      "Eres una IA",
-      "Actúa como experto",
-      "Eres un diseñador UX senior con 10 años de experiencia en apps móviles",
-      "Sé creativo",
-    ],
-    correctAnswer: 2,
-    explanation:
-      "Un ROL bien definido incluye la profesión, nivel de experiencia y área de especialización específica.",
-    category: "R",
-    difficulty: "medium",
-    points: 150,
-  },
-
-  // Preguntas sobre CONTEXTO (C)
-  {
-    id: 4,
-    question: "¿Qué representa la 'C' en RCTF?",
-    options: ["Creatividad", "Contexto", "Comando", "Calidad"],
-    correctAnswer: 1,
-    explanation:
-      "La 'C' representa el CONTEXTO, la información de fondo necesaria para entender la situación.",
-    category: "C",
     difficulty: "easy",
     points: 100,
   },
   {
+    id: 3,
+    question:
+      "La estructura de 5 pasos funciona SOLO para generar imágenes estáticas",
+    options: ["Verdadero", "Falso"],
+    correctAnswer: 1,
+    explanation: "¡La fórmula es ideal tanto para IMAGEN como para VIDEO!",
+    category: "General",
+    difficulty: "easy",
+    points: 100,
+  },
+  {
+    id: 4,
+    question:
+      "¿Qué elemento FALTA en este prompt?\n\n'Actúa como un chef italiano. Una pareja cenando en un restaurante romántico con velas, transmitiendo intimidad. Estilo cinematográfico, luz cálida. Formato cuadrado 1:1.'",
+    options: ["ROL", "ESCENA + EMOCIÓN", "OBJETIVO", "ESTILO VISUAL"],
+    correctAnswer: 2,
+    explanation:
+      "No dice PARA QUÉ es la imagen. ¿Menú? ¿Instagram? ¿Publicidad?",
+    category: "C",
+    difficulty: "medium",
+    points: 150,
+  },
+  {
     id: 5,
-    question: "¿Por qué es importante incluir contexto en un prompt?",
+    question:
+      "Quieres crear una imagen para promocionar un CAFÉ ARTESANAL en Instagram...\n\nActúa como un _______ [ROL]\n\n¿Qué ROL elegirías?",
     options: [
-      "Para hacer el prompt más interesante",
-      "Para que la IA entienda la situación específica y genere respuestas relevantes",
-      "Para cumplir con un requisito técnico",
-      "Para que el prompt sea más largo",
+      "Chef de cocina",
+      "Fotógrafo de producto",
+      "Diseñador de interiores",
     ],
     correctAnswer: 1,
     explanation:
-      "El contexto permite a la IA entender la situación específica, el público objetivo y las circunstancias, generando respuestas más relevantes.",
-    category: "C",
+      "Un fotógrafo de producto sabe capturar objetos de forma atractiva y comercial",
+    category: "R",
     difficulty: "medium",
     points: 150,
   },
   {
     id: 6,
-    question: "¿Qué información NO es típicamente parte del contexto?",
+    question: "El elemento 'ESCENA + EMOCIÓN' combina dos aspectos. ¿Cuáles?",
     options: [
-      "El público objetivo",
-      "La industria o sector",
-      "El formato de salida deseado",
-      "Antecedentes del proyecto",
+      "Colores y texturas",
+      "Lo que VES + Lo que SIENTES",
+      "Tamaño y resolución",
+      "Rol y objetivo",
+    ],
+    correctAnswer: 1,
+    explanation:
+      "Descripción física (lo visible) + Impacto emocional (lo que transmite)",
+    category: "C",
+    difficulty: "medium",
+    points: 150,
+  },
+  {
+    id: 7,
+    question: "¿Qué especificamos en la SALIDA ESPERADA?",
+    options: [
+      "La emoción que queremos transmitir",
+      "El rol de la IA",
+      "Resolución, formato (16:9, 9:16), calidad",
+      "El estilo artístico",
     ],
     correctAnswer: 2,
     explanation:
-      "El formato de salida pertenece a la 'F' (Formato) de RCTF, no al Contexto.",
-    category: "C",
-    difficulty: "hard",
-    points: 200,
-  },
-
-  // Preguntas sobre TAREA (T)
-  {
-    id: 7,
-    question: "¿Qué representa la 'T' en RCTF?",
-    options: ["Tiempo", "Tarea", "Técnica", "Texto"],
-    correctAnswer: 1,
-    explanation:
-      "La 'T' representa la TAREA, la acción específica que queremos que la IA realice.",
-    category: "T",
-    difficulty: "easy",
-    points: 100,
+      "La salida define las especificaciones TÉCNICAS: formato, resolución, dimensiones",
+    category: "F",
+    difficulty: "medium",
+    points: 150,
   },
   {
     id: 8,
-    question:
-      "¿Cuál es la característica más importante de una buena TAREA en un prompt?",
+    question: "Selecciona el ORDEN CORRECTO de los 5 elementos",
     options: [
-      "Que sea muy larga y detallada",
-      "Que sea clara, específica y accionable",
-      "Que incluya muchas opciones",
-      "Que sea ambigua para dar libertad a la IA",
+      "ROL → OBJETIVO → ESCENA+EMOCIÓN → ESTILO → SALIDA",
+      "OBJETIVO → ROL → ESTILO → ESCENA+EMOCIÓN → SALIDA",
+      "ROL → ESCENA+EMOCIÓN → OBJETIVO → SALIDA → ESTILO",
+      "ESTILO → ROL → OBJETIVO → ESCENA+EMOCIÓN → SALIDA",
     ],
-    correctAnswer: 1,
+    correctAnswer: 0,
     explanation:
-      "Una buena tarea debe ser clara, específica y accionable para que la IA sepa exactamente qué se espera.",
-    category: "T",
-    difficulty: "medium",
-    points: 150,
+      "ROL → OBJETIVO → ESCENA+EMOCIÓN → ESTILO → SALIDA es el orden correcto de la estructura de 5 pasos",
+    category: "General",
+    difficulty: "hard",
+    points: 200,
   },
   {
     id: 9,
-    question: "¿Cuál de estos es el MEJOR ejemplo de una TAREA bien definida?",
-    options: [
-      "Escribe algo sobre marketing",
-      "Haz contenido",
-      "Redacta 5 títulos de email con gancho emocional para una campaña de Black Friday",
-      "Ayúdame con mi negocio",
-    ],
-    correctAnswer: 2,
+    question:
+      "¿Es correcto incluir la EMOCIÓN junto con la descripción visual de la ESCENA en un mismo elemento?",
+    options: ["Sí", "No"],
+    correctAnswer: 0,
     explanation:
-      "Una tarea bien definida especifica la acción (redactar), la cantidad (5), el tipo (títulos de email), el estilo (gancho emocional) y el contexto (Black Friday).",
-    category: "T",
+      "¡Sí! 'ESCENA + EMOCIÓN' combina lo que se ve con lo que se siente",
+    category: "C",
     difficulty: "medium",
     points: 150,
   },
-
-  // Preguntas sobre FORMATO (F)
   {
     id: 10,
-    question: "¿Qué representa la 'F' en RCTF?",
-    options: ["Función", "Frecuencia", "Formato", "Fórmula"],
-    correctAnswer: 2,
-    explanation:
-      "La 'F' representa el FORMATO, cómo queremos que la IA estructure y presente su respuesta.",
-    category: "F",
-    difficulty: "easy",
-    points: 100,
-  },
-  {
-    id: 11,
-    question: "¿Cuál de estos NO es un elemento típico del formato?",
+    question:
+      "¿Qué elemento está MAL UBICADO o es INCORRECTO?\n\n'Actúa como fotógrafo de viajes [ROL]. Para formato vertical 9:16 [OBJETIVO]. Una familia en la playa al atardecer, felicidad [ESCENA]. Estilo cinematográfico [ESTILO]. Promocionar resort de lujo [SALIDA].'",
     options: [
-      "Lista con viñetas",
-      "Tabla comparativa",
-      "El rol del experto",
-      "Longitud de la respuesta",
-    ],
-    correctAnswer: 2,
-    explanation:
-      "El rol del experto pertenece a la 'R' de RCTF. El formato incluye estructura, longitud y estilo de presentación.",
-    category: "F",
-    difficulty: "medium",
-    points: 150,
-  },
-  {
-    id: 12,
-    question: "¿Por qué es útil especificar el formato de salida?",
-    options: [
-      "Para que la respuesta sea más corta",
-      "Para obtener la información en una estructura lista para usar",
-      "Para confundir a la IA",
-      "No es realmente útil",
+      "ROL está mal definido",
+      "OBJETIVO y SALIDA están intercambiados",
+      "ESCENA no tiene emoción",
+      "ESTILO es incorrecto",
     ],
     correctAnswer: 1,
     explanation:
-      "Especificar el formato permite obtener respuestas en una estructura directamente utilizable, ahorrando tiempo de reformateo.",
-    category: "F",
-    difficulty: "medium",
-    points: 150,
-  },
-
-  // Preguntas Generales / Integración
-  {
-    id: 13,
-    question: "¿Cuál es el orden correcto de los elementos RCTF?",
-    options: [
-      "Resultado, Contexto, Técnica, Formato",
-      "Rol, Contexto, Tarea, Formato",
-      "Respuesta, Comando, Texto, Función",
-      "Recurso, Contenido, Tiempo, Fórmula",
-    ],
-    correctAnswer: 1,
-    explanation:
-      "RCTF significa: Rol, Contexto, Tarea y Formato - en ese orden para estructurar prompts efectivos.",
-    category: "General",
-    difficulty: "easy",
-    points: 100,
-  },
-  {
-    id: 14,
-    question: "¿Es obligatorio usar TODOS los elementos RCTF en cada prompt?",
-    options: [
-      "Sí, siempre deben estar los 4 elementos",
-      "No, son guías flexibles que se adaptan según la necesidad",
-      "Solo R y T son obligatorios",
-      "Solo C y F son obligatorios",
-    ],
-    correctAnswer: 1,
-    explanation:
-      "RCTF es un framework flexible. Dependiendo de la situación, algunos elementos pueden ser más importantes que otros.",
-    category: "General",
-    difficulty: "medium",
-    points: 150,
-  },
-  {
-    id: 15,
-    question: "¿Qué ventaja principal ofrece usar la metodología RCTF?",
-    options: [
-      "Hace los prompts más largos",
-      "Garantiza respuestas perfectas siempre",
-      "Estructura el pensamiento y mejora la calidad de las respuestas",
-      "Reduce el costo de usar IA",
-    ],
-    correctAnswer: 2,
-    explanation:
-      "RCTF ayuda a estructurar el pensamiento de manera clara, lo que resulta en prompts más efectivos y respuestas de mayor calidad.",
-    category: "General",
-    difficulty: "medium",
-    points: 150,
+      "'Promocionar resort' es el OBJETIVO, '9:16' es la SALIDA. ¡Están al revés!",
+    category: "T",
+    difficulty: "hard",
+    points: 200,
   },
 ];
 
@@ -346,15 +257,59 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
   const [showIntro, setShowIntro] = useState(true);
   const [animateQuestion, setAnimateQuestion] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [floatingPoints, setFloatingPoints] = useState<{
+    points: number;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [motivationalMessage, setMotivationalMessage] = useState<string>("");
+  const [showComboEffect, setShowComboEffect] = useState(false);
+
+  // Refs for timer and timeouts cleanup
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
+
+  // Helper function to create tracked timeouts
+  const safeSetTimeout = useCallback((callback: () => void, delay: number) => {
+    const timeoutId = setTimeout(() => {
+      callback();
+      // Remove from tracking array after execution
+      timeoutsRef.current = timeoutsRef.current.filter(
+        (id) => id !== timeoutId,
+      );
+    }, delay);
+    timeoutsRef.current.push(timeoutId);
+    return timeoutId;
+  }, []);
+
+  // Cleanup all timeouts on unmount
+  useEffect(() => {
+    return () => {
+      // Clear main timer
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      // Clear all tracked timeouts
+      timeoutsRef.current.forEach((timeoutId) => clearTimeout(timeoutId));
+      timeoutsRef.current = [];
+    };
+  }, []);
 
   const currentQ = QUIZ_QUESTIONS[state.currentQuestion];
   const progress = ((state.currentQuestion + 1) / QUIZ_QUESTIONS.length) * 100;
 
-  // Timer effect
+  // Timer effect with proper cleanup
   useEffect(() => {
+    // Clear existing timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
     if (!state.isTimerActive || state.isAnswered || showIntro) return;
 
-    const timer = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setState((prev) => {
         if (prev.timeLeft <= 1) {
           // Time's up - auto submit wrong answer
@@ -371,17 +326,21 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
       });
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
   }, [state.isTimerActive, state.isAnswered, showIntro]);
 
   // Animation trigger for new questions
   useEffect(() => {
     if (!showIntro) {
       setAnimateQuestion(true);
-      const timeout = setTimeout(() => setAnimateQuestion(false), 500);
-      return () => clearTimeout(timeout);
+      safeSetTimeout(() => setAnimateQuestion(false), 500);
     }
-  }, [state.currentQuestion, showIntro]);
+  }, [state.currentQuestion, showIntro, safeSetTimeout]);
 
   const handleStartQuiz = () => {
     setShowIntro(false);
@@ -403,7 +362,48 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
 
       if (isCorrect) {
         setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 1500);
+        safeSetTimeout(() => setShowConfetti(false), 1500);
+
+        // Puntos flotantes
+        setFloatingPoints({ points: earnedPoints, x: 50, y: 50 });
+        safeSetTimeout(() => setFloatingPoints(null), 2000);
+
+        // Mensajes motivacionales
+        const messages = [
+          state.streak >= 4 ? "🔥 ¡IMPARABLE!" : "",
+          state.streak === 3 ? "⚡ ¡RACHA DE FUEGO!" : "",
+          state.streak === 2 ? "✨ ¡Vas Genial!" : "",
+          earnedPoints >= 200 ? "💎 ¡RESPUESTA PERFECTA!" : "",
+          state.timeLeft >= 25 ? "⚡ ¡Súper Rápido!" : "",
+          currentQ.difficulty === "hard"
+            ? "🎯 ¡PREGUNTA DIFÍCIL DOMINADA!"
+            : "",
+          "🌟 ¡Excelente!",
+          "🚀 ¡Increíble!",
+          "💪 ¡Así se hace!",
+        ].filter((m) => m);
+
+        setMotivationalMessage(
+          messages[Math.floor(Math.random() * messages.length)],
+        );
+        safeSetTimeout(() => setMotivationalMessage(""), 2000);
+
+        // Efecto de combo para rachas largas
+        if (state.streak >= 2) {
+          setShowComboEffect(true);
+          safeSetTimeout(() => setShowComboEffect(false), 1000);
+        }
+      } else {
+        // Mensajes de ánimo cuando fallas
+        const encouragement = [
+          "💪 ¡No te rindas!",
+          "🎯 La próxima es tuya",
+          "✨ Sigue intentando",
+        ];
+        setMotivationalMessage(
+          encouragement[Math.floor(Math.random() * encouragement.length)],
+        );
+        safeSetTimeout(() => setMotivationalMessage(""), 2000);
       }
 
       setState((prev) => ({
@@ -416,7 +416,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
         answers: [...prev.answers, answerIndex],
       }));
     },
-    [state.isAnswered, state.streak, currentQ]
+    [state.isAnswered, state.streak, state.timeLeft, currentQ],
   );
 
   const handleNextQuestion = () => {
@@ -440,12 +440,12 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
   };
 
   const correctAnswers = state.answers.filter(
-    (answer, idx) => answer === QUIZ_QUESTIONS[idx].correctAnswer
+    (answer, idx) => answer === QUIZ_QUESTIONS[idx].correctAnswer,
   ).length;
 
   const maxPossibleScore = QUIZ_QUESTIONS.reduce(
     (sum, q) => sum + q.points * DIFFICULTY_STYLES[q.difficulty].multiplier,
-    0
+    0,
   );
 
   const percentage = Math.round((correctAnswers / QUIZ_QUESTIONS.length) * 100);
@@ -469,14 +469,17 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
           <div className="relative card-glass p-8 md:p-12 animate-slide-up-strong">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-2xl mb-6 animate-float">
-                <Trophy className="w-10 h-10 text-white" />
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-emerald-500 via-blue-500 to-purple-500 rounded-3xl mb-6 animate-float shadow-2xl shadow-emerald-500/50">
+                <Trophy className="w-12 h-12 text-white animate-pulse" />
               </div>
-              <h1 className="text-4xl md:text-5xl font-black text-white mb-3">
-                Quiz <span className="text-emerald-400">RCTF</span>
+              <h1 className="text-5xl md:text-6xl font-black mb-3 bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 bg-clip-text text-transparent animate-pulse">
+                Quiz RCTF
               </h1>
-              <p className="text-gray-400 text-lg">
-                Domina el arte del Prompt Engineering
+              <p className="text-gray-300 text-xl font-semibold mb-2">
+                🎯 Domina el arte del Prompt Engineering
+              </p>
+              <p className="text-emerald-400 text-sm font-medium animate-pulse">
+                ✨ ¡Demuestra tu conocimiento y gana puntos! ✨
               </p>
             </div>
 
@@ -521,12 +524,12 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                       {key === "R"
                         ? "Rol"
                         : key === "C"
-                        ? "Contexto"
-                        : key === "T"
-                        ? "Tarea"
-                        : key === "F"
-                        ? "Formato"
-                        : "General"}
+                          ? "Contexto"
+                          : key === "T"
+                            ? "Tarea"
+                            : key === "F"
+                              ? "Formato"
+                              : "General"}
                     </span>
                   );
                 })}
@@ -553,11 +556,11 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
             {/* Start Button */}
             <button
               onClick={handleStartQuiz}
-              className="w-full btn-elegant-primary py-5 text-lg font-black flex items-center justify-center gap-3 group"
+              className="w-full bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 hover:from-emerald-500 hover:via-blue-500 hover:to-purple-500 py-6 text-xl font-black text-white rounded-2xl flex items-center justify-center gap-3 group transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(16,185,129,0.6)] animate-pulse"
             >
-              <Zap className="w-5 h-5 group-hover:animate-pulse" />
-              ¡Comenzar Quiz!
-              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <Zap className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+              🚀 ¡COMENZAR QUIZ! 🚀
+              <ChevronRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
             </button>
 
             {onClose && (
@@ -613,18 +616,39 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
             {/* Rank Display */}
             <div className="text-center mb-8">
               <div
-                className={`inline-flex items-center justify-center w-24 h-24 ${
-                  percentage >= 70
-                    ? "bg-gradient-to-br from-yellow-500 to-amber-500"
-                    : "bg-gradient-to-br from-gray-600 to-gray-700"
-                } rounded-full mb-6 animate-float`}
+                className={`inline-flex items-center justify-center w-32 h-32 mb-6 animate-bounce shadow-2xl ${
+                  percentage >= 90
+                    ? "bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500 shadow-yellow-500/50"
+                    : percentage >= 70
+                      ? "bg-gradient-to-br from-emerald-500 to-blue-500 shadow-emerald-500/50"
+                      : percentage >= 50
+                        ? "bg-gradient-to-br from-blue-500 to-purple-500 shadow-blue-500/50"
+                        : "bg-gradient-to-br from-gray-600 to-gray-700"
+                } rounded-full`}
               >
-                <RankIcon className="w-12 h-12 text-white" />
+                <RankIcon className="w-16 h-16 text-white" />
               </div>
-              <h1 className="text-3xl md:text-4xl font-black text-white mb-2">
-                ¡Quiz Completado!
+              <h1 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                {percentage >= 90
+                  ? "🎉 ¡INCREÍBLE! 🎉"
+                  : percentage >= 70
+                    ? "🌟 ¡EXCELENTE! 🌟"
+                    : percentage >= 50
+                      ? "👏 ¡BIEN HECHO! 👏"
+                      : "💪 ¡SIGUE INTENTANDO! 💪"}
               </h1>
-              <p className={`text-2xl font-bold ${rank.color}`}>{rank.title}</p>
+              <p className={`text-3xl font-black ${rank.color} animate-pulse`}>
+                {rank.title}
+              </p>
+              <p className="text-gray-400 mt-2 text-lg">
+                {percentage >= 90
+                  ? "¡Eres un verdadero maestro del RCTF!"
+                  : percentage >= 70
+                    ? "¡Dominas muy bien el método RCTF!"
+                    : percentage >= 50
+                      ? "Vas por buen camino, ¡sigue practicando!"
+                      : "No te desanimes, ¡la práctica hace al maestro!"}
+              </p>
             </div>
 
             {/* Score Card */}
@@ -664,7 +688,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                           acc.push(0);
                         }
                         return acc;
-                      }, [] as number[])
+                      }, [] as number[]),
                     )}
                   </div>
                   <div className="text-xs text-gray-500 uppercase tracking-wide">
@@ -682,16 +706,16 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
               <div className="space-y-3">
                 {["R", "C", "T", "F", "General"].map((cat) => {
                   const catQuestions = QUIZ_QUESTIONS.filter(
-                    (q) => q.category === cat
+                    (q) => q.category === cat,
                   );
                   const catCorrect = catQuestions.filter((q, i) => {
                     const globalIdx = QUIZ_QUESTIONS.findIndex(
-                      (gq) => gq.id === q.id
+                      (gq) => gq.id === q.id,
                     );
                     return state.answers[globalIdx] === q.correctAnswer;
                   }).length;
                   const catPercentage = Math.round(
-                    (catCorrect / catQuestions.length) * 100
+                    (catCorrect / catQuestions.length) * 100,
                   );
                   const style = CATEGORY_STYLES[cat];
                   const Icon = style.icon;
@@ -709,12 +733,12 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                             {cat === "R"
                               ? "Rol"
                               : cat === "C"
-                              ? "Contexto"
-                              : cat === "T"
-                              ? "Tarea"
-                              : cat === "F"
-                              ? "Formato"
-                              : "General"}
+                                ? "Contexto"
+                                : cat === "T"
+                                  ? "Tarea"
+                                  : cat === "F"
+                                    ? "Formato"
+                                    : "General"}
                           </span>
                           <span className={`text-sm font-bold ${style.text}`}>
                             {catCorrect}/{catQuestions.length}
@@ -726,12 +750,12 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                               cat === "R"
                                 ? "bg-blue-500"
                                 : cat === "C"
-                                ? "bg-purple-500"
-                                : cat === "T"
-                                ? "bg-amber-500"
-                                : cat === "F"
-                                ? "bg-emerald-500"
-                                : "bg-pink-500"
+                                  ? "bg-purple-500"
+                                  : cat === "T"
+                                    ? "bg-amber-500"
+                                    : cat === "F"
+                                      ? "bg-emerald-500"
+                                      : "bg-pink-500"
                             } transition-all duration-500`}
                             style={{ width: `${catPercentage}%` }}
                           />
@@ -771,6 +795,28 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
   // ============================================
   // RENDER: QUESTION SCREEN
   // ============================================
+
+  // Validar que currentQ existe
+  if (!currentQ) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-white mb-4">
+            No hay preguntas disponibles
+          </h2>
+          <p className="text-gray-400 mb-6">
+            El quiz no tiene preguntas configuradas.
+          </p>
+          {onClose && (
+            <button onClick={onClose} className="btn-elegant-primary px-6 py-3">
+              Volver
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   const categoryStyle = CATEGORY_STYLES[currentQ.category];
   const CategoryIcon = categoryStyle.icon;
   const isCorrect = state.selectedAnswer === currentQ.correctAnswer;
@@ -803,6 +849,40 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
               />
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Floating Points Animation */}
+      {floatingPoints && (
+        <div
+          className="fixed z-50 pointer-events-none animate-bounce"
+          style={{
+            left: "50%",
+            top: "30%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <div className="text-6xl font-black text-emerald-400 drop-shadow-[0_0_30px_rgba(16,185,129,0.8)] animate-pulse">
+            +{floatingPoints.points}
+          </div>
+        </div>
+      )}
+
+      {/* Motivational Message */}
+      {motivationalMessage && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none">
+          <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl shadow-2xl shadow-purple-500/50 animate-bounce">
+            <span className="text-2xl font-black">{motivationalMessage}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Combo Effect */}
+      {showComboEffect && (
+        <div className="fixed inset-0 pointer-events-none z-40 flex items-center justify-center">
+          <div className="text-8xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent animate-ping">
+            COMBO x{state.streak}
+          </div>
         </div>
       )}
 
@@ -871,12 +951,12 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                     {currentQ.category === "R"
                       ? "Rol"
                       : currentQ.category === "C"
-                      ? "Contexto"
-                      : currentQ.category === "T"
-                      ? "Tarea"
-                      : currentQ.category === "F"
-                      ? "Formato"
-                      : "General"}
+                        ? "Contexto"
+                        : currentQ.category === "T"
+                          ? "Tarea"
+                          : currentQ.category === "F"
+                            ? "Formato"
+                            : "General"}
                   </span>
                   <div
                     className={`text-xs ${
@@ -891,28 +971,39 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
 
               {/* Timer */}
               <div
-                className={`flex items-center gap-2 px-4 py-2 rounded-full ${
-                  state.timeLeft <= 10
-                    ? "bg-red-500/20 text-red-400"
-                    : "bg-white/5 text-gray-400"
-                } ${
-                  state.timeLeft <= 10 && !state.isAnswered
-                    ? "animate-pulse"
-                    : ""
+                className={`flex items-center gap-2 px-5 py-3 rounded-full font-bold transition-all ${
+                  state.timeLeft <= 5
+                    ? "bg-red-600 text-white scale-110 animate-bounce shadow-lg shadow-red-500/50"
+                    : state.timeLeft <= 10
+                      ? "bg-red-500/30 text-red-300 animate-pulse scale-105"
+                      : "bg-white/5 text-gray-400"
                 }`}
               >
-                <Clock className="w-4 h-4" />
-                <span className="font-mono font-bold">{state.timeLeft}s</span>
+                <Clock
+                  className={`w-5 h-5 ${state.timeLeft <= 5 ? "animate-spin" : ""}`}
+                />
+                <span className="font-mono text-lg">
+                  {state.timeLeft <= 5 ? "⚠️ " : ""}
+                  {state.timeLeft}s
+                </span>
               </div>
             </div>
-
-            {/* Question */}
+            {/* Time Warning Overlay */}
+            {state.timeLeft <= 5 && !state.isAnswered && (
+              <div className="absolute top-0 left-0 right-0 bg-red-500/10 py-2 text-center animate-pulse">
+                <span className="text-red-400 font-bold text-sm">
+                  ⏰ ¡TIEMPO CORRIENDO! ⏰
+                </span>
+              </div>
+            )}
+            {/* Question */} {/* Question */}
             <h2 className="text-xl md:text-2xl font-bold text-white mb-8 leading-relaxed">
               {currentQ.question}
             </h2>
-
             {/* Options */}
-            <div className="space-y-3 mb-6">
+            <div
+              className={`mb-6 ${currentQ.options.length === 2 ? "grid grid-cols-2 gap-4" : "space-y-3"}`}
+            >
               {currentQ.options.map((option, idx) => {
                 const isSelected = state.selectedAnswer === idx;
                 const isCorrectOption = idx === currentQ.correctAnswer;
@@ -920,46 +1011,74 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                 const showWrong =
                   state.isAnswered && isSelected && !isCorrectOption;
 
+                // Estilos especiales para Verdadero/Falso
+                const isTrueFalse = currentQ.options.length === 2;
+                const isTrue =
+                  isTrueFalse && option.toLowerCase().includes("verdadero");
+                const isFalse =
+                  isTrueFalse && option.toLowerCase().includes("falso");
+
                 return (
                   <button
                     key={idx}
                     onClick={() => handleSelectAnswer(idx)}
                     disabled={state.isAnswered}
-                    className={`w-full p-4 rounded-xl text-left transition-all duration-300 flex items-center gap-4 group ${
+                    className={`w-full p-6 rounded-xl ${isTrueFalse ? "text-center" : "text-left"} transition-all duration-300 flex ${isTrueFalse ? "flex-col" : "flex-row"} items-center gap-4 group ${
                       showCorrect
-                        ? "bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400"
+                        ? "bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400 shadow-lg shadow-emerald-500/20"
                         : showWrong
-                        ? "bg-red-500/20 border-2 border-red-500 text-red-400"
-                        : isSelected
-                        ? "bg-white/10 border-2 border-white/30 text-white"
-                        : "bg-white/5 border-2 border-transparent hover:border-white/20 hover:bg-white/10 text-gray-300"
+                          ? "bg-red-500/20 border-2 border-red-500 text-red-400 shadow-lg shadow-red-500/20"
+                          : isSelected
+                            ? "bg-white/10 border-2 border-white/30 text-white"
+                            : isTrueFalse && isTrue
+                              ? "bg-emerald-500/5 border-2 border-emerald-500/20 hover:border-emerald-500/50 hover:bg-emerald-500/10 text-emerald-300"
+                              : isTrueFalse && isFalse
+                                ? "bg-red-500/5 border-2 border-red-500/20 hover:border-red-500/50 hover:bg-red-500/10 text-red-300"
+                                : "bg-white/5 border-2 border-transparent hover:border-white/20 hover:bg-white/10 text-gray-300"
                     } ${
                       state.isAnswered ? "cursor-default" : "cursor-pointer"
                     }`}
                   >
                     <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
+                      className={`${isTrueFalse ? "w-16 h-16" : "w-8 h-8"} rounded-lg flex items-center justify-center font-bold text-sm ${
                         showCorrect
                           ? "bg-emerald-500 text-white"
                           : showWrong
-                          ? "bg-red-500 text-white"
-                          : "bg-white/10 text-gray-400 group-hover:bg-white/20"
+                            ? "bg-red-500 text-white"
+                            : isTrueFalse && isTrue
+                              ? "bg-emerald-500/20 text-emerald-400 group-hover:bg-emerald-500/30"
+                              : isTrueFalse && isFalse
+                                ? "bg-red-500/20 text-red-400 group-hover:bg-red-500/30"
+                                : "bg-white/10 text-gray-400 group-hover:bg-white/20"
                       }`}
                     >
                       {showCorrect ? (
-                        <CheckCircle className="w-5 h-5" />
+                        <CheckCircle
+                          className={`${isTrueFalse ? "w-8 h-8" : "w-5 h-5"}`}
+                        />
                       ) : showWrong ? (
-                        <XCircle className="w-5 h-5" />
+                        <XCircle
+                          className={`${isTrueFalse ? "w-8 h-8" : "w-5 h-5"}`}
+                        />
+                      ) : isTrueFalse ? (
+                        isTrue ? (
+                          <CheckCircle className="w-8 h-8" />
+                        ) : (
+                          <XCircle className="w-8 h-8" />
+                        )
                       ) : (
                         String.fromCharCode(65 + idx)
                       )}
                     </div>
-                    <span className="flex-1 font-medium">{option}</span>
+                    <span
+                      className={`${isTrueFalse ? "flex-none text-2xl" : "flex-1"} font-bold`}
+                    >
+                      {option}
+                    </span>
                   </button>
                 );
               })}
             </div>
-
             {/* Explanation (shown after answering) */}
             {state.isAnswered && (
               <div
@@ -990,7 +1109,6 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                 </div>
               </div>
             )}
-
             {/* Next Button */}
             {state.isAnswered && (
               <button

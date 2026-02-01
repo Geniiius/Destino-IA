@@ -53,15 +53,10 @@ export interface ChatMessage {
 // ESTADO DE LA APLICACIÓN
 // ============================================
 
-export type ActiveTab =
-  | "slides"
-  | "exercises"
-  | "gallery"
-  | "quiz"
-  | "challenge"
-  | "examples";
+export type ActiveTab = "slides" | "exercises" | "quiz" | "challenge";
 
 export interface SessionState {
+  id?: string;
   current_slide_id: string;
   is_exercise_active: boolean;
   active_tab: ActiveTab;
@@ -75,7 +70,7 @@ export const SESSION_STATE_ID = "00000000-0000-0000-0000-000000000000";
 // TIPOS DE UI
 // ============================================
 
-export type ViewType = "home" | "admin" | "join" | "workshop";
+export type ViewType = "home" | "admin" | "join";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
@@ -115,4 +110,4 @@ export interface ApiResponse<T> {
 // ============================================
 // SISTEMA DE GALERÍA
 // ============================================
-export * from './gallery';
+export * from "./gallery";

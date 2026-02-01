@@ -1,0 +1,1 @@
+export { TextToVideoFromScratch } from './TextToVideoFromScratch';

@@ -19,6 +19,11 @@ export interface AIExampleData {
  */
 export async function loadAIExamples(): Promise<Map<string, AIExampleData>> {
   try {
+    if (!supabase) {
+      console.warn("Supabase client not initialized");
+      return new Map();
+    }
+
     const { data, error } = await supabase
       .from("exercise_ai_examples")
       .select("*");
@@ -51,11 +56,8 @@ export async function getExercisesWithAIExamples(): Promise<Exercise[]> {
 
   return exercises.map((exercise) => {
     const aiExample = aiExamples.get(exercise.id);
-
-    return {
-      ...exercise,
-      aiExample: aiExample || exercise.aiExample,
-    };
+    // Note: aiExample would need to be added to Exercise interface if used
+    return exercise;
   });
 }
 
@@ -63,9 +65,14 @@ export async function getExercisesWithAIExamples(): Promise<Exercise[]> {
  * Obtener un ejemplo de IA por exercise_id
  */
 export async function getAIExampleByExerciseId(
-  exerciseId: string
+  exerciseId: string,
 ): Promise<AIExampleData | null> {
   try {
+    if (!supabase) {
+      console.warn("Supabase client not initialized");
+      return null;
+    }
+
     const { data, error } = await supabase
       .from("exercise_ai_examples")
       .select("*")
@@ -93,9 +100,14 @@ export async function getAIExampleByExerciseId(
  */
 export async function saveAIExample(
   exerciseId: string,
-  example: AIExampleData
+  example: AIExampleData,
 ): Promise<boolean> {
   try {
+    if (!supabase) {
+      console.warn("Supabase client not initialized");
+      return false;
+    }
+
     const { error } = await supabase.from("exercise_ai_examples").upsert({
       exercise_id: exerciseId,
       type: example.type,
@@ -118,9 +130,14 @@ export async function saveAIExample(
  */
 export async function uploadAIExampleFile(
   exerciseId: string,
-  file: File
+  file: File,
 ): Promise<string | null> {
   try {
+    if (!supabase) {
+      console.warn("Supabase client not initialized");
+      return null;
+    }
+
     const fileExt = file.name.split(".").pop();
     const fileName = `${exerciseId}-${Date.now()}.${fileExt}`;
     const filePath = `ai-examples/${fileName}`;

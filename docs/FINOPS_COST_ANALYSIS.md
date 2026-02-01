@@ -9,13 +9,13 @@
 
 ### 🎯 Découvertes Principales
 
-| Catégorie | Coût Actuel | Coût Caché Identifié | Optimisation Possible |
-|-----------|-------------|----------------------|----------------------|
-| **Storage Egress** | 0€ | **⚠️ 50-150€/mois** si scale | **-85%** avec compression |
-| **API Calls** | 0€ | **⚠️ 25€/mois** avec polling | **-70%** avec cache |
-| **Realtime Messages** | 0€ | **⚠️ 40€/mois** si broadcast | **-60%** avec throttling |
-| **Database Storage** | 0€ | **⚠️ 15€/mois** sans cleanup | **-90%** avec TTL |
-| **Bandwidth** | 0€ | **⚠️ 100€/mois** sans CDN | **-80%** avec optimisations |
+| Catégorie             | Coût Actuel | Coût Caché Identifié         | Optimisation Possible       |
+| --------------------- | ----------- | ---------------------------- | --------------------------- |
+| **Storage Egress**    | 0€          | **⚠️ 50-150€/mois** si scale | **-85%** avec compression   |
+| **API Calls**         | 0€          | **⚠️ 25€/mois** avec polling | **-70%** avec cache         |
+| **Realtime Messages** | 0€          | **⚠️ 40€/mois** si broadcast | **-60%** avec throttling    |
+| **Database Storage**  | 0€          | **⚠️ 15€/mois** sans cleanup | **-90%** avec TTL           |
+| **Bandwidth**         | 0€          | **⚠️ 100€/mois** sans CDN    | **-80%** avec optimisations |
 
 **Coût caché total potentiel**: **230-330€/mois**  
 **Après optimisations**: **20-35€/mois** ✅
@@ -81,7 +81,7 @@ Coût: GRATUIT (sous les 2 GB) ✅
 
 ```typescript
 // ✅ SOLUTION 1: Compression systématique avant upload
-import { compressImage } from '@/lib/imageCompression';
+import { compressImage } from "@/lib/imageCompression";
 
 export async function uploadImageToStorage(
   file: File,
@@ -91,7 +91,7 @@ export async function uploadImageToStorage(
   onProgress?: (progress: number) => void
 ): Promise<{ imageUrl: string; thumbnailUrl: string }> {
   const supabase = getSupabaseClient();
-  if (!supabase) throw new Error('Supabase no configurado');
+  if (!supabase) throw new Error("Supabase no configurado");
 
   // ✅ Compression en parallèle
   const [compressed, thumbnail] = await Promise.all([
@@ -107,13 +107,11 @@ export async function uploadImageToStorage(
     supabase.storage.from(STORAGE_BUCKET).upload(
       `${basePath}.jpg`,
       compressed,
-      { cacheControl: '31536000' } // ✅ Cache 1 an
+      { cacheControl: "31536000" } // ✅ Cache 1 an
     ),
-    supabase.storage.from(STORAGE_BUCKET).upload(
-      `${basePath}_thumb.jpg`,
-      thumbnail,
-      { cacheControl: '31536000' }
-    ),
+    supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(`${basePath}_thumb.jpg`, thumbnail, { cacheControl: "31536000" }),
   ]);
 
   if (mainResult.error) throw mainResult.error;
@@ -184,6 +182,7 @@ const loadSubmissions = useCallback(async () => {
 #### Calcul du coût caché
 
 **Supabase Free Tier Limits**:
+
 - **50,000 requêtes API/mois** incluses
 - Au-delà: **$0.0001 par requête**
 
@@ -256,7 +255,7 @@ BEGIN
       LIMIT 1
     )
   ) INTO result;
-  
+
   RETURN result;
 END;
 $$ LANGUAGE plpgsql;
@@ -265,7 +264,7 @@ $$ LANGUAGE plpgsql;
 ```typescript
 // Utilisation dans le hook
 const loadAllData = useCallback(async () => {
-  const { data, error } = await supabase.rpc('get_gallery_full_data', {
+  const { data, error } = await supabase.rpc("get_gallery_full_data", {
     p_session_id: sessionId,
     p_exercise_id: exerciseId,
     p_participant_id: participantId,
@@ -282,7 +281,7 @@ const loadAllData = useCallback(async () => {
 
 ```typescript
 // ✅ SOLUTION 2: Cache intelligent avec SWR pattern
-import useSWR from 'swr';
+import useSWR from "swr";
 
 const { data, error, mutate } = useSWR(
   [`gallery-${sessionId}-${exerciseId}`, sessionId, exerciseId],
@@ -298,8 +297,10 @@ const { data, error, mutate } = useSWR(
 // Invalider le cache manuellement sur Realtime event
 useEffect(() => {
   const channel = supabase.channel(`gallery:${sessionId}`).on(
-    'postgres_changes',
-    { /* ... */ },
+    "postgres_changes",
+    {
+      /* ... */
+    },
     () => mutate() // ✅ Refresh cache uniquement sur changement
   );
 }, [sessionId]);
@@ -315,7 +316,7 @@ async function cachedRequest<T>(
   ttl: number = 5000
 ): Promise<T> {
   const cached = requestCache.get(key);
-  
+
   if (cached) {
     return cached as Promise<T>;
   }
@@ -350,23 +351,28 @@ const submissions = await cachedRequest(
 // ❌ PROBLÈME: Broadcast à TOUS pour chaque changement
 submissionsChannel = supabase
   .channel(`exercise_submissions:${sessionId}`)
-  .on('postgres_changes', {
-    event: '*', // ⚠️ INSERT, UPDATE, DELETE
-    schema: 'public',
-    table: 'exercise_submissions',
-    filter: `session_id=eq.${sessionId}`,
-  }, (payload) => {
-    if (payload.eventType === 'INSERT') {
-      loadSubmissions(); // ⚠️ Re-fetch complet pour tous
+  .on(
+    "postgres_changes",
+    {
+      event: "*", // ⚠️ INSERT, UPDATE, DELETE
+      schema: "public",
+      table: "exercise_submissions",
+      filter: `session_id=eq.${sessionId}`,
+    },
+    (payload) => {
+      if (payload.eventType === "INSERT") {
+        loadSubmissions(); // ⚠️ Re-fetch complet pour tous
+      }
+      // ...
     }
-    // ...
-  })
+  )
   .subscribe();
 ```
 
 #### Calcul du coût caché
 
 **Supabase Realtime Pricing**:
+
 - **Free**: 2 millions de messages/mois
 - **Pro**: 5 millions de messages/mois
 - Au-delà: **$2.50 par million de messages**
@@ -416,17 +422,23 @@ const BROADCAST_THROTTLE = 1000; // Max 1 broadcast/seconde
 
 submissionsChannel = supabase
   .channel(`exercise_submissions:${sessionId}`)
-  .on('postgres_changes', { /* ... */ }, (payload) => {
-    const now = Date.now();
-    
-    // ✅ Throttle les broadcasts
-    if (now - lastBroadcast < BROADCAST_THROTTLE) {
-      return; // Ignorer les événements trop rapprochés
+  .on(
+    "postgres_changes",
+    {
+      /* ... */
+    },
+    (payload) => {
+      const now = Date.now();
+
+      // ✅ Throttle les broadcasts
+      if (now - lastBroadcast < BROADCAST_THROTTLE) {
+        return; // Ignorer les événements trop rapprochés
+      }
+
+      lastBroadcast = now;
+      handleSubmissionChange(payload);
     }
-    
-    lastBroadcast = now;
-    handleSubmissionChange(payload);
-  })
+  )
   .subscribe();
 ```
 
@@ -434,20 +446,20 @@ submissionsChannel = supabase
 // ✅ SOLUTION 2: Presence channels au lieu de broadcast pour tout
 // Seulement l'admin broadcast, participants écoutent
 const adminChannel = supabase.channel(`admin:${sessionId}`, {
-  config: { broadcast: { self: true } }
+  config: { broadcast: { self: true } },
 });
 
 // Admin envoie broadcast
 if (isAdmin) {
   adminChannel.send({
-    type: 'broadcast',
-    event: 'new_submission',
-    payload: { submissionId }
+    type: "broadcast",
+    event: "new_submission",
+    payload: { submissionId },
   });
 }
 
 // Participants reçoivent (pas de broadcast entre eux)
-adminChannel.on('broadcast', { event: 'new_submission' }, (payload) => {
+adminChannel.on("broadcast", { event: "new_submission" }, (payload) => {
   // Fetch uniquement la nouvelle soumission
   fetchSubmission(payload.submissionId);
 });
@@ -460,20 +472,20 @@ let updateTimer: NodeJS.Timeout | null = null;
 
 function scheduleUpdate(submissionId: string) {
   pendingUpdates.add(submissionId);
-  
+
   if (updateTimer) return;
-  
+
   // ✅ Batch updates toutes les 2 secondes
   updateTimer = setTimeout(() => {
     const ids = Array.from(pendingUpdates);
     pendingUpdates.clear();
     updateTimer = null;
-    
+
     // 1 seul broadcast pour plusieurs changements
     channel.send({
-      type: 'broadcast',
-      event: 'batch_update',
-      payload: { submissionIds: ids }
+      type: "broadcast",
+      event: "batch_update",
+      payload: { submissionIds: ids },
     });
   }, 2000);
 }
@@ -504,6 +516,7 @@ CREATE TABLE public.notifications (
 #### Calcul du coût caché
 
 **Supabase Storage Pricing**:
+
 - **Free**: 500 MB database
 - **Pro**: 8 GB database
 - Au-delà: **$0.125/GB/mois**
@@ -560,16 +573,16 @@ BEGIN
   -- Supprimer notifications > 7 jours
   DELETE FROM public.notifications
   WHERE created_at < NOW() - INTERVAL '7 days';
-  
+
   -- Archiver sessions > 30 jours
   DELETE FROM public.session_state
   WHERE created_at < NOW() - INTERVAL '30 days';
-  
+
   -- Supprimer anciennes submissions (garder seulement les favoris)
   DELETE FROM public.exercise_submissions
   WHERE submitted_at < NOW() - INTERVAL '60 days'
   AND is_favorite = false;
-  
+
   RAISE NOTICE 'Cleanup completed';
 END;
 $$ LANGUAGE plpgsql;
@@ -591,15 +604,18 @@ export async function cleanupOldStorageFiles(daysOld: number = 60) {
 
   // 1. Récupérer les anciennes soumissions à supprimer
   const { data: oldSubmissions } = await supabase
-    .from('exercise_submissions')
-    .select('image_url, image_thumbnail_url')
-    .lt('submitted_at', new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000).toISOString())
-    .eq('is_favorite', false);
+    .from("exercise_submissions")
+    .select("image_url, image_thumbnail_url")
+    .lt(
+      "submitted_at",
+      new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000).toISOString()
+    )
+    .eq("is_favorite", false);
 
   if (!oldSubmissions || oldSubmissions.length === 0) return;
 
   // 2. Extraire les paths depuis les URLs
-  const filePaths = oldSubmissions.flatMap(sub => {
+  const filePaths = oldSubmissions.flatMap((sub) => {
     const paths = [];
     if (sub.image_url) {
       const path = extractPathFromUrl(sub.image_url);
@@ -652,9 +668,7 @@ VALUES ('session-1', 'exercise_started', '{"eid": "ex1"}');
 ```typescript
 // ❌ PROBLÈME: Les assets sont servis directement par Vite/Cloudflare
 // Mais les images dynamiques passent par Supabase Storage
-const imageUrl = supabase.storage
-  .from(STORAGE_BUCKET)
-  .getPublicUrl(path);
+const imageUrl = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
 // ⚠️ Chaque vue = egress Supabase
 ```
 
@@ -684,35 +698,36 @@ Dépassement: 95 GB × $0.09 = $8.55/mois ⚠️
 
 ```typescript
 // ✅ SOLUTION 1: CDN Transform avec Supabase (si Pro)
-const { data } = supabase.storage
-  .from(STORAGE_BUCKET)
-  .getPublicUrl(path, {
-    transform: {
-      width: 300,
-      height: 300,
-      resize: 'cover',
-      format: 'webp', // ✅ WebP = -30% taille vs JPEG
-      quality: 80,
-    }
-  });
+const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path, {
+  transform: {
+    width: 300,
+    height: 300,
+    resize: "cover",
+    format: "webp", // ✅ WebP = -30% taille vs JPEG
+    quality: 80,
+  },
+});
 ```
 
 ```typescript
 // ✅ SOLUTION 2: Service Worker Cache
 // public/sw.js
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
-  
+
   // Cache images du bucket Supabase
-  if (url.hostname.includes('supabase.co') && url.pathname.includes('workshop-content')) {
+  if (
+    url.hostname.includes("supabase.co") &&
+    url.pathname.includes("workshop-content")
+  ) {
     event.respondWith(
-      caches.open('images-v1').then(cache => {
-        return cache.match(event.request).then(response => {
+      caches.open("images-v1").then((cache) => {
+        return cache.match(event.request).then((response) => {
           if (response) {
             return response; // ✅ Servir depuis cache
           }
-          
-          return fetch(event.request).then(networkResponse => {
+
+          return fetch(event.request).then((networkResponse) => {
             // ✅ Mettre en cache pour prochaine fois
             cache.put(event.request, networkResponse.clone());
             return networkResponse;
@@ -749,7 +764,7 @@ const ImageWithLazyLoad = ({ src, thumbnail, alt }) => {
           observer.disconnect();
         }
       },
-      { rootMargin: '50px' }
+      { rootMargin: "50px" }
     );
 
     observer.observe(imgRef.current);
@@ -776,23 +791,23 @@ const ImageWithLazyLoad = ({ src, thumbnail, alt }) => {
 
 ### Coûts par Tiers de Croissance
 
-| Tier | Sessions/mois | Participants | Coût Actuel | Coût Sans Optim | Coût Optimisé |
-|------|---------------|--------------|-------------|-----------------|---------------|
-| **Hobby** | 5 | 30 | **0€** | 0€ | **0€** |
-| **Standard** | 10 | 50 | **0€** | **25-45€** | **0€** |
-| **Pro** | 50 | 100 | **25€** | **150-200€** | **25-35€** |
-| **Scale** | 200 | 200 | **25€** | **500-700€** | **80-120€** |
+| Tier         | Sessions/mois | Participants | Coût Actuel | Coût Sans Optim | Coût Optimisé |
+| ------------ | ------------- | ------------ | ----------- | --------------- | ------------- |
+| **Hobby**    | 5             | 30           | **0€**      | 0€              | **0€**        |
+| **Standard** | 10            | 50           | **0€**      | **25-45€**      | **0€**        |
+| **Pro**      | 50            | 100          | **25€**     | **150-200€**    | **25-35€**    |
+| **Scale**    | 200           | 200          | **25€**     | **500-700€**    | **80-120€**   |
 
 ### Détail par Composant (10 sessions/mois, 50 participants)
 
-| Composant | Sans Optim | Avec Optim | Économie |
-|-----------|------------|------------|----------|
-| Storage Egress | $20.70 | $0 | **-100%** |
-| API Calls | $10.50 | $0 | **-100%** |
-| Realtime Messages | $2.50 | $0 | **-100%** |
-| Database Storage | $0 | $0 | - |
-| Bandwidth Total | $8.55 | $1.50 | **-82%** |
-| **TOTAL** | **$42.25** | **$1.50** | **-96%** ✅ |
+| Composant         | Sans Optim | Avec Optim | Économie    |
+| ----------------- | ---------- | ---------- | ----------- |
+| Storage Egress    | $20.70     | $0         | **-100%**   |
+| API Calls         | $10.50     | $0         | **-100%**   |
+| Realtime Messages | $2.50      | $0         | **-100%**   |
+| Database Storage  | $0         | $0         | -           |
+| Bandwidth Total   | $8.55      | $1.50      | **-82%**    |
+| **TOTAL**         | **$42.25** | **$1.50**  | **-96%** ✅ |
 
 ---
 
@@ -801,6 +816,7 @@ const ImageWithLazyLoad = ({ src, thumbnail, alt }) => {
 ### Phase 1: Quick Wins (2-4 heures)
 
 #### 1. Compression images (3h)
+
 ```typescript
 // ROI: -$20/mois
 // Complexité: Moyenne
@@ -808,6 +824,7 @@ const ImageWithLazyLoad = ({ src, thumbnail, alt }) => {
 ```
 
 #### 2. Cache headers optimaux (30 min)
+
 ```typescript
 // ROI: -$5/mois
 // Complexité: Facile
@@ -815,6 +832,7 @@ const ImageWithLazyLoad = ({ src, thumbnail, alt }) => {
 ```
 
 #### 3. Lazy loading images (1h)
+
 ```typescript
 // ROI: -$3/mois
 // Complexité: Facile
@@ -829,6 +847,7 @@ const ImageWithLazyLoad = ({ src, thumbnail, alt }) => {
 ### Phase 2: Optimisations Structurelles (4-6 heures)
 
 #### 4. Batch API requests (2h)
+
 ```typescript
 // ROI: -$8/mois
 // Complexité: Moyenne
@@ -836,6 +855,7 @@ const ImageWithLazyLoad = ({ src, thumbnail, alt }) => {
 ```
 
 #### 5. TTL automatique database (1h)
+
 ```sql
 -- ROI: Prévention future
 -- Complexité: Facile
@@ -843,6 +863,7 @@ const ImageWithLazyLoad = ({ src, thumbnail, alt }) => {
 ```
 
 #### 6. Service Worker cache (3h)
+
 ```typescript
 // ROI: -$5/mois
 // Complexité: Élevée
@@ -857,6 +878,7 @@ const ImageWithLazyLoad = ({ src, thumbnail, alt }) => {
 ### Phase 3: Optimisations Avancées (6-8 heures)
 
 #### 7. Realtime throttling (2h)
+
 ```typescript
 // ROI: -$2/mois (prévention scale)
 // Complexité: Moyenne
@@ -864,6 +886,7 @@ const ImageWithLazyLoad = ({ src, thumbnail, alt }) => {
 ```
 
 #### 8. Request deduplication (2h)
+
 ```typescript
 // ROI: -$3/mois
 // Complexité: Moyenne
@@ -871,6 +894,7 @@ const ImageWithLazyLoad = ({ src, thumbnail, alt }) => {
 ```
 
 #### 9. WebP conversion (2h)
+
 ```typescript
 // ROI: -$2/mois
 // Complexité: Facile
@@ -887,6 +911,7 @@ const ImageWithLazyLoad = ({ src, thumbnail, alt }) => {
 ### Pour votre usage actuel (10 sessions/mois, 50 participants)
 
 ✅ **À implémenter prioritairement**:
+
 1. **Compression images** (Phase 1) - ROI: $20/mois
 2. **Cache headers** (Phase 1) - ROI: $5/mois
 3. **Batch API requests** (Phase 2) - ROI: $8/mois
@@ -894,6 +919,7 @@ const ImageWithLazyLoad = ({ src, thumbnail, alt }) => {
 **Total économisé**: $33/mois pour 6h de dev
 
 ❌ **Pas nécessaire maintenant**:
+
 - Service Worker cache (over-engineering)
 - Realtime throttling (pas encore problème)
 - WebP conversion (JPEG suffit)
@@ -906,24 +932,23 @@ const ImageWithLazyLoad = ({ src, thumbnail, alt }) => {
 // ✅ Dashboard FinOps à implémenter
 export async function getUsageMetrics(startDate: Date, endDate: Date) {
   const supabase = getSupabaseClient();
-  
+
   // 1. Compter requêtes API
   const { count: apiCalls } = await supabase
-    .from('exercise_submissions')
-    .select('*', { count: 'exact', head: true })
-    .gte('created_at', startDate.toISOString())
-    .lte('created_at', endDate.toISOString());
+    .from("exercise_submissions")
+    .select("*", { count: "exact", head: true })
+    .gte("created_at", startDate.toISOString())
+    .lte("created_at", endDate.toISOString());
 
   // 2. Calculer storage utilisé
-  const { data: storageStats } = await supabase
-    .rpc('get_storage_usage');
+  const { data: storageStats } = await supabase.rpc("get_storage_usage");
 
   // 3. Estimer bandwidth (approximation)
   const { data: submissions } = await supabase
-    .from('exercise_submissions')
-    .select('image_url')
-    .gte('submitted_at', startDate.toISOString());
-  
+    .from("exercise_submissions")
+    .select("image_url")
+    .gte("submitted_at", startDate.toISOString());
+
   const estimatedBandwidth = submissions?.length * 0.3; // 300 KB moyenne
 
   return {
@@ -982,15 +1007,15 @@ function calculateCost(usage: UsageMetrics): number {
 export const alerts = {
   storage: {
     threshold: 400, // MB
-    action: 'email',
+    action: "email",
   },
   apiCalls: {
     threshold: 40000, // par mois
-    action: 'email',
+    action: "email",
   },
   bandwidth: {
     threshold: 1.6, // GB par mois
-    action: 'email',
+    action: "email",
   },
 };
 ```
@@ -1002,11 +1027,13 @@ export const alerts = {
 ### 1. Principe du "Juste Nécessaire"
 
 ❌ **Éviter**:
+
 - Fetch full objects si seulement quelques champs nécessaires
 - Télécharger images full-size pour thumbnails
 - Broadcast à tous si seulement admin doit savoir
 
 ✅ **Préférer**:
+
 - `select('id, name')` au lieu de `select('*')`
 - Thumbnails dédiés
 - Channels ciblés par rôle
@@ -1016,10 +1043,10 @@ export const alerts = {
 ```typescript
 // ✅ Configurer cache headers optimaux
 const CACHE_STRATEGIES = {
-  images: 'public, max-age=31536000, immutable', // 1 an
-  thumbnails: 'public, max-age=31536000, immutable',
-  api: 'private, max-age=300', // 5 minutes
-  realtime: 'no-cache', // Pas de cache
+  images: "public, max-age=31536000, immutable", // 1 an
+  thumbnails: "public, max-age=31536000, immutable",
+  api: "private, max-age=300", // 5 minutes
+  realtime: "no-cache", // Pas de cache
 };
 ```
 
@@ -1027,7 +1054,7 @@ const CACHE_STRATEGIES = {
 
 ```typescript
 // ✅ Logger les coûts estimés en dev
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   console.log(`[FinOps] Estimated cost: $${estimatedCost.toFixed(4)}`);
   console.log(`[FinOps] API calls: ${apiCallCount}`);
   console.log(`[FinOps] Bandwidth: ${bandwidthMB} MB`);
@@ -1041,12 +1068,12 @@ if (process.env.NODE_ENV === 'development') {
 ### Croissance Linéaire (conservatrice)
 
 | Mois | Sessions | Coût Sans Optim | Coût Optimisé | Économie Cumulée |
-|------|----------|-----------------|---------------|------------------|
-| 1 | 5 | $0 | $0 | $0 |
-| 3 | 10 | $42 | $2 | $120 |
-| 6 | 20 | $95 | $8 | $522 |
-| 12 | 50 | $210 | $35 | $2,100 |
-| 24 | 100 | $450 | $80 | $8,880 |
+| ---- | -------- | --------------- | ------------- | ---------------- |
+| 1    | 5        | $0              | $0            | $0               |
+| 3    | 10       | $42             | $2            | $120             |
+| 6    | 20       | $95             | $8            | $522             |
+| 12   | 50       | $210            | $35           | $2,100           |
+| 24   | 100      | $450            | $80           | $8,880           |
 
 ### ROI Total sur 2 ans
 

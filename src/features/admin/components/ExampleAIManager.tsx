@@ -47,6 +47,13 @@ export const ExampleAIManager: React.FC<ExampleAIManagerProps> = ({
   const loadExample = async () => {
     try {
       setLoading(true);
+
+      if (!supabase) {
+        console.warn("Supabase client not initialized");
+        showMessage("error", "Base de datos no disponible");
+        return;
+      }
+
       const { data, error } = await supabase
         .from("exercise_ai_examples")
         .select("*")
@@ -80,7 +87,7 @@ export const ExampleAIManager: React.FC<ExampleAIManagerProps> = ({
   };
 
   const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -89,6 +96,11 @@ export const ExampleAIManager: React.FC<ExampleAIManagerProps> = ({
       setUploading(true);
       showMessage("success", "Subiendo archivo...");
 
+      if (!supabase) {
+        showMessage("error", "Base de datos no disponible");
+        return;
+      }
+
       // Determinar el tipo según la extensión
       const fileType = file.type.startsWith("video/") ? "video" : "image";
       const fileExt = file.name.split(".").pop();
@@ -96,7 +108,7 @@ export const ExampleAIManager: React.FC<ExampleAIManagerProps> = ({
       const filePath = `ai-examples/${fileName}`;
 
       // Subir a Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from("workshop-content")
         .upload(filePath, file, {
           cacheControl: "3600",
@@ -135,6 +147,11 @@ export const ExampleAIManager: React.FC<ExampleAIManagerProps> = ({
 
     try {
       setSaving(true);
+
+      if (!supabase) {
+        showMessage("error", "Base de datos no disponible");
+        return;
+      }
 
       if (example.id) {
         // Actualizar existente

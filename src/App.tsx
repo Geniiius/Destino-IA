@@ -10,12 +10,11 @@
 
 import React, { useState, useEffect } from "react";
 import { AdminDashboard } from "@/features/admin/components/AdminDashboard";
-import { ParticipantView } from "@/features/workshop/components/ParticipantView";
 import { JoinForm } from "@/features/auth/components/JoinForm";
 import { HomePage } from "@/features/home/components/HomePage";
 import SplashCursor from "@/components/effects/SplashCursor";
 
-type ViewType = "home" | "admin" | "join" | "workshop";
+type ViewType = "home" | "admin" | "join";
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewType>("home");
@@ -36,7 +35,7 @@ const App: React.FC = () => {
 
   const handleJoin = (name: string) => {
     setParticipantName(name);
-    setView("workshop");
+    // TODO: Implementar nueva lógica de ejercicios
   };
 
   return (
@@ -53,9 +52,6 @@ const App: React.FC = () => {
       {view === "home" && <HomePage />}
       {view === "admin" && <AdminDashboard />}
       {view === "join" && <JoinForm onJoin={handleJoin} />}
-      {view === "workshop" && (
-        <ParticipantView participantName={participantName} />
-      )}
     </div>
   );
 };

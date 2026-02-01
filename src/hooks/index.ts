@@ -3,5 +3,6 @@
  * @description Barrel export para hooks
  */
 
-export { useLocalStorage } from './useLocalStorage';
-export { useDebounce } from './useDebounce';
+export { useLocalStorage } from "./useLocalStorage";
+export { useDebounce } from "./useDebounce";
+export { useCopyToClipboard } from "./useCopyToClipboard";

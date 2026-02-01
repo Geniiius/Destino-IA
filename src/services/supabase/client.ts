@@ -67,6 +67,9 @@ export const channels = {
  */
 export async function checkConnection(): Promise<boolean> {
   try {
+    if (!supabase) {
+      return false;
+    }
     const { error } = await supabase.from("health_check").select("*").limit(1);
     return !error;
   } catch {

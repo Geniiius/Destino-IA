@@ -26,12 +26,12 @@ Votre stack actuelle **est largement suffisante** pour 30-50 participants. Supab
 
 #### Goulots d'étranglement identifiés
 
-| Composant | Charge CPU | Risque | Seuil de rupture |
-|-----------|-----------|--------|------------------|
-| **PDF.js Processing** | ⚠️ ÉLEVÉ | 🔴 Critique | >50 pages ou >10MB |
-| **Canvas Rendering** (Slides) | ⚠️ MOYEN | 🟡 Modéré | >30 slides avec images |
-| **Galerie (Grid Rendering)** | ⚠️ MOYEN | 🟡 Modéré | >50 images simultanées |
-| **React Re-renders** | ✅ BAS | 🟢 Faible | - |
+| Composant                     | Charge CPU | Risque      | Seuil de rupture       |
+| ----------------------------- | ---------- | ----------- | ---------------------- |
+| **PDF.js Processing**         | ⚠️ ÉLEVÉ   | 🔴 Critique | >50 pages ou >10MB     |
+| **Canvas Rendering** (Slides) | ⚠️ MOYEN   | 🟡 Modéré   | >30 slides avec images |
+| **Galerie (Grid Rendering)**  | ⚠️ MOYEN   | 🟡 Modéré   | >50 images simultanées |
+| **React Re-renders**          | ✅ BAS     | 🟢 Faible   | -                      |
 
 #### Preuves dans le code
 
@@ -44,7 +44,7 @@ for (let i = 1; i <= pdf.numPages; i++) {
   const canvas = document.createElement("canvas");
   canvas.width = viewport.width;
   canvas.height = viewport.height;
-  
+
   await page.render({ canvasContext: context, viewport }).promise;
   const imageUrl = canvas.toDataURL("image/jpeg", 0.85); // Conversion JPEG bloquante
 }
@@ -58,13 +58,13 @@ for (let i = 1; i <= pdf.numPages; i++) {
 
 #### Consommation mémoire estimée
 
-| Élément | Taille unitaire | Quantité max | Total |
-|---------|----------------|--------------|--------|
-| **Slides chargés** (avec images Base64) | ~500KB-2MB | 50 slides | **25-100 MB** |
-| **Images galerie** (URLs) | ~50-500KB | 100 images | **5-50 MB** |
-| **État React** | ~1-5MB | 1 session | **1-5 MB** |
-| **Realtime buffers** | ~2-10MB | 3 channels | **6-30 MB** |
-| **Total estimé** | | | **🔴 37-185 MB** |
+| Élément                                 | Taille unitaire | Quantité max | Total            |
+| --------------------------------------- | --------------- | ------------ | ---------------- |
+| **Slides chargés** (avec images Base64) | ~500KB-2MB      | 50 slides    | **25-100 MB**    |
+| **Images galerie** (URLs)               | ~50-500KB       | 100 images   | **5-50 MB**      |
+| **État React**                          | ~1-5MB          | 1 session    | **1-5 MB**       |
+| **Realtime buffers**                    | ~2-10MB         | 3 channels   | **6-30 MB**      |
+| **Total estimé**                        |                 |              | **🔴 37-185 MB** |
 
 #### Risque de Memory Leak
 
@@ -74,12 +74,15 @@ for (let i = 1; i <= pdf.numPages; i++) {
 useEffect(() => {
   let submissionsChannel: RealtimeChannel | null = null;
   let broadcastChannel: RealtimeChannel | null = null;
-  
+
   // Si l'effet se re-déclenche sans cleanup, fuite mémoire garantie
-  submissionsChannel = supabase.channel(`exercise_submissions:${sessionId}`)
-    .on('postgres_changes', { /* ... */ })
+  submissionsChannel = supabase
+    .channel(`exercise_submissions:${sessionId}`)
+    .on("postgres_changes", {
+      /* ... */
+    })
     .subscribe();
-    
+
   return () => {
     if (submissionsChannel) supabase.removeChannel(submissionsChannel);
     if (broadcastChannel) supabase.removeChannel(broadcastChannel);
@@ -95,12 +98,12 @@ useEffect(() => {
 
 #### Bande passante par participant
 
-| Opération | Direction | Taille | Fréquence |
-|-----------|-----------|--------|-----------|
-| **Upload image** | ↑ Upload | 500KB-5MB | 1-3 par exercice |
-| **Download images galerie** | ↓ Download | 50-500KB × N images | Continu |
-| **Realtime updates** | ↕ Bi-directionnel | 1-10KB | 0.5-5/sec |
-| **Slides PDF** | ↓ Download | 1-20MB | 1 fois |
+| Opération                   | Direction         | Taille              | Fréquence        |
+| --------------------------- | ----------------- | ------------------- | ---------------- |
+| **Upload image**            | ↑ Upload          | 500KB-5MB           | 1-3 par exercice |
+| **Download images galerie** | ↓ Download        | 50-500KB × N images | Continu          |
+| **Realtime updates**        | ↕ Bi-directionnel | 1-10KB              | 0.5-5/sec        |
+| **Slides PDF**              | ↓ Download        | 1-20MB              | 1 fois           |
 
 #### Calcul de charge réseau pour votre cas
 
@@ -140,7 +143,7 @@ CREATE INDEX idx_submissions_exercise ON exercise_submissions(exercise_id);
 
 -- 🔴 MANQUANT: Index composite pour requêtes fréquentes
 -- Cette requête sera LENTE avec >1000 soumissions:
-SELECT * FROM exercise_submissions 
+SELECT * FROM exercise_submissions
 WHERE session_id = ? AND exercise_id = ? AND is_favorite = true;
 ```
 
@@ -149,10 +152,10 @@ WHERE session_id = ? AND exercise_id = ? AND is_favorite = true;
 ```typescript
 // getExerciseStats - Compte toutes les soumissions par exercice
 const { data, count } = await supabase
-  .from('exercise_submissions')
-  .select('*', { count: 'exact' })
-  .eq('session_id', sessionId)
-  .eq('exercise_id', exerciseId);
+  .from("exercise_submissions")
+  .select("*", { count: "exact" })
+  .eq("session_id", sessionId)
+  .eq("exercise_id", exerciseId);
 ```
 
 **Impact**: Avec 1000+ soumissions, cette requête prendra 500ms-2s sans index composite.
@@ -164,11 +167,12 @@ const { data, count } = await supabase
 // ⚠️ PROBLÈME: Client singleton mais connexion pool non configuré
 supabaseClient = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY, {
   auth: { persistSession: true, autoRefreshToken: true },
-  realtime: { params: { eventsPerSecond: 10 } } // Limite côté client
+  realtime: { params: { eventsPerSecond: 10 } }, // Limite côté client
 });
 ```
 
-**Limite Supabase Free Tier**: 
+**Limite Supabase Free Tier**:
+
 - 500 connexions simultanées max
 - 2GB database size
 - 10GB bandwidth/month
@@ -179,12 +183,12 @@ supabaseClient = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY, {
 
 #### Endpoints Supabase utilisés
 
-| Endpoint | Opération | Fréquence | Rate Limit Supabase |
-|----------|-----------|-----------|---------------------|
-| `/rest/v1/session_state` | SELECT/UPDATE | 1-5/sec | 100 req/sec (Free) |
-| `/rest/v1/exercise_submissions` | SELECT/INSERT/UPDATE | 0.5-2/sec | 100 req/sec |
-| `/storage/v1/object/workshop-content` | POST (upload) | Burst: 10-50/sec | 60 req/min (Free) |
-| `/realtime/v1` (WebSocket) | SUBSCRIBE | Connection persist | 500 connections |
+| Endpoint                              | Opération            | Fréquence          | Rate Limit Supabase |
+| ------------------------------------- | -------------------- | ------------------ | ------------------- |
+| `/rest/v1/session_state`              | SELECT/UPDATE        | 1-5/sec            | 100 req/sec (Free)  |
+| `/rest/v1/exercise_submissions`       | SELECT/INSERT/UPDATE | 0.5-2/sec          | 100 req/sec         |
+| `/storage/v1/object/workshop-content` | POST (upload)        | Burst: 10-50/sec   | 60 req/min (Free)   |
+| `/realtime/v1` (WebSocket)            | SUBSCRIBE            | Connection persist | 500 connections     |
 
 #### Point de rupture identifié
 
@@ -195,13 +199,14 @@ export async function uploadImageToStorage(file: File, ...): Promise<string> {
   const { data, error } = await supabase.storage
     .from(STORAGE_BUCKET)
     .upload(filename, file, { cacheControl: '3600', upsert: false });
-    
+
   if (error) throw new Error(`Error al subir la imagen: ${error.message}`);
   // ⚠️ Pas de gestion du 429 (Too Many Requests)
 }
 ```
 
 **Scénario de rupture**:
+
 - 50 participants uploadent une image simultanément
 - Supabase Storage rate limit: 60 req/min = 1 req/sec
 - **Résultat**: 49 échecs, participants bloqués
@@ -214,23 +219,23 @@ export async function uploadImageToStorage(file: File, ...): Promise<string> {
 
 ```typescript
 // useExerciseSync.ts - 1 channel par participant
-const channel = supabase.channel(`session:${sessionId}`)
+const channel = supabase.channel(`session:${sessionId}`);
 
 // useGallery.ts - 2 channels par participant
-submissionsChannel = supabase.channel(`exercise_submissions:${sessionId}`)
-broadcastChannel = supabase.channel(`gallery_broadcast:${sessionId}`)
+submissionsChannel = supabase.channel(`exercise_submissions:${sessionId}`);
+broadcastChannel = supabase.channel(`gallery_broadcast:${sessionId}`);
 
 // TOTAL: 3 connexions WebSocket par participant
 ```
 
 #### Calcul de charge Realtime pour votre cas
 
-| Nombre participants | Connexions WS | État Supabase Free | Marge |
-|---------------------|---------------|-------------------|--------|
-| **30** | **90** | ✅ **Parfait** | 55% disponible |
-| **50** | **150** | ✅ **Confortable** | 25% disponible |
-| 100 | 300 | ⚠️ Nécessite Pro | - |
-| 200 | 600 | 🔴 Nécessite upgrade | - |
+| Nombre participants | Connexions WS | État Supabase Free   | Marge          |
+| ------------------- | ------------- | -------------------- | -------------- |
+| **30**              | **90**        | ✅ **Parfait**       | 55% disponible |
+| **50**              | **150**       | ✅ **Confortable**   | 25% disponible |
+| 100                 | 300           | ⚠️ Nécessite Pro     | -              |
+| 200                 | 600           | 🔴 Nécessite upgrade | -              |
 
 **Conclusion pour votre usage**: Avec 30-50 participants, vous êtes **largement en-dessous des limites** (150 connexions utilisées sur 200 disponibles en Free tier).
 
@@ -250,7 +255,8 @@ broadcastChannel = supabase.channel(`gallery_broadcast:${sessionId}`)
 })
 ```
 
-**Impact**: 
+**Impact**:
+
 - 100 participants × 300 broadcasts = 30,000 messages/exercice
 - Avec 5 exercices simultanés = 150,000 messages en 2h
 - **Supabase Realtime facturera au-delà de 2M messages/mois**
@@ -262,12 +268,14 @@ broadcastChannel = supabase.channel(`gallery_broadcast:${sessionId}`)
 #### ⚠️ ABSENT - Problème majeur
 
 Actuellement **AUCUNE file d'attente** n'est implémentée. Tous les traitements sont:
+
 - Synchrones
 - Bloquants
 - Sans retry automatique
 - Sans priorisation
 
 **Opérations nécessitant des queues**:
+
 1. **Image processing**: Compression, thumbnail generation
 2. **PDF processing**: Extraction de texte/images
 3. **Notification delivery**: Broadcast aux participants
@@ -283,7 +291,7 @@ Actuellement **AUCUNE file d'attente** n'est implémentée. Tous les traitements
 
 ```typescript
 // ✅ SOLUTION 1: Virtualisation de la galerie
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 // Au lieu de rendre 500 images, rendre seulement 10-20 visibles
 const rowVirtualizer = useVirtualizer({
@@ -297,14 +305,14 @@ const rowVirtualizer = useVirtualizer({
 ```typescript
 // ✅ SOLUTION 2: Web Workers pour PDF processing
 // useSlideGeneration.ts
-const worker = new Worker('/pdf-worker.js');
+const worker = new Worker("/pdf-worker.js");
 worker.postMessage({ file: await file.arrayBuffer() });
 worker.onmessage = (e) => setSlides(e.data.slides);
 ```
 
 ```typescript
 // ✅ SOLUTION 3: Lazy loading des images
-<img 
+<img
   src={submission.image_thumbnail_url || submission.image_url}
   loading="lazy"
   decoding="async"
@@ -315,11 +323,11 @@ worker.onmessage = (e) => setSlides(e.data.slides);
 
 ```sql
 -- ✅ SOLUTION 4: Index composites manquants
-CREATE INDEX idx_submissions_session_exercise_favorite 
-ON exercise_submissions(session_id, exercise_id, is_favorite) 
+CREATE INDEX idx_submissions_session_exercise_favorite
+ON exercise_submissions(session_id, exercise_id, is_favorite)
 WHERE is_favorite = true;
 
-CREATE INDEX idx_submissions_session_submitted 
+CREATE INDEX idx_submissions_session_submitted
 ON exercise_submissions(session_id, submitted_at DESC);
 
 -- ✅ SOLUTION 5: Partitioning par session
@@ -333,15 +341,16 @@ CREATE TABLE exercise_submissions_partitioned (
 ```typescript
 // ✅ SOLUTION 6: Channel pooling
 // Au lieu de 3 channels/participant, partager 1 channel par session
-const sharedChannel = supabase.channel(`session:${sessionId}:all`)
-  .on('broadcast', { event: 'submission' }, handleSubmission)
-  .on('broadcast', { event: 'broadcast_state' }, handleBroadcast)
+const sharedChannel = supabase
+  .channel(`session:${sessionId}:all`)
+  .on("broadcast", { event: "submission" }, handleSubmission)
+  .on("broadcast", { event: "broadcast_state" }, handleBroadcast)
   .subscribe();
 ```
 
 ```typescript
 // ✅ SOLUTION 7: Throttling des updates
-import { useThrottle } from '@/hooks/useThrottle';
+import { useThrottle } from "@/hooks/useThrottle";
 
 const throttledUpdate = useThrottle((state) => {
   // Envoyer max 1 update/sec au lieu de 10/sec
@@ -354,19 +363,17 @@ const throttledUpdate = useThrottle((state) => {
 ```typescript
 // ✅ SOLUTION 8: Image compression avant upload
 async function compressImage(file: File): Promise<Blob> {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
   const img = await createImageBitmap(file);
-  
+
   // Limiter à 1920px max
   const scale = Math.min(1, 1920 / img.width);
   canvas.width = img.width * scale;
   canvas.height = img.height * scale;
-  
+
   ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-  return new Promise((resolve) => 
-    canvas.toBlob(resolve, 'image/jpeg', 0.85)
-  );
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
 }
 ```
 
@@ -376,13 +383,13 @@ async function compressImage(file: File): Promise<Blob> {
 export async function generateThumbnail(imageUrl: string) {
   const response = await fetch(imageUrl);
   const buffer = await response.arrayBuffer();
-  
+
   // Utiliser sharp ou autre lib pour resize
   const thumbnail = await sharp(buffer)
-    .resize(300, 300, { fit: 'cover' })
+    .resize(300, 300, { fit: "cover" })
     .jpeg({ quality: 80 })
     .toBuffer();
-    
+
   return uploadToStorage(thumbnail);
 }
 ```
@@ -395,11 +402,13 @@ export async function generateThumbnail(imageUrl: string) {
 ## 💰 Budget Réel pour Votre Usage
 
 ### Configuration Actuelle (Suffisante)
+
 - **Supabase Free**: 0€/mois
 - **Cloudflare Pages** (hosting): 0€/mois
 - **Total**: **0€/mois** ✅
 
 ### Si vous voulez upgrader (optionnel)
+
 - **Supabase Pro**: 25€/mois
   - Avantages: Plus de bandwidth (250GB), backup automatique, support prioritaire
   - **Pas nécessaire** pour 30-50 participants
@@ -423,6 +432,7 @@ Pour éviter la sur-ingénierie, voici ce qui est **inutile** pour 30-50 partici
 ### 💸 Économies Réalisées
 
 En restant sur l'architecture actuelle simple:
+
 - **Coût mensuel**: 0€ (vs 500-2000€ avec sur-ingénierie)
 - **Complexité**: Simple (vs 10× plus complexe)
 - **Maintenance**: Minimale (vs équipe dédiée)
@@ -435,13 +445,13 @@ En restant sur l'architecture actuelle simple:
 
 ## 📊 Seuils pour Votre Usage (30-50 participants)
 
-| Composant | Usage Actuel | Limite Free | Marge Disponible | Statut |
-|-----------|--------------|-------------|------------------|--------|
-| **Realtime WS** | 90-150 conn | 200 conn | 25-55% | ✅ Confortable |
-| **Database Size** | ~10-50 MB | 500 MB | 90-98% | ✅ Excellent |
-| **Bandwidth** | ~500 MB/session | 2 GB/mois | 3-4 sessions/mois | ✅ Suffisant |
-| **Storage** | ~200-500 MB | 1 GB | 50-75% | ✅ Bon |
-| **API Requests** | ~50-100/min | 1000/min | 90-95% | ✅ Parfait |
+| Composant         | Usage Actuel    | Limite Free | Marge Disponible  | Statut         |
+| ----------------- | --------------- | ----------- | ----------------- | -------------- |
+| **Realtime WS**   | 90-150 conn     | 200 conn    | 25-55%            | ✅ Confortable |
+| **Database Size** | ~10-50 MB       | 500 MB      | 90-98%            | ✅ Excellent   |
+| **Bandwidth**     | ~500 MB/session | 2 GB/mois   | 3-4 sessions/mois | ✅ Suffisant   |
+| **Storage**       | ~200-500 MB     | 1 GB        | 50-75%            | ✅ Bon         |
+| **API Requests**  | ~50-100/min     | 1000/min    | 90-95%            | ✅ Parfait     |
 
 **Conclusion**: Vous utilisez **moins de 30%** des ressources disponibles en Free tier.
 
@@ -452,10 +462,12 @@ En restant sur l'architecture actuelle simple:
 ### ✅ Priorité 1 - Quick Wins (2-3 heures)
 
 1. **Ajouter index composites DB** (30 min)
+
    - Améliore performance queries stats
    - Copy-paste du SQL fourni
 
 2. **Loading state pour uploads** (1h)
+
    - Meilleure UX pendant upload images
    - Simple progress bar
 
@@ -466,6 +478,7 @@ En restant sur l'architecture actuelle simple:
 ### 🟡 Priorité 2 - Confort (1-2 jours)
 
 4. **Compression images côté client** (1 jour)
+
    - Réduit temps d'upload pour 3G/4G
    - Utilise Canvas API (déjà dans le code)
 
@@ -476,6 +489,7 @@ En restant sur l'architecture actuelle simple:
 ### 🔵 Priorité 3 - Nice-to-Have (optionnel)
 
 6. **Web Worker pour PDF** (2 jours)
+
    - Seulement si vous traitez des PDF >20 pages
    - Évite freeze UI
 
@@ -496,6 +510,7 @@ En restant sur l'architecture actuelle simple:
 ## 🧪 Tests Simples Recommandés
 
 ### Test 1: Simuler 50 participants avec vos amis/collègues
+
 ```
 ✅ Demandez à 10-15 personnes de se connecter simultanément
 ✅ Faites-les tous uploader une image en même temps
@@ -503,6 +518,7 @@ En restant sur l'architecture actuelle simple:
 ```
 
 ### Test 2: Tester avec connexion 3G
+
 ```
 ✅ Chrome DevTools → Network → Slow 3G
 ✅ Essayez d'uploader une image de 2-3 MB
@@ -510,6 +526,7 @@ En restant sur l'architecture actuelle simple:
 ```
 
 ### Test 3: PDF processing
+
 ```
 ✅ Uploadez un PDF de 20-30 pages
 ✅ Si l'UI freeze >5 secondes, considérez le Web Worker

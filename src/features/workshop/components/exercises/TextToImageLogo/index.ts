@@ -1,0 +1,1 @@
+export { TextToImageLogo } from './TextToImageLogo';
