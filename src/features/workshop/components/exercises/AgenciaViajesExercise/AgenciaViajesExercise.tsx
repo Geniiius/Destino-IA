@@ -50,6 +50,10 @@ export const AgenciaViajesExercise: React.FC<AgenciaViajesExerciseProps> = ({
   };
 
   const handleSubmit = () => {
+    console.log("🔍 handleSubmit called");
+    console.log("📋 Current answers:", state.answers);
+    console.log("✅ Is complete?", isAnswerComplete(state.answers));
+    
     if (isAnswerComplete(state.answers)) {
       const prompt = generatePrompt(state.answers);
       completeExercise();
@@ -61,6 +65,8 @@ export const AgenciaViajesExercise: React.FC<AgenciaViajesExerciseProps> = ({
 
       console.log("✅ Ejercicio completado");
       console.log("📝 Prompt generado:", prompt);
+    } else {
+      console.warn("⚠️ Formulario incompleto");
     }
   };
 
@@ -122,16 +128,6 @@ export const AgenciaViajesExercise: React.FC<AgenciaViajesExerciseProps> = ({
                 Has creado tu primer prompt estructurado
               </p>
 
-              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 mb-8">
-                <p className="text-emerald-400 font-bold mb-2">
-                  ⏱️ Tiempo total
-                </p>
-                <p className="text-4xl font-bold text-white">
-                  {Math.floor(state.timeSpent / 60)}:
-                  {(state.timeSpent % 60).toString().padStart(2, "0")}
-                </p>
-              </div>
-
               <div className="bg-white/5 rounded-2xl p-6 mb-8 text-left">
                 <p className="text-sm font-bold text-emerald-400 mb-3 uppercase tracking-wide">
                   Tu Prompt Final:
@@ -142,12 +138,41 @@ export const AgenciaViajesExercise: React.FC<AgenciaViajesExerciseProps> = ({
                 </p>
               </div>
 
-              <button
-                onClick={handleExit}
-                className="px-10 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 rounded-xl text-white font-bold text-lg transition-all hover:scale-105 shadow-[0_0_30px_rgba(16,185,129,0.4)]"
-              >
-                Continuar
-              </button>
+              {/* Instrucciones para usar el prompt */}
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 text-left">
+                <p className="text-blue-400 font-bold mb-4 flex items-center gap-2 text-lg">
+                  <span className="text-2xl">💡</span> ¿Qué hacer ahora?
+                </p>
+                <div className="space-y-4 text-gray-300">
+                  <p className="leading-relaxed">
+                    Ya has generado la idea de tu prompt.
+                  </p>
+                  <p className="leading-relaxed">
+                    Ahora puedes ir a <span className="text-emerald-400 font-semibold">ChatGPT</span> y decirle:
+                  </p>
+                  <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+                    <p className="text-white font-medium italic">
+                      "Genérame un prompt para crear esto:"
+                    </p>
+                  </div>
+                  <p className="leading-relaxed">
+                    (pega tu prompt de arriba y envíalo)
+                  </p>
+                  <div className="mt-6 pt-6 border-t border-blue-500/20">
+                    <p className="leading-relaxed mb-3">
+                      Una vez que ChatGPT te haya generado el prompt final, puedes ir a la herramienta de generación de imágenes y decir:
+                    </p>
+                    <div className="bg-white/5 border border-white/10 rounded-lg p-4 mb-3">
+                      <p className="text-white font-medium italic">
+                        "Créame una imagen"
+                      </p>
+                    </div>
+                    <p className="leading-relaxed">
+                      y luego pegar el prompt que ChatGPT generó.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         );

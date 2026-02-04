@@ -4,7 +4,7 @@
  * Self-contained component - Beach/Remote Worker theme
  */
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
   Sparkles,
   ArrowRight,
@@ -21,99 +21,381 @@ import {
   Palette,
   Box,
   Terminal,
+  FileText
 } from "lucide-react";
 import { useCopyToClipboard } from "../../../../../hooks";
 
+// --- DATOS GLOBALES ---
+
+const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
+  rol: User,
+  objetivo: Target,
+  escena: Sun,
+  estilo: Palette,
+  salida: FileText,
+};
+
+const COLOR_STYLES: Record<string, any> = {
+  purple: {
+    bg: "bg-purple-500/20",
+    border: "border-purple-500/30",
+    text: "text-purple-400",
+  },
+  pink: {
+    bg: "bg-pink-500/20",
+    border: "border-pink-500/30",
+    text: "text-pink-400",
+  },
+  rose: {
+      bg: "bg-rose-500/20",
+      border: "border-rose-500/30",
+      text: "text-rose-400",
+  },
+  amber: {
+      bg: "bg-amber-500/20",
+      border: "border-amber-500/30",
+      text: "text-amber-400",
+  }
+};
+
+const FIELDS = [
+  {
+    key: "rol",
+    label: "1. ROL",
+    placeholder: "Ej: Fotógrafo de National Geographic...",
+    color: "purple",
+  },
+  {
+    key: "objetivo",
+    label: "2. OBJETIVO",
+    placeholder: "Ej: Campaña Instagram...",
+    color: "pink",
+  },
+  {
+    key: "escena",
+    label: "3. ESCENA + EMOCIÓN",
+    placeholder: "Ej: Playa Tailandia, libertad...",
+    color: "purple",
+  },
+  {
+    key: "estilo",
+    label: "4. ESTILO",
+    placeholder: "Ej: Golden hour, vibrante...",
+    color: "pink",
+  },
+  {
+    key: "salida",
+    label: "5. SALIDA",
+    placeholder: "Ej: Prompt en inglés...",
+    color: "purple",
+  },
+];
+
+interface PracticeScreenProps {
+  answers: { rol: string; objetivo: string; escena: string; estilo: string; salida: string };
+  handleAnswerChange: (key: string, value: string) => void;
+  handleSubmit: () => void;
+  showResult: boolean;
+  setMode: (mode: string) => void;
+}
+
+const PracticeScreen: React.FC<PracticeScreenProps> = ({ answers, handleAnswerChange, handleSubmit, showResult, setMode }) => {
+    
+    const isComplete = Object.values(answers).every(v => v.trim().length > 0);
+    const completedCount = Object.values(answers).filter(v => v.trim().length > 0).length;
+    
+    const generatedPrompt = `Actúa como ${answers.rol}. ${answers.objetivo}. ${answers.escena}. Usa un estilo ${answers.estilo}. ${answers.salida}.`;
+
+    if (showResult) {
+      return (
+        <div className="max-w-3xl mx-auto animate-fade-in">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-12 text-center shadow-2xl">
+            <div className="text-8xl mb-6 animate-bounce">🎉</div>
+
+            <h1 className="text-5xl font-bold text-white mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              ¡Ejercicio Completado!
+            </h1>
+
+            <p className="text-2xl text-gray-300 mb-8">
+              Has creado tu primer prompt estructurado
+            </p>
+
+            <div className="bg-white/5 rounded-2xl p-6 mb-8 text-left">
+              <p className="text-sm font-bold text-purple-400 mb-3 uppercase tracking-wide">
+                Tu Prompt Final:
+              </p>
+              <p className="text-gray-200 leading-relaxed">
+                {generatedPrompt}
+              </p>
+            </div>
+
+            {/* Instrucciones para usar el prompt */}
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 text-left">
+              <p className="text-blue-400 font-bold mb-4 flex items-center gap-2 text-lg">
+                <span className="text-2xl">💡</span> ¿Qué hacer ahora?
+              </p>
+              <div className="space-y-4 text-gray-300">
+                <p className="leading-relaxed">
+                  Ya has generado la idea de tu prompt.
+                </p>
+                <p className="leading-relaxed">
+                  Ahora puedes ir a <span className="text-emerald-400 font-semibold">ChatGPT</span> y decirle:
+                </p>
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+                  <p className="text-white font-medium italic">
+                    "Genérame un prompt para crear esto:"
+                  </p>
+                </div>
+                <p className="leading-relaxed">
+                  (pega tu prompt de arriba y envíalo)
+                </p>
+                <div className="mt-6 pt-6 border-t border-blue-500/20">
+                  <p className="leading-relaxed mb-3">
+                    Una vez que ChatGPT te haya generado el prompt final, puedes ir a la herramienta de generación de imágenes y decir:
+                  </p>
+                  <div className="bg-white/5 border border-white/10 rounded-lg p-4 mb-3">
+                    <p className="text-white font-medium italic">
+                      "Créame una imagen"
+                    </p>
+                  </div>
+                  <p className="leading-relaxed">
+                    y luego pegar el prompt que ChatGPT generó.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-8 flex justify-center gap-4">
+                 <button
+                    onClick={() => setMode("practice")}
+                    className="px-6 py-3 rounded-xl border border-white/20 hover:bg-white/5 transition-colors text-white"
+                 >
+                     Editar Prompt
+                 </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="w-full max-w-6xl mx-auto h-full flex flex-col justify-center animate-fade-in">
+        <div className="flex items-center justify-between mb-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-md">
+          <button
+            onClick={() => setMode("intro")}
+            className="text-gray-500 hover:text-white text-sm"
+          >
+             <ChevronLeft className="w-5 h-5" />
+          </button>
+          
+          <div>
+            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+              Diseña tu Escena de Playa
+              <span className="text-sm font-normal text-gray-400 bg-white/10 px-2 py-1 rounded-full">
+                {completedCount}/{FIELDS.length}
+              </span>
+            </h1>
+          </div>
+
+          <div className="flex gap-1">
+            {FIELDS.map((f, index) => (
+              <div
+                key={index}
+                className={`w-6 h-2 rounded-full transition-all ${
+                  index < completedCount ? "bg-" + f.color + "-500 shadow-[0_0_10px_rgba(200,80,200,0.5)]" : "bg-white/10"
+                }`}
+                style={{ backgroundColor: index < completedCount ? "" : undefined }}
+              >
+                  {index < completedCount && <div className={`w-full h-full rounded-full bg-${f.color}-500`}></div>}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {FIELDS.map((f, i) => {
+            const value = answers[f.key as keyof typeof answers];
+            const isFilled = value.trim().length > 0;
+            
+            const colorStyle = COLOR_STYLES[f.color] || COLOR_STYLES.purple;
+            const Icon = ICON_MAP[f.key] || Sparkles;
+
+            return (
+              <div
+                key={i}
+                className={`
+                  relative group transition-all duration-300
+                  bg-black/20 backdrop-blur-sm border rounded-xl p-4
+                  ${isFilled ? colorStyle.border : "border-white/5 hover:border-white/20"}
+                  ${isFilled ? colorStyle.bg.replace('/20', '/10') : ""}
+                `}
+              >
+               <div className="flex gap-3">
+                  <div
+                    className={`
+                      flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-all
+                      ${isFilled ? colorStyle.bg : "bg-white/5 group-hover:bg-white/10"}
+                      ${isFilled ? colorStyle.text : "text-gray-500 group-hover:text-gray-300"}
+                    `}
+                  >
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <label
+                      className={`
+                        block text-xs font-bold uppercase tracking-wider mb-1.5
+                        ${colorStyle.text}
+                      `}
+                    >
+                      {f.label}
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={answers[f.key as keyof typeof answers]}
+                      onChange={(e) => handleAnswerChange(f.key, e.target.value)}
+                      className={`
+                        w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white 
+                        placeholder-gray-600 focus:outline-none focus:ring-1 focus:bg-black/60 transition-all resize-none
+                        ${isFilled ? "border-white/20" : ""}
+                        focus:ring-${f.color}-500
+                      `}
+                      placeholder={f.placeholder}
+                    />
+                  </div>
+               </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex gap-4 justify-end items-center mt-auto">
+          <button
+            onClick={handleSubmit}
+            disabled={!isComplete}
+            className={`
+              group flex items-center gap-3 px-8 py-3 rounded-xl font-bold text-white transition-all
+              ${isComplete 
+                ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-105 shadow-lg shadow-purple-900/20" 
+                : "bg-gray-800 text-gray-500 cursor-not-allowed"}
+            `}
+          >
+            <span>Generar Prompt</span>
+            <Zap className={`w-5 h-5 ${isComplete ? "group-hover:translate-x-1" : ""} transition-transform`} />
+          </button>
+        </div>
+      </div>
+    );
+};
+
 export const TextToImageIntro: React.FC = () => {
-  const [mode, setMode] = useState("intro"); // intro, tutorial, example, practice
+  const [mode, setMode] = useState("intro");
   const [currentStep, setCurrentStep] = useState(0);
+  const [showResult, setShowResult] = useState(false);
+  const [answers, setAnswers] = useState({
+    rol: "",
+    objetivo: "",
+    escena: "",
+    estilo: "",
+    salida: "",
+  });
   const { copied, copy } = useCopyToClipboard();
 
-  // DATOS: Tema Beach/Remote Worker (Purple/Pink)
+  const handleAnswerChange = useCallback((key: string, value: string) => {
+    setAnswers(prev => ({ ...prev, [key]: value }));
+  }, []);
+
+  const handleSubmit = useCallback(() => {
+    const isComplete = Object.values(answers).every(v => v.trim().length > 0);
+    if (isComplete) {
+      setShowResult(true);
+    }
+  }, [answers]);
+
+  // DATOS: Tema Workers (Purple/Pink)
   const tutorialSteps = [
     {
       num: 1,
       subtitle: "ROL",
       title: "Paso 1: El Experto",
       icon: <Camera className="w-6 h-6" />,
-      question: "¿Quién eres?",
+      question: "¿Quién toma la foto?",
       explanation:
-        'Para lifestyle de playa, necesitas un experto en "Fotografía de Viajes" o "Travel Lifestyle Photographer".',
+        "No es lo mismo un 'Turista con iPhone' que un 'Fotógrafo de National Geographic'. El rol define la calidad.",
       example:
-        "Actúa como un fotógrafo profesional especializado en lifestyle de teletrabajo y destinos tropicales.",
+        "Actúa como un fotógrafo profesional de viajes de National Geographic.",
       color: "purple",
-      tip: "Esto asegura composiciones aspiracionales y colores vibrantes.",
+      tip: "Define la autoridad y el 'ojo' artístico. IAs como Midjourney lo aman.",
     },
     {
       num: 2,
       subtitle: "OBJETIVO",
-      title: "Paso 2: El Uso",
+      title: "Paso 2: El Propósito",
       icon: <Target className="w-6 h-6" />,
-      question: "¿Para qué usarás la imagen?",
+      question: "¿Para qué es la imagen?",
       explanation:
-        "¿Es para Instagram, un blog de nómadas digitales, o una campaña de trabajo remoto?",
+        "Define si es para vender, inspirar o informar. Esto ajusta la composición.",
       example:
-        "Imagen para campaña de marketing digital vendiendo paquetes de trabajo remoto en playas.",
+        "Crear una imagen aspiracional para una campaña de Instagram sobre nómadas digitales.",
       color: "pink",
-      tip: 'Mencionar "Digital Nomad Lifestyle" potencia la estética moderna.',
+      tip: "Mencionar 'Instagram' suele generar formatos más atractivos y saturados.",
     },
     {
       num: 3,
       subtitle: "ESCENA + EMOCIÓN",
-      title: "Paso 3: La Escena",
+      title: "Paso 3: El Ambiente",
       icon: <Sun className="w-6 h-6" />,
-      question: "¿Qué debe verse y sentirse?",
+      question: "¿Qué lugar y qué feeling?",
       explanation:
-        "Describe la playa, el momento del día, y la sensación de libertad + productividad.",
+        "Describe el entorno físico y la emoción abstracta que debe transmitir.",
       example:
-        "Persona trabajando con laptop en terraza de villa con vista al océano tropical, atardecer. Emoción: Libertad, equilibrio, éxito.",
+        "Playa paradisíaca en Tailandia al atardecer, persona trabajando con laptop en hamaca. Emoción: Libertad y paz financiera.",
       color: "purple",
-      tip: 'La "Hora Dorada" (Golden Hour) hace las mejores fotos de playa.',
+      tip: "Sé específico con el lugar (Tailandia vs Playa) para mejores detalles.",
     },
     {
       num: 4,
       subtitle: "ESTILO",
-      title: "Paso 4: La Técnica",
+      title: "Paso 4: La Estética",
       icon: <Palette className="w-6 h-6" />,
-      question: "¿Cómo debe verse técnicamente?",
+      question: "¿Cómo se ve visualmente?",
       explanation:
-        'Define iluminación, colores, formato y calidad técnica para lograr el "look profesional".',
+        "Iluminación, colores y estilo artístico. ¿Es realista? ¿Es ilustración 3D?",
       example:
-        "Fotografía realista premium, luz cálida natural, colores vibrantes, alta resolución, formato horizontal 16:9.",
+        "Fotografía golden hour (hora dorada), colores cálidos y vibrantes, alta definición 8k, estilo travel blogger.",
       color: "pink",
-      tip: 'Pide "Natural lighting" y "Warm tones" para el vibe de playa perfecto.',
+      tip: "Palabras clave: 'Golden hour', 'Vibrant', 'Photo-realistic'.",
     },
     {
       num: 5,
       subtitle: "SALIDA",
-      title: "Paso 5: El Output",
+      title: "Paso 5: El Formato",
       icon: <Box className="w-6 h-6" />,
-      question: "¿Qué debe entregarte ChatGPT?",
+      question: "¿Qué me entregas?",
       explanation:
-        "Pedimos el prompt técnico en inglés para maximizar la calidad de la IA.",
+        "Pide el prompt técnico en inglés. Las mejores IAs de imagen funcionan mejor en inglés.",
       example:
-        "Entrégame únicamente el prompt final en inglés, optimizado para Midjourney v6.",
+        "Dame solo el prompt en inglés optimizado para Midjourney v6. Sin explicaciones extra.",
       color: "purple",
-      tip: "Los prompts en inglés generan mejores resultados en todas las IAs.",
+      tip: "El inglés es el idioma nativo de la generación de imágenes.",
     },
   ];
 
-  // EJEMPLO COMPLETO
   const completeExample = {
-    userPrompt: `ChatGPT, actúa como un fotógrafo experto en lifestyle de trabajo remoto (ROL).
+    userPrompt: `ChatGPT, actúa como un fotógrafo profesional de National Geographic (ROL).
 
-Necesito una imagen para una campaña de marketing digital promocionando paquetes de trabajo remoto en playas tropicales (OBJETIVO).
+Obtén una imagen aspiracional para una campaña de Instagram sobre trabajadores remotos (OBJETIVO).
 
-Escena: Un profesional digital trabajando en una laptop sobre una mesa de madera en la terraza de una villa con vista al océano tropical. Atardecer con luz dorada. Palmeras y océano en el fondo.
-Emoción: Libertad absoluta, equilibrio trabajo-vida, éxito y paz (ESCENA + EMOCIÓN).
+Escena: Playa paradisíaca de arena blanca en Tailandia, hora dorada. Un joven profesional trabaja relajado en una hamaca con su laptop, cóctel al lado.
+Emoción: Libertad absoluta, paz, éxito sin estrés (ESCENA + EMOCIÓN).
 
-Estilo: Fotografía realista premium con iluminación natural cálida, colores vibrantes tropical, alta resolución, formato horizontal 16:9 para web (ESTILO).
+Estilo: Fotografía de viaje premiada, iluminación cálida de atardecer, colores turquesa y naranja vibrantes, enfoque nítido en el sujeto, fondo bokeh suave (ESTILO).
 
-Salida: Solo el prompt en inglés, listo para Midjourney v6 (SALIDA).`,
+Salida: Prompt técnico detallado en inglés para Midjourney v6 (SALIDA).`,
 
-    aiPrompt: `Professional digital nomad working on laptop at wooden table on tropical beach villa terrace, ocean view background, golden hour natural lighting, palm trees swaying, turquoise water, warm sunset glow, lifestyle photography, vibrant tropical colors, relaxed yet productive atmosphere, luxury remote work concept, high-resolution photorealistic style, 16:9 horizontal format, shallow depth of field, premium travel photography aesthetic --ar 16:9 --v 6 --style raw --q 2`,
+    aiPrompt: `Young digital nomad working on laptop in a hammock between palm trees on a pristine white sand beach in Thailand during golden hour, turquoise ocean in background, tropical cocktail on side table, warm sunset lighting, relaxed and successful atmosphere, award-winning travel photography style, vibrant orange and teal color grading, sharp focus on subject, soft bokeh background, high resolution, 8k, inspirational Instagram aesthetic --ar 4:5 --v 6 --style raw`,
 
-    finalCommand: `Create an image: Professional digital nomad working on laptop at wooden table...`,
+    finalCommand: `Imagine prompt: Young digital nomad working on laptop...`,
   };
 
   // --- SCREENS ---
@@ -121,25 +403,24 @@ Salida: Solo el prompt en inglés, listo para Midjourney v6 (SALIDA).`,
   const IntroScreen = () => (
     <div className="space-y-8 animate-fade-in max-w-4xl mx-auto">
       <div className="text-center space-y-6 py-8">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-900/50 border border-purple-500 text-purple-300 text-sm font-semibold tracking-wide">
-          <Sun className="w-4 h-4" />
-          🏖️ TEXT TO IMAGE: BEACH
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-900/50 border border-purple-500 text-purple-300 text-sm font-semibold tracking-wide shadow-sm shadow-purple-500/20">
+          <Terminal className="w-4 h-4" />
+          BASICS: TEXT TO IMAGE
         </div>
 
         <h1 className="text-5xl md:text-6xl font-black text-white tracking-tight leading-tight">
-          Aprende los <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-            Fundamentos
+          Crea Imágenes <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400">
+            Increíbles con IA
           </span>
         </h1>
 
         <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-          Domina la metodología de 5 elementos para crear imágenes de
-          trabajadores remotos en playas.
+          Aprende la estructura de 5 pasos para pedirle a ChatGPT los mejores
+          prompts para Midjourney, Dall-E 3 o Ideogram.
         </p>
       </div>
 
-      {/* Los 5 Pilares */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {tutorialSteps.map((s, i) => (
           <div
@@ -157,13 +438,15 @@ Salida: Solo el prompt en inglés, listo para Midjourney v6 (SALIDA).`,
       <div className="grid md:grid-cols-2 gap-4 pt-4">
         <button
           onClick={() => setMode("tutorial")}
-          className="group bg-gray-800 hover:bg-gray-700 text-white p-6 rounded-2xl font-bold text-lg transition-all shadow-lg border border-gray-700 flex items-center justify-between"
+          className="group bg-purple-900/40 hover:bg-purple-900/60 text-white p-6 rounded-2xl font-bold text-lg transition-all shadow-lg border border-purple-500/30 flex items-center justify-between"
         >
           <div className="flex items-center gap-3">
-            <BookOpen className="w-6 h-6 text-purple-400" />
+            <BookOpen className="w-6 h-6 text-pink-400" />
             <div className="text-left">
-              <div className="text-sm font-normal text-gray-400">Aprender</div>
-              Ver Tutorial
+              <div className="text-sm font-normal text-purple-300">
+                Aprender
+              </div>
+              Ver los 5 Pasos
             </div>
           </div>
           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -171,15 +454,13 @@ Salida: Solo el prompt en inglés, listo para Midjourney v6 (SALIDA).`,
 
         <button
           onClick={() => setMode("practice")}
-          className="group bg-purple-600 hover:bg-purple-500 text-white p-6 rounded-2xl font-bold text-lg transition-all shadow-lg flex items-center justify-between"
+          className="group bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white p-6 rounded-2xl font-bold text-lg transition-all shadow-lg shadow-purple-900/20 flex items-center justify-between"
         >
           <div className="flex items-center gap-3">
             <Zap className="w-6 h-6" />
             <div className="text-left">
-              <div className="text-sm font-normal text-purple-200">
-                Practicar
-              </div>
-              Crear Mi Prompt
+              <div className="text-sm font-normal text-pink-200">Practicar</div>
+              Crear mi Primer Prompt
             </div>
           </div>
           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -211,7 +492,7 @@ Salida: Solo el prompt en inglés, listo para Midjourney v6 (SALIDA).`,
             {tutorialSteps.map((_, idx) => (
               <div
                 key={idx}
-                className={`h-1.5 w-8 rounded-full transition-all ${idx === currentStep ? "bg-purple-500" : "bg-gray-700"}`}
+                className={`h-1.5 w-8 rounded-full transition-all ${idx === currentStep ? "bg-pink-500" : "bg-gray-800"}`}
               />
             ))}
           </div>
@@ -221,8 +502,10 @@ Salida: Solo el prompt en inglés, listo para Midjourney v6 (SALIDA).`,
           <div
             className={`p-8 border-b ${currentTheme.split(" ")[1]} ${currentTheme.split(" ")[2]}`}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-3 border ${currentTheme}">
-              {step.icon} {step.subtitle}
+            <div
+              className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-3 border ${currentTheme}`}
+            >
+              {step.icon} PASO {step.num}: {step.subtitle}
             </div>
             <h2 className="text-4xl font-black text-white">{step.title}</h2>
           </div>
@@ -235,10 +518,10 @@ Salida: Solo el prompt en inglés, listo para Midjourney v6 (SALIDA).`,
               <p className="text-gray-400 text-lg">{step.explanation}</p>
             </div>
 
-            <div className="bg-black/30 rounded-xl border border-gray-700 overflow-hidden">
+            <div className="bg-black/40 rounded-xl border border-gray-700 overflow-hidden">
               <div className="bg-gray-800/50 px-4 py-2 border-b border-gray-700">
                 <span className="text-xs text-gray-400 font-bold uppercase">
-                  💡 Ejemplo:
+                  💡 Ejemplo Real:
                 </span>
               </div>
               <div className="p-5">
@@ -250,7 +533,7 @@ Salida: Solo el prompt en inglés, listo para Midjourney v6 (SALIDA).`,
               </div>
             </div>
 
-            <div className="flex items-center gap-3 text-sm text-gray-500">
+            <div className="flex items-center gap-3 text-sm text-gray-500 bg-gray-950/50 p-3 rounded-lg">
               <Lightbulb className="w-4 h-4" />
               {step.tip}
             </div>
@@ -271,7 +554,7 @@ Salida: Solo el prompt en inglés, listo para Midjourney v6 (SALIDA).`,
               }}
               className="bg-white text-black hover:bg-gray-200 px-6 py-3 rounded-xl font-bold flex items-center gap-2"
             >
-              {isLast ? "Ver Ejemplo" : "Siguiente"}
+              {isLast ? "Ver Prompt Final" : "Siguiente"}
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -290,14 +573,17 @@ Salida: Solo el prompt en inglés, listo para Midjourney v6 (SALIDA).`,
           ← Volver
         </button>
         <h2 className="text-3xl font-black text-white">
-          Ejemplo <span className="text-purple-400">Completo</span>
+          Estructura del{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
+            Prompt Perfecto
+          </span>
         </h2>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
         <div className="space-y-4">
           <div className="text-sm font-bold text-gray-500 uppercase tracking-widest">
-            Tu Petición (Español)
+            Tu Petición a ChatGPT
           </div>
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
             <pre className="font-mono text-sm text-gray-300 whitespace-pre-wrap">
@@ -308,7 +594,7 @@ Salida: Solo el prompt en inglés, listo para Midjourney v6 (SALIDA).`,
 
         <div className="space-y-4">
           <div className="text-sm font-bold text-gray-500 uppercase tracking-widest">
-            Prompt Generado (Inglés)
+            Lo que ChatGPT te da
           </div>
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
             <p className="text-gray-300 text-sm leading-relaxed mb-6">
@@ -331,91 +617,19 @@ Salida: Solo el prompt en inglés, listo para Midjourney v6 (SALIDA).`,
             onClick={() => setMode("practice")}
             className="w-full py-4 border border-dashed border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 rounded-xl"
           >
-            ¡Intentarlo yo!
+            ¡Quiero intentarlo!
           </button>
         </div>
       </div>
     </div>
   );
 
-  const PracticeScreen = React.memo(() => {
-    const fields = [
-      {
-        label: "1. ROL",
-        placeholder: "Ej: Fotógrafo de National Geographic...",
-        color: "purple",
-      },
-      {
-        label: "2. OBJETIVO",
-        placeholder: "Ej: Campaña Instagram...",
-        color: "pink",
-      },
-      {
-        label: "3. ESCENA + EMOCIÓN",
-        placeholder: "Ej: Playa Tailandia, libertad...",
-        color: "purple",
-      },
-      {
-        label: "4. ESTILO",
-        placeholder: "Ej: Golden hour, vibrante...",
-        color: "pink",
-      },
-      {
-        label: "5. SALIDA",
-        placeholder: "Ej: Prompt en inglés...",
-        color: "purple",
-      },
-    ];
-
-    return (
-      <div className="max-w-2xl mx-auto animate-fade-in">
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => setMode("intro")}
-            className="text-gray-500 hover:text-white text-sm"
-          >
-            Cancelar
-          </button>
-        </div>
-
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-white">Tu Turno</h2>
-          <p className="text-gray-400 text-sm mt-2">Completa los 5 elementos</p>
-        </div>
-
-        <div className="space-y-6">
-          {fields.map((f, i) => (
-            <div
-              key={i}
-              className="bg-gray-900 border border-gray-800 rounded-2xl p-5"
-            >
-              <label
-                className={`text-${f.color}-400 text-sm font-bold mb-2 block`}
-              >
-                {f.label}
-              </label>
-              <textarea
-                rows={2}
-                className="w-full bg-black/30 border border-gray-800 rounded-xl p-3 text-white placeholder:text-gray-700 focus:border-purple-500 outline-none resize-none"
-                placeholder={f.placeholder}
-              />
-            </div>
-          ))}
-
-          <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-4 rounded-xl shadow-lg">
-            Generar Prompt
-          </button>
-        </div>
-      </div>
-    );
-  });
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-pink-900 to-purple-900 text-white p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-slate-900 to-blue-950 text-white p-4 md:p-8">
       {mode === "intro" && <IntroScreen />}
       {mode === "tutorial" && <TutorialScreen />}
       {mode === "example" && <ExampleScreen />}
-      {mode === "practice" && <PracticeScreen />}
+      {mode === "practice" && <PracticeScreen answers={answers} handleAnswerChange={handleAnswerChange} handleSubmit={handleSubmit} showResult={showResult} setMode={setMode} />}
 
       <style>{`
         @keyframes fade-in {

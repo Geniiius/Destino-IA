@@ -108,6 +108,20 @@ export interface ApiResponse<T> {
 }
 
 // ============================================
+// MESSAGERIE DIRECTE
+// ============================================
+
+export interface DirectMessage {
+  id: string;
+  session_id: string;
+  participant_id: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+// ============================================
 // SISTEMA DE GALERÍA
 // ============================================
 export * from "./gallery";
+

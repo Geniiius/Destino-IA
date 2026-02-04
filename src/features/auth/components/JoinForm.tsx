@@ -4,25 +4,30 @@
  */
 
 import React, { useState } from "react";
-import { ArrowRight, User, Mail } from "lucide-react";
+import { ArrowRight, User, Mail, Loader2 } from "lucide-react";
 import { LIMITS, ROUTES } from "@/config";
+import { joinSession } from "@/services/participants";
 
 interface JoinFormProps {
-  onJoin: (name: string, email: string) => void;
+  onJoin: (name: string, email: string, id?: string) => void;
 }
+
+// Session ID par défaut pour le workshop
+const DEFAULT_SESSION_ID = "destino-ia-workshop";
 
 export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -54,7 +59,23 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
       return;
     }
 
-    onJoin(trimmedName, trimmedEmail);
+    setIsLoading(true);
+
+    try {
+      // Créer ou rejoindre la session
+      const participant = await joinSession(
+        DEFAULT_SESSION_ID,
+        trimmedName,
+        trimmedEmail
+      );
+      onJoin(trimmedName, trimmedEmail, participant?.id);
+    } catch (err) {
+      // Si Supabase n'est pas configuré, continuer sans ID
+      console.warn("Supabase non disponible, continuation sans ID:", err);
+      onJoin(trimmedName, trimmedEmail);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBack = () => {
@@ -141,16 +162,27 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
             <button
               type="button"
               onClick={handleBack}
-              className="btn-elegant-secondary flex-1 py-4"
+              disabled={isLoading}
+              className="btn-elegant-secondary flex-1 py-4 disabled:opacity-50"
             >
               Volver
             </button>
             <button
               type="submit"
-              className="btn-elegant-primary flex-1 py-4 flex items-center justify-center gap-2"
+              disabled={isLoading}
+              className="btn-elegant-primary flex-1 py-4 flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              Entrar
-              <ArrowRight className="w-4 h-4" />
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Conectando...
+                </>
+              ) : (
+                <>
+                  Entrar
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </div>
         </form>

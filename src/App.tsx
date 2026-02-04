@@ -13,12 +13,24 @@ import { AdminDashboard } from "@/features/admin/components/AdminDashboard";
 import { JoinForm } from "@/features/auth/components/JoinForm";
 import { HomePage } from "@/features/home/components/HomePage";
 import SplashCursor from "@/components/effects/SplashCursor";
+import { MessageButton, MessagePanel } from "@/components/messaging";
+import { useParticipantMessages } from "@/hooks";
 
 type ViewType = "home" | "admin" | "join";
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewType>("home");
   const [participantName, setParticipantName] = useState<string>("");
+  const [participantId, setParticipantId] = useState<string | null>(null);
+
+  // Hook de messagerie pour les participants
+  const {
+    messages,
+    unreadCount,
+    isOpen: isMessagePanelOpen,
+    togglePanel: toggleMessagePanel,
+    closePanel: closeMessagePanel,
+  } = useParticipantMessages(participantId);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -33,10 +45,25 @@ const App: React.FC = () => {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  const handleJoin = (name: string) => {
+  // Récupérer le participantId depuis le localStorage au chargement
+  useEffect(() => {
+    const storedParticipantId = localStorage.getItem("destino_participant_id");
+    if (storedParticipantId) {
+      setParticipantId(storedParticipantId);
+    }
+  }, []);
+
+  const handleJoin = (name: string, email: string, id?: string) => {
     setParticipantName(name);
+    if (id) {
+      setParticipantId(id);
+      localStorage.setItem("destino_participant_id", id);
+    }
     // TODO: Implementar nueva lógica de ejercicios
   };
+
+  // Afficher le bouton de messagerie seulement si on a un participant connecté
+  const showMessaging = participantId && view !== "admin";
 
   return (
     <div className="min-h-screen bg-[#050508] relative overflow-hidden flex flex-col items-center justify-center">
@@ -52,6 +79,19 @@ const App: React.FC = () => {
       {view === "home" && <HomePage />}
       {view === "admin" && <AdminDashboard />}
       {view === "join" && <JoinForm onJoin={handleJoin} />}
+
+      {/* Messagerie participant */}
+      {showMessaging && (
+        <>
+          <MessageButton
+            unreadCount={unreadCount}
+            onClick={toggleMessagePanel}
+          />
+          {isMessagePanelOpen && (
+            <MessagePanel messages={messages} onClose={closeMessagePanel} />
+          )}
+        </>
+      )}
     </div>
   );
 };

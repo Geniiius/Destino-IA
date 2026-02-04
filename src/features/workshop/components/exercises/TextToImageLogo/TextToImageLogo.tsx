@@ -1,4 +1,10 @@
-import React, { useState } from "react";
+/**
+ * @file TextToImageLogo.tsx
+ * @description Ejercicio Text-to-Image: Integración de Logo
+ * Self-contained component - Branding theme (Rose/Orange)
+ */
+
+import React, { useState, useCallback } from "react";
 import {
   Sparkles,
   ArrowRight,
@@ -18,10 +24,57 @@ import {
   ScanFace,
   BookOpen,
   Rocket,
+  User,
+  Eye,
+  Monitor
 } from "lucide-react";
 import { useCopyToClipboard } from "../../../../../hooks";
 
-// --- DATOS ESTÁTICOS ---
+// --- DATOS GLOBALES ---
+
+// Mapeo de iconos para PracticeScreen
+const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
+  rol: User,
+  obj: Target,
+  esc: ImageIcon,
+  int: Layers,
+  est: Palette,
+  sal: Box,
+};
+
+// Estilos de color para la UI refinada
+const COLOR_STYLES: Record<string, any> = {
+  indigo: {
+    bg: "bg-indigo-500/20",
+    border: "border-indigo-500/30",
+    text: "text-indigo-400",
+  },
+  emerald: {
+    bg: "bg-emerald-500/20",
+    border: "border-emerald-500/30",
+    text: "text-emerald-400",
+  },
+  amber: {
+    bg: "bg-amber-500/20",
+    border: "border-amber-500/30",
+    text: "text-amber-400",
+  },
+  rose: {
+    bg: "bg-rose-500/20",
+    border: "border-rose-500/30",
+    text: "text-rose-400",
+  },
+  purple: {
+    bg: "bg-purple-500/20",
+    border: "border-purple-500/30",
+    text: "text-purple-400",
+  },
+  cyan: {
+    bg: "bg-cyan-500/20",
+    border: "border-cyan-500/30",
+    text: "text-cyan-400",
+  },
+};
 
 const tutorialSteps = [
   {
@@ -433,6 +486,51 @@ const ExampleScreen: React.FC<ExampleScreenProps> = ({ setMode }) => {
   );
 };
 
+const FIELDS = [
+  {
+    id: "rol",
+    label: "ROL / PERSPECTIVA",
+    desc: "¿Quién cuenta la historia?",
+    ex: "Ej: Fotógrafo de Producto...",
+    color: "indigo",
+  },
+  {
+    id: "obj",
+    label: "OBJETIVO",
+    desc: "¿Qué buscas lograr?",
+    ex: "Ej: Campaña de Instagram...",
+    color: "emerald",
+  },
+  {
+    id: "esc",
+    label: "ESCENA + ENTORNO",
+    desc: "¿Dónde está el objeto?",
+    ex: "Ej: Mesa de madera, luz de mañana...",
+    color: "amber",
+  },
+  {
+    id: "int",
+    label: "DETALLES DE INTEGRACIÓN",
+    desc: "¿Dónde y cómo va el logo?",
+    ex: "Ej: En la etiqueta, bordado, relieve...",
+    color: "rose",
+  },
+  {
+    id: "est",
+    label: "ESTILO VISUAL",
+    desc: "Look & Feel",
+    ex: "Ej: Minimalista, macro, bokeh...",
+    color: "purple",
+  },
+  {
+    id: "sal",
+    label: "SALIDA / FORMATO",
+    desc: "Resolución y uso",
+    ex: "Ej: Vertical para Stories, 4k...",
+    color: "cyan",
+  },
+];
+
 interface PracticeScreenProps {
   setMode: (mode: string) => void;
   onGenerate: (inputs: Record<string, string>) => void;
@@ -440,7 +538,6 @@ interface PracticeScreenProps {
 
 const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
   ({ setMode, onGenerate }) => {
-    // Estado local para los inputs del usuario
     const [inputs, setInputs] = useState({
       rol: "",
       obj: "",
@@ -454,119 +551,135 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
       setInputs((prev) => ({ ...prev, [id]: value }));
     };
 
-    // Definición de campos para el formulario de práctica (6 PILARES)
-    const fields = [
-      {
-        id: "rol",
-        label: "1. ROL / PERSPECTIVA",
-        desc: "¿Quién cuenta la historia?",
-        ex: "Ej: Fotógrafo de Producto...",
-        color: "indigo",
-      },
-      {
-        id: "obj",
-        label: "2. OBJETIVO",
-        desc: "¿Qué buscas lograr?",
-        ex: "Ej: Campaña de Instagram...",
-        color: "emerald",
-      },
-      {
-        id: "esc",
-        label: "3. ESCENA + ENTORNO",
-        desc: "¿Dónde está el objeto?",
-        ex: "Ej: Mesa de madera, luz de mañana...",
-        color: "amber",
-      },
-      {
-        id: "int",
-        label: "4. DETALLES DE INTEGRACIÓN",
-        desc: "¿Dónde y cómo va el logo?",
-        ex: "Ej: En la etiqueta, bordado, relieve...",
-        color: "rose",
-      },
-      {
-        id: "est",
-        label: "5. ESTILO VISUAL",
-        desc: "Look & Feel",
-        ex: "Ej: Minimalista, macro, bokeh...",
-        color: "purple",
-      },
-      {
-        id: "sal",
-        label: "6. SALIDA / FORMATO",
-        desc: "Resolución y uso",
-        ex: "Ej: Vertical para Stories, 4k...",
-        color: "cyan",
-      },
-    ];
+    const isComplete = Object.values(inputs).every(v => v.trim().length > 0);
+    const completedCount = Object.values(inputs).filter(v => v.trim().length > 0).length;
 
     return (
-      <div className="max-w-2xl mx-auto animate-fade-in">
-        <div className="flex items-center justify-between mb-6">
+      <div className="w-full max-w-6xl mx-auto h-full flex flex-col justify-center">
+        {/* Header Compacto */}
+        <div className="flex items-center justify-between mb-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-md">
           <button
-            onClick={() => setMode("intro")}
-            className="text-gray-500 hover:text-white text-sm"
+              onClick={() => setMode("intro")}
+              className="text-gray-500 hover:text-white text-sm"
           >
-            Cancelar
+              <ChevronLeft className="w-5 h-5" />
           </button>
+          <div>
+            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+              Define tu Integración
+              <span className="text-sm font-normal text-gray-400 bg-white/10 px-2 py-1 rounded-full">
+                {completedCount}/{FIELDS.length}
+              </span>
+            </h1>
+            <p className="text-gray-400 text-sm hidden md:block">Rellena los 6 pilares de branding</p>
+          </div>
+          
+          {/* Progress Bar Compacta */}
+          <div className="flex gap-1">
+            {FIELDS.map((f, index) => (
+              <div
+                key={index}
+                className={`w-6 h-2 rounded-full transition-all ${
+                  index < completedCount ? "bg-" + f.color + "-500 shadow-[0_0_10px_rgba(200,200,200,0.5)]" : "bg-white/10"
+                }`}
+                style={{ backgroundColor: index < completedCount ? "" : undefined, opacity: index < completedCount ? 1 : 0.2 }}
+              >
+                  {/* Tailwind dynamic colors note: ensure safelist if needed, otherwise use style for dynamic colors if generic class names fail */}
+                  <div className={`w-full h-full rounded-full bg-${f.color}-500`} style={{ display: index < completedCount ? 'block' : 'none' }}></div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-white">
-            Define tu Integración
-          </h2>
-          <p className="text-gray-400 text-sm mt-2">
-            Rellena los 6 pilares para crear un branding perfecto.
-          </p>
-        </div>
+        {/* Formulario en Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {FIELDS.map((field) => {
+            const value = inputs[field.id as keyof typeof inputs] || "";
+            const isFilled = value.trim().length > 0;
+            
+            const colorStyle = COLOR_STYLES[field.color] || COLOR_STYLES.indigo;
+            const Icon = ICON_MAP[field.id] || Sparkles;
 
-        <div className="space-y-6">
-          {fields.map((f, i) => (
-            <div
-              key={i}
-              className="bg-gray-900 border border-gray-800 rounded-2xl p-5 hover:border-gray-700 transition-colors"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`bg-${f.color}-500/20 text-${f.color}-400 text-xs font-black px-2 py-1 rounded`}
+            return (
+              <div
+                key={field.id}
+                className={`
+                  relative group transition-all duration-300
+                  bg-black/20 backdrop-blur-sm border rounded-xl p-4
+                  ${isFilled ? colorStyle.border : "border-white/5 hover:border-white/20"}
+                  ${isFilled ? colorStyle.bg.replace('/20', '/10') : ""}
+                `}
+              >
+                <div className="flex gap-3">
+                  {/* Icono */}
+                  <div
+                    className={`
+                      flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-all
+                      ${isFilled ? colorStyle.bg : "bg-white/5 group-hover:bg-white/10"}
+                      ${isFilled ? colorStyle.text : "text-gray-500 group-hover:text-gray-300"}
+                    `}
                   >
-                    {i + 1}
-                  </span>
-                  <span
-                    className={`text-${f.color}-400 font-bold text-sm tracking-wider`}
-                  >
-                    {f.label}
-                  </span>
+                    <Icon className="w-5 h-5" />
+                  </div>
+
+                  {/* Input Area */}
+                  <div className="flex-1 min-w-0">
+                    <label
+                      htmlFor={field.id}
+                      className={`
+                        block text-xs font-bold uppercase tracking-wider mb-1.5
+                        ${colorStyle.text}
+                      `}
+                    >
+                      {field.label}
+                    </label>
+
+                    <textarea
+                      id={field.id}
+                      value={value}
+                      onChange={(e) => handleChange(field.id, e.target.value)}
+                      placeholder={field.ex} // Usando el ejemplo como placeholder
+                      rows={2} // Altura fija pequeña
+                      className={`
+                        w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white 
+                        placeholder-gray-600 focus:outline-none focus:ring-1 focus:bg-black/60 transition-all resize-none
+                        ${isFilled ? "border-white/20" : ""}
+                        focus:ring-${field.color}-500
+                      `}
+                    />
+                  </div>
                 </div>
-                <span className="text-gray-500 text-xs">{f.desc}</span>
               </div>
-
-              <textarea
-                rows={1}
-                value={inputs[f.id as keyof typeof inputs]}
-                onChange={(e) => handleChange(f.id, e.target.value)}
-                className="w-full bg-black/30 border border-gray-800 rounded-xl p-3 text-white placeholder:text-gray-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 outline-none transition-all resize-none"
-                placeholder="..."
-              />
-
-              <div className="mt-3 flex items-center gap-2 bg-gray-950/50 p-2 rounded-lg border border-gray-800/50">
-                <Sparkles className="w-3 h-3 text-gray-500" />
-                <span className="text-xs text-gray-500 font-mono">{f.ex}</span>
-              </div>
+            );
+          })}
+        </div>
+        
+        {/* Helper Note / Preview */}
+        {!isComplete && (
+            <div className="text-center text-sm text-gray-500 mb-6 font-mono">
+                💡 Completa los {FIELDS.length} campos para generar el prompt perfecto.
             </div>
-          ))}
+        )}
 
+        {/* Botones de acción */}
+        <div className="flex gap-4 justify-end items-center mt-auto">
           <button
             onClick={() => onGenerate(inputs)}
-            className="w-full bg-gradient-to-r from-rose-600 to-orange-600 hover:from-rose-500 hover:to-orange-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-rose-900/20 transition-all mt-4 hover:scale-[1.02] active:scale-95"
+            disabled={!isComplete}
+            className={`
+              group flex items-center gap-3 px-8 py-3 rounded-xl font-bold text-white transition-all
+              ${isComplete 
+                ? "bg-gradient-to-r from-rose-600 to-orange-600 hover:scale-105 shadow-lg shadow-rose-900/20" 
+                : "bg-gray-800 text-gray-500 cursor-not-allowed"}
+            `}
           >
-            Generar Prompt de Branding
+            <span>Generar Prompt de Branding</span>
+            <Zap className={`w-5 h-5 ${isComplete ? "group-hover:translate-x-1" : ""} transition-transform`} />
           </button>
         </div>
       </div>
     );
-  },
+  }
 );
 
 // --- PANTALLA DE RESULTADO (NUEVA) ---
@@ -598,74 +711,62 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
       <div className="bg-gray-900 border border-gray-800 rounded-3xl overflow-hidden shadow-2xl relative">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 via-orange-500 to-rose-500"></div>
         <div className="p-8 space-y-6">
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-xs font-bold text-rose-400 uppercase tracking-wider">
-                Prompt Generado
-              </label>
-              <button
-                onClick={() => copy(completeExample.aiPrompt)}
-                className="flex items-center gap-2 text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 px-3 py-1.5 rounded-lg transition-colors"
-              >
-                {copied ? (
-                  <Check className="w-4 h-4" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-                {copied ? "Copiado" : "Copiar Texto"}
-              </button>
-            </div>
-            <div className="bg-black/50 border border-gray-800 rounded-xl p-6 font-mono text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+          <div className="bg-black/30 rounded-2xl p-6 border border-gray-800">
+            <p className="text-gray-300 leading-relaxed font-mono text-sm">
               {generatedPrompt}
-            </div>
+            </p>
           </div>
 
-          <div className="bg-rose-900/10 border border-rose-500/20 p-4 rounded-xl flex items-center gap-3">
-            <div className="p-2 bg-rose-500/20 rounded-full">
-              <Upload className="w-4 h-4 text-rose-400" />
-            </div>
-            <div className="text-sm text-gray-300">
-              <strong className="text-white">Recordatorio:</strong> No olvides
-              subir tu archivo de logo (PNG) junto con este prompt.
-            </div>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setMode("practice")}
+              className="flex-1 py-4 text-gray-400 hover:text-white font-bold"
+            >
+              ← Editar
+            </button>
+            <button
+              onClick={() => copy(generatedPrompt)}
+              className="flex-[2] bg-white text-black hover:bg-gray-200 rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-5 h-5" /> ¡Copiado!
+                </>
+              ) : (
+                <>
+                  <Copy className="w-5 h-5" /> Copiar Prompt
+                </>
+              )}
+            </button>
           </div>
-
-          <button
-            onClick={() => setMode("intro")}
-            className="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold py-4 rounded-xl transition-all"
-          >
-            Crear otro mockup
-          </button>
         </div>
       </div>
     </div>
   );
 };
 
-// --- COMPONENTE PRINCIPAL ---
-
 export const TextToImageLogo: React.FC = () => {
-  const [mode, setMode] = useState("intro"); // intro, tutorial, example, practice, result
+  const [mode, setMode] = useState("intro");
   const [currentStep, setCurrentStep] = useState(0);
-  const [generatedPrompt, setGeneratedPrompt] = useState("");
+  const [finalPrompt, setFinalPrompt] = useState("");
 
-  // Función para construir el prompt final desde los inputs del usuario
-  const handleGeneratePrompt = (inputs: Record<string, string>) => {
-    const prompt = `Actúa como un ${inputs.rol}.
-Objetivo: ${inputs.obj}
-Escena: ${inputs.esc}
-Integración del Logo: ${inputs.int}
-Estilo Visual: ${inputs.est}
-Formato de Salida: ${inputs.sal}
+  const handleGenerate = useCallback((inputs: Record<string, string>) => {
+    // Lógica de construcción del prompt
+    const prompt = `
+Role: ${inputs.rol}
+Objective: ${inputs.obj}
+Scene/Context: ${inputs.esc}
+Integration Details: ${inputs.int}
+Visual Style: ${inputs.est}
+Output Format: ${inputs.sal}
+`.trim();
 
-Genera una imagen fotorrealista de alta calidad siguiendo estos parámetros.`;
-
-    setGeneratedPrompt(prompt);
+    setFinalPrompt(prompt);
     setMode("result");
-  };
+  }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0505] text-gray-100 p-4 md:p-8 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-rose-950 via-gray-900 to-purple-950 text-white p-4 md:p-8 font-sans selection:bg-rose-500/30">
       {mode === "intro" && <IntroScreen setMode={setMode} />}
       {mode === "tutorial" && (
         <TutorialScreen
@@ -676,21 +777,12 @@ Genera una imagen fotorrealista de alta calidad siguiendo estos parámetros.`;
       )}
       {mode === "example" && <ExampleScreen setMode={setMode} />}
       {mode === "practice" && (
-        <PracticeScreen setMode={setMode} onGenerate={handleGeneratePrompt} />
+        <PracticeScreen setMode={setMode} onGenerate={handleGenerate} />
       )}
       {mode === "result" && (
-        <ResultScreen generatedPrompt={generatedPrompt} setMode={setMode} />
+        <ResultScreen generatedPrompt={finalPrompt} setMode={setMode} />
       )}
-
-      <style>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-      `}</style>
     </div>
   );
 };
+```

@@ -25,8 +25,11 @@ import {
   AdminHeader,
   ParticipantList,
   ExerciseManagement,
+  SendMessageModal,
   type ExerciseId,
 } from "./dashboard";
+
+import { sendDirectMessage } from "@/services/directMessages";
 
 import {
   Users,
@@ -103,6 +106,8 @@ export const AdminDashboard: React.FC = () => {
   const [currentExercise, setCurrentExercise] = useState<ExerciseId | null>(
     null,
   );
+  const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
+  const [showMessageModal, setShowMessageModal] = useState(false);
 
   // Session ID pour les exercices
   const sessionId = session.id || "default-session";
@@ -189,8 +194,18 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleSendToParticipant = (participant: Participant) => {
-    // TODO: Implémenter l'envoi d'email jetable
-    console.log("Envoyer email à:", participant.name);
+    setSelectedParticipant(participant);
+    setShowMessageModal(true);
+  };
+
+  const handleSendMessage = async (message: string) => {
+    if (!selectedParticipant) return;
+    
+    await sendDirectMessage(
+      sessionId,
+      selectedParticipant.id,
+      message
+    );
   };
 
   const handleSendToAll = () => {
@@ -390,10 +405,10 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-white">
-                        Quiz RCTF
+                        Quiz 5 Pasos
                       </h2>
                       <p className="text-gray-400">
-                        Validación de conocimientos de Prompt Engineering
+                        🎭 ROL · 🎯 OBJETIVO · 🎬 ESCENA · 🎨 ESTILO · 📐 FORMATO
                       </p>
                     </div>
                   </div>
@@ -766,6 +781,18 @@ export const AdminDashboard: React.FC = () => {
             {currentExercise === "flyerToVideo" && <FlyerToVideoWorkflow />}
           </div>
         </div>
+      )}
+
+      {/* Modal de messagerie directe */}
+      {showMessageModal && selectedParticipant && (
+        <SendMessageModal
+          participant={selectedParticipant}
+          onClose={() => {
+            setShowMessageModal(false);
+            setSelectedParticipant(null);
+          }}
+          onSend={handleSendMessage}
+        />
       )}
     </div>
   );

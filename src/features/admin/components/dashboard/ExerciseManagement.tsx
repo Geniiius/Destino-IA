@@ -64,6 +64,60 @@ export const ExerciseManagement: React.FC<ExerciseManagementProps> = ({
           </div>
         </div>
 
+        {/* Info del ejercicio activo - Barra compacte en haut */}
+        {isActive && currentExerciseData && (
+          <div
+            className={`flex-shrink-0 mb-4 ${currentExerciseData.badge.bg.replace("/20", "/10")} border ${currentExerciseData.badge.bg.replace("bg-", "border-").replace("/20", "/30")} rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-300`}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex-shrink-0 w-10 h-10 ${currentExerciseData.badge.bg} rounded-lg flex items-center justify-center`}
+                >
+                  <span className="text-xl">{currentExerciseData.emoji}</span>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <h3
+                    className={`text-sm font-bold ${currentExerciseData.badge.text} truncate`}
+                  >
+                    Ejercicio &quot;{currentExerciseData.title}&quot; activo
+                  </h3>
+                  <div className="flex items-center gap-3 text-xs text-gray-400">
+                    <div className="flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      <span>{participantCount} participantes conectados</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      <span>Duración: {currentExerciseData.duration}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Botones de control compacts */}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  onClick={onPreview}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-blue-400 text-sm font-medium transition-all"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  Ver Ejercicio
+                </button>
+
+                <button
+                  onClick={onStop}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg text-red-400 text-sm font-medium transition-all"
+                >
+                  <Square className="w-3.5 h-3.5" />
+                  Detener
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Lista de ejercicios disponibles - Con scroll */}
         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
@@ -119,65 +173,8 @@ export const ExerciseManagement: React.FC<ExerciseManagementProps> = ({
           </div>
         </div>
 
-        {/* Info del ejercicio activo - Fuera del scroll */}
+        {/* Instrucciones cuando no hay ejercicio activo */}
         <div className="flex-shrink-0">
-          {isActive && currentExerciseData && (
-            <div
-              className={`${currentExerciseData.badge.bg.replace("/20", "/10")} border ${currentExerciseData.badge.bg.replace("bg-", "border-").replace("/20", "/30")} rounded-xl p-6`}
-            >
-              <div className="flex items-start gap-4">
-                <div
-                  className={`flex-shrink-0 w-12 h-12 ${currentExerciseData.badge.bg} rounded-xl flex items-center justify-center`}
-                >
-                  <span className="text-2xl">{currentExerciseData.emoji}</span>
-                </div>
-
-                <div className="flex-1">
-                  <h3
-                    className={`text-lg font-bold mb-2 ${currentExerciseData.badge.text}`}
-                  >
-                    Ejercicio &quot;{currentExerciseData.title}&quot; activo
-                  </h3>
-                  <p className="text-sm text-gray-300 mb-4">
-                    Los participantes están viendo y completando el ejercicio en
-                    sus pantallas.
-                  </p>
-
-                  <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      <span>{participantCount} participantes conectados</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      <span>Duración: {currentExerciseData.duration}</span>
-                    </div>
-                  </div>
-
-                  {/* Botones de control */}
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={onPreview}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-blue-400 font-medium transition-all"
-                    >
-                      <Eye className="w-4 h-4" />
-                      Ver Ejercicio
-                    </button>
-
-                    <button
-                      onClick={onStop}
-                      className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg text-red-400 font-medium transition-all"
-                    >
-                      <Square className="w-4 h-4" />
-                      Detener Ejercicio
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Instrucciones cuando no hay ejercicio activo */}
           {!isActive && (
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6">
               <div className="flex items-start gap-3">

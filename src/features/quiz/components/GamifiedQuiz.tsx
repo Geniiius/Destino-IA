@@ -1,6 +1,6 @@
 /**
  * @file features/quiz/components/GamifiedQuiz.tsx
- * @description Quiz gamificado interactivo sobre la metodología RCTF
+ * @description Quiz gamificado interactivo sobre la Estructura de 5 Pasos del Prompt
  *
  * Características:
  * - Animaciones fluidas entre preguntas
@@ -472,9 +472,16 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
               <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-emerald-500 via-blue-500 to-purple-500 rounded-3xl mb-6 animate-float shadow-2xl shadow-emerald-500/50">
                 <Trophy className="w-12 h-12 text-white animate-pulse" />
               </div>
-              <h1 className="text-5xl md:text-6xl font-black mb-3 bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 bg-clip-text text-transparent animate-pulse">
-                Quiz RCTF
+              <h1 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 bg-clip-text text-transparent animate-pulse">
+                Quiz 5 Pasos
               </h1>
+              <div className="flex flex-wrap justify-center gap-2 mb-2">
+                <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium">🎭 ROL</span>
+                <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full font-medium">🎯 OBJETIVO</span>
+                <span className="px-2 py-1 bg-pink-500/20 text-pink-400 text-xs rounded-full font-medium">🎬 ESCENA</span>
+                <span className="px-2 py-1 bg-amber-500/20 text-amber-400 text-xs rounded-full font-medium">🎨 ESTILO</span>
+                <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs rounded-full font-medium">📐 FORMATO</span>
+              </div>
               <p className="text-gray-300 text-xl font-semibold mb-2">
                 🎯 Domina el arte del Prompt Engineering
               </p>
@@ -585,7 +592,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
     const getRank = () => {
       if (percentage >= 90)
         return {
-          title: "Maestro RCTF",
+          title: "Maestro del Prompt",
           icon: Trophy,
           color: "text-yellow-400",
         };
@@ -642,9 +649,9 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
               </p>
               <p className="text-gray-400 mt-2 text-lg">
                 {percentage >= 90
-                  ? "¡Eres un verdadero maestro del RCTF!"
+                  ? "¡Eres un verdadero maestro del Prompt!"
                   : percentage >= 70
-                    ? "¡Dominas muy bien el método RCTF!"
+                    ? "¡Dominas muy bien la Estructura de 5 Pasos!"
                     : percentage >= 50
                       ? "Vas por buen camino, ¡sigue practicando!"
                       : "No te desanimes, ¡la práctica hace al maestro!"}
@@ -996,14 +1003,145 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                 </span>
               </div>
             )}
-            {/* Question */} {/* Question */}
+            {/* Question */}
             <h2 className="text-xl md:text-2xl font-bold text-white mb-8 leading-relaxed">
               {currentQ.question}
             </h2>
-            {/* Options */}
-            <div
-              className={`mb-6 ${currentQ.options.length === 2 ? "grid grid-cols-2 gap-4" : "space-y-3"}`}
-            >
+
+            {/* Options - Layout especial para comparación de prompts (pregunta 1) */}
+            {currentQ.id === 1 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                {currentQ.options.map((option, idx) => {
+                  const isSelected = state.selectedAnswer === idx;
+                  const isCorrectOption = idx === currentQ.correctAnswer;
+                  const showCorrect = state.isAnswered && isCorrectOption;
+                  const showWrong = state.isAnswered && isSelected && !isCorrectOption;
+
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => handleSelectAnswer(idx)}
+                      disabled={state.isAnswered}
+                      className={`group relative flex flex-col h-full p-6 rounded-2xl transition-all duration-300 ${
+                        showCorrect
+                          ? "bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border-2 border-emerald-500 shadow-lg shadow-emerald-500/30"
+                          : showWrong
+                            ? "bg-gradient-to-br from-red-500/20 to-red-600/10 border-2 border-red-500 shadow-lg shadow-red-500/30"
+                            : isSelected
+                              ? "bg-white/10 border-2 border-purple-500/50 shadow-lg shadow-purple-500/20"
+                              : "bg-gradient-to-br from-white/5 to-white/[0.02] border-2 border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/10 hover:scale-[1.02]"
+                      } ${state.isAnswered ? "cursor-default" : "cursor-pointer"}`}
+                    >
+                      {/* Label Prompt A/B */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div
+                          className={`px-4 py-1.5 rounded-full text-sm font-bold ${
+                            showCorrect
+                              ? "bg-emerald-500 text-white"
+                              : showWrong
+                                ? "bg-red-500 text-white"
+                                : idx === 0
+                                  ? "bg-gray-500/30 text-gray-400"
+                                  : "bg-purple-500/30 text-purple-400"
+                          }`}
+                        >
+                          Prompt {String.fromCharCode(65 + idx)}
+                        </div>
+                        
+                        {/* Indicador de resultado */}
+                        {showCorrect && (
+                          <div className="flex items-center gap-1.5 text-emerald-400">
+                            <CheckCircle className="w-6 h-6" />
+                            <span className="text-sm font-bold">CORRECTO</span>
+                          </div>
+                        )}
+                        {showWrong && (
+                          <div className="flex items-center gap-1.5 text-red-400">
+                            <XCircle className="w-6 h-6" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Contenido del prompt */}
+                      <div className={`flex-1 text-left leading-relaxed ${
+                        showCorrect 
+                          ? "text-emerald-100" 
+                          : showWrong 
+                            ? "text-red-200" 
+                            : "text-gray-300"
+                      }`}>
+                        {/* Estilo especial para prompt estructurado (opción B) */}
+                        {idx === 1 ? (
+                          <div className="space-y-2">
+                            {option.split('. ').map((part, partIdx) => {
+                              // Colorear cada parte según el elemento RCTF
+                              const isRol = part.includes('Actúa como');
+                              const isObjetivo = part.includes('Para ');
+                              const isEscena = part.includes('Playa') || part.includes('palmeras') || part.includes('sensación');
+                              const isEstilo = part.includes('Estilo') || part.includes('colores');
+                              const isFormato = part.includes('Formato');
+
+                              return (
+                                <span 
+                                  key={partIdx} 
+                                  className={`inline ${
+                                    isRol ? "text-blue-400 font-semibold" :
+                                    isObjetivo ? "text-purple-400 font-semibold" :
+                                    isEstilo ? "text-amber-400 font-semibold" :
+                                    isFormato ? "text-emerald-400 font-semibold" :
+                                    ""
+                                  }`}
+                                >
+                                  {part}{partIdx < option.split('. ').length - 1 ? '. ' : ''}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="italic opacity-80">{option}</p>
+                        )}
+                      </div>
+
+                      {/* Badge indicador de calidad */}
+                      {!state.isAnswered && (
+                        <div className={`mt-4 pt-4 border-t ${idx === 1 ? "border-purple-500/20" : "border-white/10"}`}>
+                          <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+                            {idx === 0 ? (
+                              <>
+                                <span className="w-2 h-2 rounded-full bg-gray-500"></span>
+                                Prompt básico
+                              </>
+                            ) : (
+                              <>
+                                <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                                Prompt estructurado
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Mostrar elementos RCTF si es correcto */}
+                      {showCorrect && idx === 1 && (
+                        <div className="mt-4 pt-4 border-t border-emerald-500/20">
+                          <div className="flex flex-wrap gap-2">
+                            <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium">🎭 ROL</span>
+                            <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full font-medium">🎯 OBJETIVO</span>
+                            <span className="px-2 py-1 bg-pink-500/20 text-pink-400 text-xs rounded-full font-medium">🎬 ESCENA</span>
+                            <span className="px-2 py-1 bg-amber-500/20 text-amber-400 text-xs rounded-full font-medium">🎨 ESTILO</span>
+                            <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs rounded-full font-medium">📐 FORMATO</span>
+                          </div>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Options - Layout normal para otras preguntas */
+              <div
+                className={`mb-6 ${currentQ.options.length === 2 ? "grid grid-cols-2 gap-4" : "space-y-3"}`}
+              >
               {currentQ.options.map((option, idx) => {
                 const isSelected = state.selectedAnswer === idx;
                 const isCorrectOption = idx === currentQ.correctAnswer;
@@ -1079,6 +1217,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                 );
               })}
             </div>
+            )}
             {/* Explanation (shown after answering) */}
             {state.isAnswered && (
               <div

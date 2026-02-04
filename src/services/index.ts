@@ -7,3 +7,6 @@
 
 // Supabase
 export * from "./supabase";
+
+// Direct Messages
+export * from "./directMessages";
