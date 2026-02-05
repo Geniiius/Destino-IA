@@ -1,178 +1,130 @@
-# 📚 Documentation - Système d'Exercices
+# 📚 Documentation Destino IA
 
-Bienvenue dans la documentation du système de pilotage d'exercices et quiz en temps réel.
+> **Hub Central de Documentation**  
+> Dernière mise à jour: 5 février 2026
 
-## 📖 Documents disponibles
+---
 
-### 🚀 Pour commencer
+## 🚀 Démarrage Rapide
 
-- **[EXERCISE_QUICKSTART.md](EXERCISE_QUICKSTART.md)**  
-  Guide de démarrage rapide pour utiliser le système  
-  👥 Public : Formateurs et participants  
-  ⏱️ Lecture : 5 min
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [Mode Local](./MODE_LOCAL.md) | Travailler sans Supabase | Développeurs |
 
-- **[../DEPLOYMENT_CHECKLIST.md](../DEPLOYMENT_CHECKLIST.md)**  
-  Checklist complète pour déployer le système  
-  👥 Public : Développeurs et administrateurs système  
-  ⏱️ Durée : 30-60 min
+---
 
-### 🔧 Documentation technique
+## 🏗️ Architecture & Technique
 
-- **[EXERCISE_SYSTEM.md](EXERCISE_SYSTEM.md)**  
-  Documentation technique complète du système  
-  👥 Public : Développeurs  
-  ⏱️ Lecture : 15 min  
-  Contenu : Architecture, API, personnalisation, débogage
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [Architecture](./ARCHITECTURE.md) | Décisions architecturales, structure du projet | Développeurs, Architectes |
+| [Performance](./PERFORMANCE_ANALYSIS.md) | Optimisations, scalabilité, métriques | Développeurs Senior |
+| [Scalabilité](./SCALABILITY_ANALYSIS.md) | Analyse de montée en charge | Architectes |
 
-- **[ARCHITECTURE.md](ARCHITECTURE.md)**  
-  Architecture globale du projet  
-  👥 Public : Développeurs et architectes  
-  📍 Référence pour comprendre l'ensemble du projet
+---
 
-### 📝 Résumé
+## 📋 Référence Projet
 
-- **[../IMPLEMENTATION_SUMMARY.md](../IMPLEMENTATION_SUMMARY.md)**  
-  Résumé de l'implémentation complète  
-  👥 Public : Tous  
-  ⏱️ Lecture : 10 min  
-  Vue d'ensemble de ce qui a été créé
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [Base de Connaissance](./BASE_DE_CONNAISSANCE.md) | **Source de vérité unique** - Vision, objectifs, standards | Tous |
+| [Audit Technique](./AUDIT_TECHNIQUE.md) | État actuel du projet post-amélioration (READY) | Tech Lead, Management |
 
-## 🎯 Choisir le bon document
+---
 
-### Je veux utiliser le système maintenant
+## 🔒 Sécurité & QA
 
-→ Lire [EXERCISE_QUICKSTART.md](EXERCISE_QUICKSTART.md)
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [Security & QA](./AUDIT_SECURITY_QA_COMPLETE.md) | Audit sécurité, RLS, authentification | DevOps, Sécurité |
 
-### Je veux déployer le système
+---
 
-→ Suivre [DEPLOYMENT_CHECKLIST.md](../DEPLOYMENT_CHECKLIST.md)
+## 💰 Opérations & Coûts
 
-### Je veux comprendre comment ça marche
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [Analyse Supabase](./ANALYSE_CONNEXION_SUPABASE.md) | Connexion et intégration Supabase | DevOps |
+| [FinOps](./FINOPS.md) | Analyse des coûts cloud, optimisations | FinOps, Management |
 
-→ Lire [EXERCISE_SYSTEM.md](EXERCISE_SYSTEM.md)
+---
 
-### Je veux personnaliser ou déboguer
+## 🔧 Guides Fonctionnels
 
-→ Consulter [EXERCISE_SYSTEM.md](EXERCISE_SYSTEM.md) section "Personnalisation" et "Débogage"
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [Admin AI Examples](./ADMIN_AI_EXAMPLES.md) | Gestion des exemples IA depuis le dashboard | Administrateurs |
+| [Vue Test Participant](./VUE_TEST_PARTICIPANT.md) | Prévisualisation vue participant | Formateurs |
+| [Funcionalidad Ver Ejemplo](./FUNCIONALIDAD_VER_EJEMPLO.md) | Bouton "Ver ejemplo" dans les exercices | Développeurs |
 
-### Je veux ajouter de nouveaux exercices
+---
 
-→ Éditer `src/data/exercises.ts` (voir exemples dans le fichier)
+## 📦 Archives & Historique
 
-### Je veux comprendre l'architecture globale
+> Documents historiques conservés pour référence. **Ne pas modifier.**
 
-→ Lire [ARCHITECTURE.md](ARCHITECTURE.md) et [EXERCISE_SYSTEM.md](EXERCISE_SYSTEM.md)
+| Document | Description |
+|----------|-------------|
+| [Rapport Phase 0](./archive/RAPPORT_PHASE_0.md) | Déblocage build initial (1 fév 2026) |
+| [Rapport Phase 1](./archive/RAPPORT_PHASE_1.md) | Correction bugs timers (1 fév 2026) |
+| [Implementation Summary](./archive/IMPLEMENTATION_SUMMARY.md) | Résumé implémentation système exercices |
 
-## 🗂️ Organisation du projet
+---
 
-```
-destino-ia---atelier-interactif/
-│
-├── docs/                           # 📚 Documentation
-│   ├── README.md                   # ← Vous êtes ici
-│   ├── ARCHITECTURE.md             # Architecture globale
-│   ├── BASE_DE_CONNAISSANCE.md     # Base de connaissances
-│   ├── EXERCISE_SYSTEM.md          # Doc technique exercices
-│   └── EXERCISE_QUICKSTART.md      # Guide rapide
-│
-├── src/
-│   ├── data/
-│   │   └── exercises.ts            # 📊 Base d'exercices
-│   │
-│   ├── features/
-│   │   ├── admin/
-│   │   │   ├── components/
-│   │   │   │   ├── AdminDashboard.tsx
-│   │   │   │   └── ExerciseControl.tsx  # 🎛️ Module admin
-│   │   │   └── hooks/
-│   │   │       └── useExerciseSync.ts   # 🔄 Sync temps réel
-│   │   │
-│   │   └── workshop/
-│   │       └── components/
-│   │           ├── ParticipantView.tsx
-│   │           └── ExerciseViewer.tsx   # 📱 Affichage participant
-│   │
-│   └── services/
-│       └── supabase/
-│           ├── client.ts
-│           └── index.ts
-│
-├── supabase/
-│   └── migrations/
-│       └── 001_exercise_system.sql      # 🗄️ Schéma DB
-│
-├── IMPLEMENTATION_SUMMARY.md            # 📝 Résumé implémentation
-├── DEPLOYMENT_CHECKLIST.md              # ✅ Checklist déploiement
-└── README.md                            # 📖 README principal
+## 📝 Contenu Pédagogique
 
-```
+| Document | Description |
+|----------|-------------|
+| [Quiz - Dominando el Prompt](./content/QUIZ_DOMINANDO_PROMPT.md) | Quiz interactif structure 5 pasos |
 
-## 🔗 Liens rapides
+---
 
-- [Base d'exercices](../src/data/exercises.ts)
-- [Module Admin](../src/features/admin/components/ExerciseControl.tsx)
-- [Hook de synchronisation](../src/features/admin/hooks/useExerciseSync.ts)
-- [Affichage participant](../src/features/workshop/components/ExerciseViewer.tsx)
-- [Migration SQL](../supabase/migrations/001_exercise_system.sql)
+## 📐 Standards de Documentation
 
-## 💡 Besoin d'aide ?
+| Document | Description |
+|----------|-------------|
+| [Documentation Standards](./DOCUMENTATION_STANDARDS.md) | **Règles de création et maintenance** de la documentation |
 
-1. Consulter la section [Dépannage](EXERCISE_SYSTEM.md#débogage) dans la doc technique
-2. Vérifier la [Checklist de déploiement](../DEPLOYMENT_CHECKLIST.md#-dépannage)
-3. Consulter les logs Supabase
-4. Vérifier la console navigateur (F12)
+---
 
-## 📊 Diagramme du flux
+## 🗂️ Documentation Collocated (près du code)
 
-```
-┌─────────────┐
-│    ADMIN    │
-│  Dashboard  │
-└──────┬──────┘
-       │
-       │ Sélectionne & Lance
-       │ un exercice
-       ▼
-┌─────────────────────┐
-│    SUPABASE         │
-│  session_state      │ ◄──── Realtime Sync
-│  notifications      │
-└──────┬──────────────┘
-       │
-       │ Broadcast
-       │
-       ▼
-┌─────────────────────┐
-│   PARTICIPANTS      │
-│   ExerciseViewer    │
-└─────────────────────┘
-       │
-       │ Complète
-       │
-       ▼
-┌─────────────────────┐
-│    ADMIN            │
-│  Termine exercice   │
-└─────────────────────┘
-       │
-       │ Broadcast fin
-       │
-       ▼
-┌─────────────────────┐
-│  TOUS retournent    │
-│  à la présentation  │
-└─────────────────────┘
+Ces fichiers README sont situés directement dans les dossiers du code source:
+
+| Emplacement | Description |
+|-------------|-------------|
+| `/public/assets/ai-examples/README.md` | Guide d'utilisation des assets AI statiques |
+| `/src/.../AgenciaViajesExercise/README.md` | Documentation du composant exercice |
+
+---
+
+## 🔗 Commandes Rapides
+
+```bash
+# Développement
+npm run dev
+
+# Build production
+npm run build
+
+# Vérification types (strict)
+npm run type-check
+
+# Nettoyage cache
+npm run clean
 ```
 
-## 🎓 Ressources additionnelles
+---
 
-- [Documentation Supabase Realtime](https://supabase.com/docs/guides/realtime)
-- [Documentation React](https://react.dev)
-- [Documentation TypeScript](https://www.typescriptlang.org/docs/)
-- [Lucide Icons](https://lucide.dev/)
+## 📊 État du Projet
 
-## 🔄 Mises à jour
+| Métrique | Valeur |
+|----------|--------|
+| **Score Technique** | 8.5/10 |
+| **TypeScript** | Strict complet |
+| **Statut** | ✅ READY pour intégration Supabase |
+| **Dernière mise à jour** | 5 février 2026 |
 
-Cette documentation est à jour avec la version actuelle du système.
+---
 
-Dernière mise à jour : Janvier 2026
+> **Règle d'or**: Avant de créer un nouveau fichier .md, vérifier si l'information peut être ajoutée dans un fichier existant. Voir [Documentation Standards](./DOCUMENTATION_STANDARDS.md).

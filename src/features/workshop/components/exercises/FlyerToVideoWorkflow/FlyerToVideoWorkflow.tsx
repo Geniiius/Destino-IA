@@ -11,12 +11,124 @@ import {
   Tv,
   PenTool,
   Rocket,
+  Palmtree,
+  Mountain,
+  Building2,
+  Umbrella,
+  Heart,
 } from "lucide-react";
 import { useCopyToClipboard } from "../../../../../hooks";
+
+// Definición de temas con ejemplos estructurados
+const TEMAS_EJEMPLOS = {
+  playa: {
+    nombre: "Playa & Resort",
+    icono: Palmtree,
+    color: "cyan",
+    ejemplo: {
+      rol: "Director creativo de agencia de viajes especializada en destinos de playa y resort all-inclusive",
+      objetivo: "Crear un spot publicitario que inspire a familias y parejas a reservar vacaciones de playa con urgencia promocional",
+      escenaEmocion: "Playas paradisíacas del Caribe mexicano al atardecer, sensación de libertad, relajación y escape del estrés cotidiano",
+      estiloVisual: "Cinematográfico premium con tonos cálidos dorados, agua cristalina turquesa, tomas aéreas de drone, slow motion en olas",
+      salidaEsperada: "4 escenas de video 9:16 de 6 segundos cada una, calidad broadcast TV, con sugerencias de locución en español mexicano",
+      destino: "Cancún, Riviera Maya",
+      imagen: "Pareja caminando de la mano en playa de arena blanca, agua turquesa cristalina, atardecer dorado, palmeras al fondo",
+      titulo: "Escápate al Paraíso",
+      duracion: "5 días / 4 noches",
+      precio: "$12,999 MXN",
+      beneficios: "All-inclusive, Vuelos directos, Traslados incluidos",
+      color: "Turquesa tropical",
+      ambiente: "Relajación, Romance, Escape"
+    }
+  },
+  aventura: {
+    nombre: "Aventura & Naturaleza",
+    icono: Mountain,
+    color: "emerald",
+    ejemplo: {
+      rol: "Director creativo especializado en turismo de aventura y ecoturismo para viajeros exploradores",
+      objetivo: "Inspirar a aventureros a descubrir destinos naturales únicos con experiencias auténticas e inolvidables",
+      escenaEmocion: "Paisajes montañosos épicos de Islandia, cascadas monumentales, sensación de asombro, descubrimiento y conexión con la naturaleza",
+      estiloVisual: "Épico cinematográfico estilo documental National Geographic, tonos verdes y azules intensos, tomas dramáticas de paisajes",
+      salidaEsperada: "4 escenas de video 9:16 de 6 segundos cada una, estética de película de aventura, transiciones fluidas",
+      destino: "Islandia - Tierra de Hielo y Fuego",
+      imagen: "Viajero frente a cascada Skógafoss, arcoíris visible, musgo verde brillante, cielo dramático con nubes",
+      titulo: "Conquista lo Imposible",
+      duracion: "8 días / 7 noches",
+      precio: "$45,000 MXN",
+      beneficios: "Guía experto, Aurora boreal, Glaciares privados",
+      color: "Verde bosque",
+      ambiente: "Aventura, Épico, Descubrimiento"
+    }
+  },
+  ciudad: {
+    nombre: "Ciudad & Cultura",
+    icono: Building2,
+    color: "violet",
+    ejemplo: {
+      rol: "Director creativo de turismo cultural urbano para viajeros sofisticados que buscan arte, historia y gastronomía",
+      objetivo: "Atraer a viajeros culturales a explorar las joyas arquitectónicas, museos y experiencias gastronómicas de ciudades europeas",
+      escenaEmocion: "Calles empedradas de Roma al amanecer, arquitectura histórica majestuosa, sensación de elegancia, historia viva y sofisticación",
+      estiloVisual: "Cinematográfico elegante estilo película europea, tonos cálidos ocres y dorados, fotografía de golden hour, movimientos suaves",
+      salidaEsperada: "4 escenas de video 9:16 de 6 segundos cada una, calidad premium lifestyle, narración envolvente",
+      destino: "Roma, Italia",
+      imagen: "Vista del Coliseo al amanecer dorado, calle italiana con scooter vintage, fuente de Trevi iluminada",
+      titulo: "Vive la Dolce Vita",
+      duracion: "7 días / 6 noches",
+      precio: "$35,000 MXN",
+      beneficios: "Tours VIP sin filas, Cenas gourmet, Hotel céntrico",
+      color: "Dorado romano",
+      ambiente: "Cultura, Elegancia, Historia"
+    }
+  },
+  crucero: {
+    nombre: "Crucero & Lujo",
+    icono: Umbrella,
+    color: "blue",
+    ejemplo: {
+      rol: "Director creativo de marketing de cruceros de lujo para familias y parejas que buscan experiencias all-inclusive premium",
+      objetivo: "Posicionar el crucero como la experiencia vacacional definitiva donde el viaje es tan importante como el destino",
+      escenaEmocion: "Cubierta de crucero de lujo al atardecer navegando el Mediterráneo, sensación de exclusividad, libertad infinita y servicio impecable",
+      estiloVisual: "Ultra premium y aspiracional, tonos azules profundos y blancos brillantes, tomas cinematográficas del barco y destinos",
+      salidaEsperada: "4 escenas de video 9:16 de 6 segundos cada una, estética de marca de lujo, transiciones elegantes",
+      destino: "Crucero Mediterráneo - Barcelona a Roma",
+      imagen: "Pareja brindando champagne en balcón de suite, vista al mar infinito, puesta de sol espectacular, barco navegando",
+      titulo: "Navega Hacia tus Sueños",
+      duracion: "10 días / 9 noches",
+      precio: "$55,000 MXN",
+      beneficios: "Suite con balcón, Bebidas premium, 5 destinos incluidos",
+      color: "Azul océano profundo",
+      ambiente: "Lujo, Exclusividad, Libertad"
+    }
+  },
+  romantico: {
+    nombre: "Romántico & Luna de Miel",
+    icono: Heart,
+    color: "rose",
+    ejemplo: {
+      rol: "Director creativo especializado en viajes románticos y lunas de miel para parejas enamoradas",
+      objetivo: "Crear una experiencia visual irresistible que haga que las parejas imaginen su momento perfecto juntos",
+      escenaEmocion: "Maldivas al atardecer, villas sobre el agua cristalina, intimidad perfecta, romance de película y momentos inolvidables",
+      estiloVisual: "Romántico cinematográfico con tonos rosados, dorados suaves, bokeh de luces, tomas íntimas y emotivas",
+      salidaEsperada: "4 escenas de video 9:16 de 6 segundos cada una, estética de película romántica, música sugerida emotiva",
+      destino: "Maldivas - Paraíso del Romance",
+      imagen: "Pareja cenando en muelle privado sobre el agua, velas flotantes, cielo estrellado, villa overwater iluminada",
+      titulo: "Tu Historia de Amor Comienza Aquí",
+      duracion: "6 días / 5 noches",
+      precio: "$89,000 MXN",
+      beneficios: "Villa overwater, Cena romántica privada, Spa para parejas",
+      color: "Rosa atardecer",
+      ambiente: "Romance, Intimidad, Ensueño"
+    }
+  }
+};
+
+type TemaKey = keyof typeof TEMAS_EJEMPLOS;
 
 const FlyerToVideoWorkflow = () => {
   // ESTADOS
   const [step, setStep] = useState("intro"); // intro, flyer_data, prompt_gen, finished
+  const [selectedTema, setSelectedTema] = useState<TemaKey | null>(null);
   const [inputs, setInputs] = useState({
     destino: "",
     imagen: "",
@@ -30,6 +142,22 @@ const FlyerToVideoWorkflow = () => {
 
   // Use copy hook
   const { copied, copy } = useCopyToClipboard();
+
+  // Función para aplicar ejemplo de tema
+  const aplicarEjemplo = (tema: TemaKey) => {
+    setSelectedTema(tema);
+    const ejemplo = TEMAS_EJEMPLOS[tema].ejemplo;
+    setInputs({
+      destino: ejemplo.destino,
+      imagen: ejemplo.imagen,
+      titulo: ejemplo.titulo,
+      duracion: ejemplo.duracion,
+      precio: ejemplo.precio,
+      beneficios: ejemplo.beneficios,
+      color: ejemplo.color,
+      ambiente: ejemplo.ambiente,
+    });
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -137,9 +265,11 @@ const FlyerToVideoWorkflow = () => {
 
   // 2. FASE 1: DATOS DEL FLYER
   if (step === "flyer_data") {
+    const temaActual = selectedTema ? TEMAS_EJEMPLOS[selectedTema] : null;
+    
     return (
       <div className="min-h-screen bg-[#050505] text-white p-6 font-sans animate-fade-in">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
             <button
               onClick={() => setStep("intro")}
@@ -153,13 +283,96 @@ const FlyerToVideoWorkflow = () => {
           <div className="text-center mb-10">
             <h2 className="text-4xl font-bold mb-2 flex items-center justify-center gap-3">
               <PenTool className="w-8 h-8 text-cyan-500" />
-              Diseña la Oferta
+              Define la Imagen Base
             </h2>
             <p className="text-gray-400">
-              Rellena los datos clave de tu Flyer. Esto será la base de todo el
-              spot publicitario.
+              Selecciona un tema para ver ejemplos estructurados, o rellena manualmente los datos.
             </p>
           </div>
+
+          {/* SELECTOR DE TEMAS */}
+          <div className="mb-8">
+            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 text-center">
+              Elige un tema para cargar un ejemplo completo:
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              {(Object.keys(TEMAS_EJEMPLOS) as TemaKey[]).map((key) => {
+                const tema = TEMAS_EJEMPLOS[key];
+                const IconComponent = tema.icono;
+                const isSelected = selectedTema === key;
+                const colorClasses: Record<string, string> = {
+                  cyan: isSelected ? "border-cyan-500 bg-cyan-900/30 text-cyan-300" : "border-gray-700 hover:border-cyan-500/50",
+                  emerald: isSelected ? "border-emerald-500 bg-emerald-900/30 text-emerald-300" : "border-gray-700 hover:border-emerald-500/50",
+                  violet: isSelected ? "border-violet-500 bg-violet-900/30 text-violet-300" : "border-gray-700 hover:border-violet-500/50",
+                  blue: isSelected ? "border-blue-500 bg-blue-900/30 text-blue-300" : "border-gray-700 hover:border-blue-500/50",
+                  rose: isSelected ? "border-rose-500 bg-rose-900/30 text-rose-300" : "border-gray-700 hover:border-rose-500/50",
+                };
+                
+                return (
+                  <button
+                    key={key}
+                    onClick={() => aplicarEjemplo(key)}
+                    className={`p-4 rounded-xl border transition-all flex flex-col items-center gap-2 ${colorClasses[tema.color]}`}
+                  >
+                    <IconComponent className="w-6 h-6" />
+                    <span className="text-xs font-medium text-center">{tema.nombre}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* EJEMPLO ESTRUCTURADO - Solo visible si hay tema seleccionado */}
+          {temaActual && (
+            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/50 border border-gray-700 rounded-2xl p-6 mb-8 space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-5 h-5 text-yellow-400" />
+                <h3 className="text-lg font-bold text-white">Ejemplo de Prompt Estructurado: {temaActual.nombre}</h3>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-black/30 rounded-xl p-4 border border-cyan-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded text-xs font-bold">ROL</span>
+                    <span className="text-gray-400 text-xs">¿Quién eres?</span>
+                  </div>
+                  <p className="text-sm text-gray-200">{temaActual.ejemplo.rol}</p>
+                </div>
+                
+                <div className="bg-black/30 rounded-xl p-4 border border-orange-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded text-xs font-bold">OBJETIVO</span>
+                    <span className="text-gray-400 text-xs">¿Qué quieres hacer?</span>
+                  </div>
+                  <p className="text-sm text-gray-200">{temaActual.ejemplo.objetivo}</p>
+                </div>
+                
+                <div className="bg-black/30 rounded-xl p-4 border border-purple-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded text-xs font-bold">ESCENA + EMOCIÓN</span>
+                    <span className="text-gray-400 text-xs">¿Dónde y qué sentimiento?</span>
+                  </div>
+                  <p className="text-sm text-gray-200">{temaActual.ejemplo.escenaEmocion}</p>
+                </div>
+                
+                <div className="bg-black/30 rounded-xl p-4 border border-pink-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-pink-500/20 text-pink-400 px-2 py-0.5 rounded text-xs font-bold">ESTILO VISUAL</span>
+                    <span className="text-gray-400 text-xs">¿Cómo debe verse?</span>
+                  </div>
+                  <p className="text-sm text-gray-200">{temaActual.ejemplo.estiloVisual}</p>
+                </div>
+                
+                <div className="md:col-span-2 bg-black/30 rounded-xl p-4 border border-green-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-xs font-bold">SALIDA ESPERADA</span>
+                    <span className="text-gray-400 text-xs">¿Qué formato?</span>
+                  </div>
+                  <p className="text-sm text-gray-200">{temaActual.ejemplo.salidaEsperada}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="bg-[#0f0f12] border border-cyan-900/30 rounded-3xl p-8 space-y-6 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1 h-full bg-cyan-500"></div>

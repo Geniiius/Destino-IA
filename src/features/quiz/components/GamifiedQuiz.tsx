@@ -349,7 +349,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
 
   const handleSelectAnswer = useCallback(
     (answerIndex: number) => {
-      if (state.isAnswered) return;
+      if (state.isAnswered || !currentQ) return;
 
       const isCorrect = answerIndex === currentQ.correctAnswer;
       const streakBonus =
@@ -384,7 +384,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
         ].filter((m) => m);
 
         setMotivationalMessage(
-          messages[Math.floor(Math.random() * messages.length)],
+          messages[Math.floor(Math.random() * messages.length)] ?? "",
         );
         safeSetTimeout(() => setMotivationalMessage(""), 2000);
 
@@ -401,7 +401,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
           "✨ Sigue intentando",
         ];
         setMotivationalMessage(
-          encouragement[Math.floor(Math.random() * encouragement.length)],
+          encouragement[Math.floor(Math.random() * encouragement.length)] ?? "",
         );
         safeSetTimeout(() => setMotivationalMessage(""), 2000);
       }
@@ -440,13 +440,8 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
   };
 
   const correctAnswers = state.answers.filter(
-    (answer, idx) => answer === QUIZ_QUESTIONS[idx].correctAnswer,
+    (answer, idx) => answer === QUIZ_QUESTIONS[idx]?.correctAnswer,
   ).length;
-
-  const maxPossibleScore = QUIZ_QUESTIONS.reduce(
-    (sum, q) => sum + q.points * DIFFICULTY_STYLES[q.difficulty].multiplier,
-    0,
-  );
 
   const percentage = Math.round((correctAnswers / QUIZ_QUESTIONS.length) * 100);
 
@@ -689,7 +684,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                   <div className="text-4xl font-black text-amber-400">
                     {Math.max(
                       ...state.answers.reduce((acc, ans, idx) => {
-                        if (ans === QUIZ_QUESTIONS[idx].correctAnswer) {
+                        if (ans === QUIZ_QUESTIONS[idx]?.correctAnswer) {
                           acc.push((acc[acc.length - 1] || 0) + 1);
                         } else {
                           acc.push(0);
@@ -715,7 +710,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                   const catQuestions = QUIZ_QUESTIONS.filter(
                     (q) => q.category === cat,
                   );
-                  const catCorrect = catQuestions.filter((q, i) => {
+                  const catCorrect = catQuestions.filter((q, _i) => {
                     const globalIdx = QUIZ_QUESTIONS.findIndex(
                       (gq) => gq.id === q.id,
                     );
@@ -724,13 +719,13 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                   const catPercentage = Math.round(
                     (catCorrect / catQuestions.length) * 100,
                   );
-                  const style = CATEGORY_STYLES[cat];
-                  const Icon = style.icon;
+                  const style = CATEGORY_STYLES[cat] ?? CATEGORY_STYLES["General"];
+                  const Icon = style?.icon ?? (() => null);
 
                   return (
                     <div key={cat} className="flex items-center gap-3">
                       <div
-                        className={`${style.bg} ${style.text} w-10 h-10 rounded-lg flex items-center justify-center`}
+                        className={`${style?.bg ?? ""} ${style?.text ?? ""} w-10 h-10 rounded-lg flex items-center justify-center`}
                       >
                         <Icon className="w-5 h-5" />
                       </div>
@@ -747,7 +742,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                                     ? "Formato"
                                     : "General"}
                           </span>
-                          <span className={`text-sm font-bold ${style.text}`}>
+                          <span className={`text-sm font-bold ${style?.text ?? ""}`}>
                             {catCorrect}/{catQuestions.length}
                           </span>
                         </div>
@@ -824,8 +819,8 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
     );
   }
 
-  const categoryStyle = CATEGORY_STYLES[currentQ.category];
-  const CategoryIcon = categoryStyle.icon;
+  const categoryStyle = CATEGORY_STYLES[currentQ.category] ?? CATEGORY_STYLES["General"];
+  const CategoryIcon = categoryStyle?.icon ?? (() => null);
   const isCorrect = state.selectedAnswer === currentQ.correctAnswer;
 
   return (
@@ -947,13 +942,13 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div
-                  className={`${categoryStyle.bg} ${categoryStyle.text} w-10 h-10 rounded-xl flex items-center justify-center`}
+                  className={`${categoryStyle?.bg ?? ""} ${categoryStyle?.text ?? ""} w-10 h-10 rounded-xl flex items-center justify-center`}
                 >
                   <CategoryIcon className="w-5 h-5" />
                 </div>
                 <div>
                   <span
-                    className={`text-xs font-medium ${categoryStyle.text} uppercase tracking-wide`}
+                    className={`text-xs font-medium ${categoryStyle?.text ?? ""} uppercase tracking-wide`}
                   >
                     {currentQ.category === "R"
                       ? "Rol"
@@ -1077,7 +1072,6 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                               // Colorear cada parte según el elemento RCTF
                               const isRol = part.includes('Actúa como');
                               const isObjetivo = part.includes('Para ');
-                              const isEscena = part.includes('Playa') || part.includes('palmeras') || part.includes('sensación');
                               const isEstilo = part.includes('Estilo') || part.includes('colores');
                               const isFormato = part.includes('Formato');
 

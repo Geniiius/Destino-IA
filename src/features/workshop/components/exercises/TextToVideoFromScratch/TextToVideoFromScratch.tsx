@@ -1,12 +1,9 @@
 import React, { useState } from "react";
 import {
-  Sparkles,
-  ArrowRight,
   Lightbulb,
   Zap,
   Check,
   Copy,
-  Film,
   Rocket,
   Clapperboard,
   Wand2,

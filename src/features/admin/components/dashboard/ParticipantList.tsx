@@ -15,8 +15,8 @@ interface ParticipantListProps {
 
 const getInitials = (name: string): string => {
   const names = name.split(" ");
-  if (names.length >= 2) {
-    return (names[0][0] + names[1][0]).toUpperCase();
+  if (names.length >= 2 && names[0] && names[1]) {
+    return ((names[0][0] ?? '') + (names[1][0] ?? '')).toUpperCase();
   }
   return name.slice(0, 2).toUpperCase();
 };

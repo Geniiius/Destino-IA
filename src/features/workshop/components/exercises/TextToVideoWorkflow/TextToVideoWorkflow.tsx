@@ -31,6 +31,13 @@ const MISSIONS = {
       escena: "Amanecer en Santorini, pareja brindando, mar en calma.",
       salida: "Reel vertical 9:16 de alta calidad.",
     },
+    ejemplo: {
+      rol: "Director de fotografía especializado en viajes de lujo y lifestyle para marcas premium",
+      objetivo: "Crear un reel viral que inspire a viajeros a reservar experiencias de lujo únicas",
+      escenaEmocion: "Amanecer dorado en Santorini, pareja elegante brindando con champagne en terraza con vista al mar Egeo, sensación de romance, exclusividad y libertad infinita",
+      estiloVisual: "Cinematográfico premium con tonos cálidos dorados y azules profundos, lens flare natural, movimiento suave de cámara, bokeh en luces del fondo",
+      salidaEsperada: "Reel vertical 9:16 de 6 segundos, calidad 4K, optimizado para TikTok/Instagram"
+    }
   },
   corporate: {
     id: "corporate",
@@ -45,6 +52,13 @@ const MISSIONS = {
         "Reunión ejecutiva en oficina de cristal, horizonte urbano futurista.",
       salida: "Video horizontal 16:9, bucle perfecto.",
     },
+    ejemplo: {
+      rol: "Director creativo de agencia de branding corporativo especializado en empresas tecnológicas Fortune 500",
+      objetivo: "Producir un hero video para landing page que transmita innovación, confianza y liderazgo en el sector fintech",
+      escenaEmocion: "Reunión ejecutiva en oficina de cristal minimalista, horizonte urbano futurista al atardecer, sensación de poder, innovación y visión de futuro",
+      estiloVisual: "Estética corporate premium con tonos azules fríos y acentos dorados, iluminación volumétrica, movimientos lentos y elegantes, profundidad de campo cinematográfica",
+      salidaEsperada: "Video horizontal 16:9 de 8 segundos en bucle perfecto (seamless loop), calidad broadcast"
+    }
   },
   ads: {
     id: "ads",
@@ -58,6 +72,13 @@ const MISSIONS = {
       escena: "Lata de refresco helada con gotas de condensación, fondo neón.",
       salida: "Formato cuadrado 1:1, alta fidelidad.",
     },
+    ejemplo: {
+      rol: "Director creativo senior de agencia de publicidad especializado en spots de alto impacto para marcas de consumo masivo",
+      objetivo: "Crear un bumper ad de 6 segundos irresistible que detenga el scroll y genere deseo inmediato del producto",
+      escenaEmocion: "Lata de refresco premium helada con gotas de condensación brillantes, fondo degradado neón vibrante, sensación de frescura extrema, deseo y satisfacción instantánea",
+      estiloVisual: "Publicidad de alto impacto con iluminación de estudio perfecta, macro shots del producto, colores saturados, reflejos especulares en el metal, estética de comercial de TV premium",
+      salidaEsperada: "Formato cuadrado 1:1 de 6 segundos, ultra alta definición, optimizado para YouTube Bumper Ads"
+    }
   },
 };
 
@@ -212,7 +233,7 @@ const TextToVideoWorkflow: React.FC<TextToVideoWorkflowProps> = ({
   if (step === "strategy") {
     return (
       <div className="min-h-screen bg-[#050505] text-white p-6 font-sans animate-fade-in">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
             <button
               onClick={() => setStep("intro")}
@@ -230,6 +251,74 @@ const TextToVideoWorkflow: React.FC<TextToVideoWorkflowProps> = ({
               <span className="text-cyan-400 font-bold">{mission?.title}</span>
             </p>
           </div>
+
+          {/* EJEMPLO ESTRUCTURADO VISIBLE */}
+          {mission?.ejemplo && (
+            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/50 border border-gray-700 rounded-2xl p-6 mb-8 space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-5 h-5 text-yellow-400" />
+                <h3 className="text-lg font-bold text-white">Ejemplo de Prompt Estructurado: {mission.title}</h3>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-black/30 rounded-xl p-4 border border-blue-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded text-xs font-bold">ROL</span>
+                    <span className="text-gray-400 text-xs">¿Quién eres?</span>
+                  </div>
+                  <p className="text-sm text-gray-200">{mission.ejemplo.rol}</p>
+                </div>
+                
+                <div className="bg-black/30 rounded-xl p-4 border border-emerald-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-xs font-bold">OBJETIVO</span>
+                    <span className="text-gray-400 text-xs">¿Qué quieres hacer?</span>
+                  </div>
+                  <p className="text-sm text-gray-200">{mission.ejemplo.objetivo}</p>
+                </div>
+                
+                <div className="bg-black/30 rounded-xl p-4 border border-amber-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-xs font-bold">ESCENA + EMOCIÓN</span>
+                    <span className="text-gray-400 text-xs">¿Dónde y qué sentimiento?</span>
+                  </div>
+                  <p className="text-sm text-gray-200">{mission.ejemplo.escenaEmocion}</p>
+                </div>
+                
+                <div className="bg-black/30 rounded-xl p-4 border border-pink-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-pink-500/20 text-pink-400 px-2 py-0.5 rounded text-xs font-bold">ESTILO VISUAL</span>
+                    <span className="text-gray-400 text-xs">¿Cómo debe verse?</span>
+                  </div>
+                  <p className="text-sm text-gray-200">{mission.ejemplo.estiloVisual}</p>
+                </div>
+                
+                <div className="md:col-span-2 bg-black/30 rounded-xl p-4 border border-fuchsia-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-fuchsia-500/20 text-fuchsia-400 px-2 py-0.5 rounded text-xs font-bold">SALIDA ESPERADA</span>
+                    <span className="text-gray-400 text-xs">¿Qué formato?</span>
+                  </div>
+                  <p className="text-sm text-gray-200">{mission.ejemplo.salidaEsperada}</p>
+                </div>
+              </div>
+
+              {/* Botón para cargar ejemplo */}
+              <div className="pt-2 flex justify-center">
+                <button
+                  onClick={() => setInputs({
+                    rol: mission.ejemplo.rol,
+                    objetivo: mission.ejemplo.objetivo,
+                    escena: mission.ejemplo.escenaEmocion,
+                    salida: mission.ejemplo.salidaEsperada,
+                  })}
+                  className="bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-500/50 text-yellow-300 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Usar este ejemplo como base
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="bg-[#0f0f12] border border-gray-800 rounded-3xl p-8 space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
@@ -261,7 +350,7 @@ const TextToVideoWorkflow: React.FC<TextToVideoWorkflowProps> = ({
 
             <div className="space-y-2">
               <label className="text-amber-400 text-xs font-bold uppercase tracking-wider">
-                3. Escena (Descripción Visual)
+                3. Escena + Emoción (Descripción Visual)
               </label>
               <textarea
                 name="escena"
@@ -278,7 +367,7 @@ const TextToVideoWorkflow: React.FC<TextToVideoWorkflowProps> = ({
 
             <div className="space-y-2">
               <label className="text-pink-400 text-xs font-bold uppercase tracking-wider">
-                4. Formato (Salida)
+                4. Formato (Salida Esperada)
               </label>
               <input
                 name="salida"

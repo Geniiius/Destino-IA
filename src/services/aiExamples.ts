@@ -1,8 +1,26 @@
 /**
  * @file services/aiExamples.ts
  * @description Servicio para gestionar ejemplos de IA desde Supabase
+ * 
+ * ⚠️ DEPRECATED - MIGRADO A ASSETS ESTÁTICOS
+ * ==========================================
+ * Este archivo contiene el código original para cargar ejemplos desde Supabase.
+ * Se conserva como referencia para:
+ * - Contenido dinámico futuro (admin puede agregar ejemplos via DB)
+ * - Rollback si es necesario
+ * 
+ * NUEVA IMPLEMENTACIÓN:
+ * - Hook: src/hooks/useAIExamples.ts
+ * - Datos: public/assets/ai-examples/examples.json
+ * - Tipos: src/types/aiExamples.ts
+ * 
+ * RAZÓN DE LA MIGRACIÓN (FinOps):
+ * - Eliminar egress de Supabase Storage (~$0.09/GB)
+ * - Servir via Vercel CDN (incluido en plan free)
+ * - Cache local para reducir appels HTTP
  */
 
+/*
 import { supabase } from "./supabase";
 import { exercises } from "@/data/exercises";
 import type { Exercise } from "@/data/exercises";
@@ -14,9 +32,7 @@ export interface AIExampleData {
   description?: string;
 }
 
-/**
- * Cargar todos los ejemplos de IA desde Supabase
- */
+// Cargar todos los ejemplos de IA desde Supabase
 export async function loadAIExamples(): Promise<Map<string, AIExampleData>> {
   try {
     if (!supabase) {
@@ -48,9 +64,7 @@ export async function loadAIExamples(): Promise<Map<string, AIExampleData>> {
   }
 }
 
-/**
- * Obtener ejercicios con ejemplos de IA desde Supabase
- */
+// Obtener ejercicios con ejemplos de IA desde Supabase
 export async function getExercisesWithAIExamples(): Promise<Exercise[]> {
   const aiExamples = await loadAIExamples();
 
@@ -61,9 +75,7 @@ export async function getExercisesWithAIExamples(): Promise<Exercise[]> {
   });
 }
 
-/**
- * Obtener un ejemplo de IA por exercise_id
- */
+// Obtener un ejemplo de IA por exercise_id
 export async function getAIExampleByExerciseId(
   exerciseId: string,
 ): Promise<AIExampleData | null> {
@@ -95,9 +107,7 @@ export async function getAIExampleByExerciseId(
   }
 }
 
-/**
- * Guardar o actualizar un ejemplo de IA
- */
+// Guardar o actualizar un ejemplo de IA
 export async function saveAIExample(
   exerciseId: string,
   example: AIExampleData,
@@ -125,9 +135,7 @@ export async function saveAIExample(
   }
 }
 
-/**
- * Subir archivo a Supabase Storage
- */
+// Subir archivo a Supabase Storage
 export async function uploadAIExampleFile(
   exerciseId: string,
   file: File,
@@ -160,4 +168,31 @@ export async function uploadAIExampleFile(
     console.error("Error al subir archivo:", error);
     return null;
   }
+}
+*/
+
+// ============================================
+// STUBS PARA COMPATIBILIDAD
+// ============================================
+// Si hay código que aún importa de este archivo, estos stubs evitan errores
+
+export interface AIExampleData {
+  type: "image" | "video";
+  url: string;
+  prompt: string;
+  description?: string;
+}
+
+/** @deprecated Use useAIExamples hook instead */
+export async function loadAIExamples(): Promise<Map<string, AIExampleData>> {
+  console.warn('[DEPRECATED] loadAIExamples - Use useAIExamples hook instead');
+  return new Map();
+}
+
+/** @deprecated Use useAIExamples hook instead */
+export async function getAIExampleByExerciseId(
+  _exerciseId: string,
+): Promise<AIExampleData | null> {
+  console.warn('[DEPRECATED] getAIExampleByExerciseId - Use useAIExamples hook instead');
+  return null;
 }

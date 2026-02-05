@@ -4,7 +4,7 @@
  * Self-contained component - Nightlife/Urban Ads theme (Indigo/Fuchsia/Violet)
  */
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Sparkles,
   ArrowRight,
@@ -20,7 +20,6 @@ import {
   Target,
   Palette,
   Box,
-  Layers,
   Terminal,
   FileText
 } from "lucide-react";
@@ -478,15 +477,18 @@ export const TextToImageAds: React.FC = () => {
     const TutorialScreen = () => {
       const step = tutorialSteps[currentStep];
       const isLast = currentStep === tutorialSteps.length - 1;
+
+      if (!step) return null;
   
-      const colors: Record<string, string> = {
+      const colors: { [key: string]: string } = {
         indigo: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
         fuchsia: "text-fuchsia-400 bg-fuchsia-500/10 border-fuchsia-500/20",
         violet: "text-violet-400 bg-violet-500/10 border-violet-500/20",
         cyan: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
         pink: "text-pink-400 bg-pink-500/10 border-pink-500/20",
-      };
-      const currentTheme = colors[step.color] || colors.indigo;
+      } as const;
+      const defaultTheme = "text-indigo-400 bg-indigo-500/10 border-indigo-500/20";
+      const currentTheme: string = colors[step.color] ?? defaultTheme;
   
       return (
         <div className="max-w-3xl mx-auto animate-fade-in h-full flex flex-col">

@@ -18,9 +18,9 @@ import { ExampleScreen } from "./screens/ExampleScreen";
 import { PracticeScreen } from "./screens/PracticeScreen";
 
 export const AgenciaViajesExercise: React.FC<AgenciaViajesExerciseProps> = ({
-  participantId,
-  participantName,
-  sessionId,
+  participantId: _participantId,
+  participantName: _participantName,
+  sessionId: _sessionId,
   onComplete,
   onExit,
 }) => {

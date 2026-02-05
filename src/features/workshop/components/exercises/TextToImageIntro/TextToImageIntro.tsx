@@ -4,7 +4,7 @@
  * Self-contained component - Beach/Remote Worker theme
  */
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Sparkles,
   ArrowRight,
@@ -471,13 +471,14 @@ Salida: Prompt técnico detallado en inglés para Midjourney v6 (SALIDA).`,
 
   const TutorialScreen = () => {
     const step = tutorialSteps[currentStep];
+    if (!step) return null;
     const isLast = currentStep === tutorialSteps.length - 1;
 
     const colors: Record<string, string> = {
       purple: "text-purple-400 bg-purple-500/10 border-purple-500/20",
       pink: "text-pink-400 bg-pink-500/10 border-pink-500/20",
     };
-    const currentTheme = colors[step.color];
+    const currentTheme = colors[step.color] ?? "text-purple-400 bg-purple-500/10 border-purple-500/20";
 
     return (
       <div className="max-w-3xl mx-auto animate-fade-in h-full flex flex-col">

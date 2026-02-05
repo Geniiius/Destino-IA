@@ -4,7 +4,7 @@
  * Créé un dégradé fluide et organique avec des couleurs personnalisables
  */
 
-import { Renderer, Program, Mesh, Color, Triangle } from 'ogl';
+import { Renderer, Program, Mesh, Triangle } from 'ogl';
 import { useEffect, useRef } from 'react';
 
 const VERT = `#version 300 es
@@ -137,9 +137,9 @@ const Aurora: React.FC<AuroraProps> = ({
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
       return result
         ? [
-            parseInt(result[1], 16) / 255,
-            parseInt(result[2], 16) / 255,
-            parseInt(result[3], 16) / 255,
+            parseInt(result[1]!, 16) / 255,
+            parseInt(result[2]!, 16) / 255,
+            parseInt(result[3]!, 16) / 255,
           ]
         : [0, 0, 0];
     };

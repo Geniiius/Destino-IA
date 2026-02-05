@@ -8,7 +8,6 @@ import React, { useState, useCallback } from "react";
 import {
   Sparkles,
   ArrowRight,
-  Lightbulb,
   Zap,
   Check,
   Copy,
@@ -25,8 +24,6 @@ import {
   BookOpen,
   Rocket,
   User,
-  Eye,
-  Monitor
 } from "lucide-react";
 import { useCopyToClipboard } from "../../../../../hooks";
 
@@ -286,6 +283,7 @@ const TutorialScreen: React.FC<TutorialScreenProps> = ({
   setMode,
 }) => {
   const step = tutorialSteps[currentStep];
+  if (!step) return null;
   const isLast = currentStep === tutorialSteps.length - 1;
 
   // Mapa de colores
@@ -297,7 +295,7 @@ const TutorialScreen: React.FC<TutorialScreenProps> = ({
     purple: "text-purple-400 bg-purple-500/10 border-purple-500/20",
     cyan: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
   };
-  const currentTheme = colors[step.color];
+  const currentTheme = colors[step.color] ?? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
 
   return (
     <div className="max-w-3xl mx-auto animate-fade-in h-full flex flex-col">
@@ -785,4 +783,3 @@ Output Format: ${inputs.sal}
     </div>
   );
 };
-```

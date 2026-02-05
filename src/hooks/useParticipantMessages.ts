@@ -27,7 +27,7 @@ export function useParticipantMessages(
 ): UseParticipantMessagesReturn {
   const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
+  const [_channel, setChannel] = useState<RealtimeChannel | null>(null);
 
   // Charger les messages initiaux
   useEffect(() => {

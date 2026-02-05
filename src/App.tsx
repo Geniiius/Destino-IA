@@ -20,7 +20,7 @@ type ViewType = "home" | "admin" | "join";
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewType>("home");
-  const [participantName, setParticipantName] = useState<string>("");
+  const [_participantName, setParticipantName] = useState<string>("");
   const [participantId, setParticipantId] = useState<string | null>(null);
 
   // Hook de messagerie pour les participants
@@ -53,7 +53,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const handleJoin = (name: string, email: string, id?: string) => {
+  const handleJoin = (name: string, _email: string, id?: string) => {
     setParticipantName(name);
     if (id) {
       setParticipantId(id);

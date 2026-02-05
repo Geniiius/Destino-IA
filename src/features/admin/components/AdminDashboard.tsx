@@ -36,14 +36,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Play,
-  Home,
   FileUp,
   Loader2,
   AlertCircle,
-  Mail,
-  Send,
   Presentation,
-  BookOpen,
   HelpCircle,
   Trophy,
   LayoutList,
@@ -86,13 +82,13 @@ const SLIDE_TYPE_STYLES: Record<
   },
 };
 
-// Onglets de navegación
-const TABS: { id: ActiveTab; label: string; icon: React.ElementType }[] = [
-  { id: "slides", label: "Slides", icon: Presentation },
-  { id: "exercises", label: "Ejercicios", icon: BookOpen },
-  { id: "quiz", label: "Quiz", icon: HelpCircle },
-  { id: "challenge", label: "Défi", icon: Trophy },
-];
+// Onglets de navegación - disponibles pour extension future
+// const TABS: { id: ActiveTab; label: string; icon: React.ElementType }[] = [
+//   { id: "slides", label: "Slides", icon: Presentation },
+//   { id: "exercises", label: "Ejercicios", icon: BookOpen },
+//   { id: "quiz", label: "Quiz", icon: HelpCircle },
+//   { id: "challenge", label: "Défi", icon: Trophy },
+// ];
 
 export const AdminDashboard: React.FC = () => {
   const [slides, setSlides] = useState<Slide[]>(mockSlides);
@@ -144,7 +140,10 @@ export const AdminDashboard: React.FC = () => {
       direction === "prev"
         ? Math.max(0, currentIdx - 1)
         : Math.min(slides.length - 1, currentIdx + 1);
-    updateSession({ current_slide_id: slides[newIdx].id });
+    const targetSlide = slides[newIdx];
+    if (targetSlide) {
+      updateSession({ current_slide_id: targetSlide.id });
+    }
   };
 
   const handleLaunchExercise = (exercise: ExerciseId) => {
@@ -184,14 +183,7 @@ export const AdminDashboard: React.FC = () => {
     window.location.hash = "";
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
+  // Fonction getInitials disponible dans ParticipantList
 
   const handleSendToParticipant = (participant: Participant) => {
     setSelectedParticipant(participant);
@@ -274,19 +266,17 @@ export const AdminDashboard: React.FC = () => {
                       /* Afficher le contenu texte classique */
                       <>
                         {/* Badge de type */}
-                        <span
-                          className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase mb-6 ${
-                            SLIDE_TYPE_STYLES[currentSlide?.type || "theory"].bg
-                          } ${
-                            SLIDE_TYPE_STYLES[currentSlide?.type || "theory"]
-                              .text
-                          }`}
-                        >
-                          {
-                            SLIDE_TYPE_STYLES[currentSlide?.type || "theory"]
-                              .label
-                          }
-                        </span>
+                        {(() => {
+                          const slideType = currentSlide?.type ?? "theory";
+                          const style = SLIDE_TYPE_STYLES[slideType] ?? SLIDE_TYPE_STYLES.theory;
+                          return (
+                            <span
+                              className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase mb-6 ${style?.bg ?? ""} ${style?.text ?? ""}`}
+                            >
+                              {style?.label ?? ""}
+                            </span>
+                          );
+                        })()}
 
                         {/* Titre */}
                         <h2 className="text-4xl font-bold text-white mb-3">
@@ -635,7 +625,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex-1 overflow-y-auto p-4 space-y-2">
             {slides.map((slide, idx) => {
               const typeStyle =
-                SLIDE_TYPE_STYLES[slide.type] || SLIDE_TYPE_STYLES.theory;
+                SLIDE_TYPE_STYLES[slide.type] ?? SLIDE_TYPE_STYLES.theory;
               const isActive = session.current_slide_id === slide.id;
 
               return (
@@ -668,9 +658,9 @@ export const AdminDashboard: React.FC = () => {
 
                       {/* Badge de type */}
                       <span
-                        className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${typeStyle.bg} ${typeStyle.text}`}
+                        className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${typeStyle?.bg ?? ""} ${typeStyle?.text ?? ""}`}
                       >
-                        {typeStyle.label}
+                        {typeStyle?.label ?? ""}
                       </span>
 
                       {/* Sous-titre si présent */}

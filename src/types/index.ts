@@ -125,3 +125,8 @@ export interface DirectMessage {
 // ============================================
 export * from "./gallery";
 
+// ============================================
+// EJEMPLOS DE IA (CDN STATIC)
+// ============================================
+export * from "./aiExamples";
+

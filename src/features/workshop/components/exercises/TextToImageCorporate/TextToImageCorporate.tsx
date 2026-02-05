@@ -4,7 +4,7 @@
  * Self-contained component - Corporate/Executive theme (Blue/Emerald)
  */
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Sparkles,
   ArrowRight,
@@ -20,7 +20,6 @@ import {
   Target,
   Palette,
   Box,
-  Briefcase,
   Terminal,
   FileText
 } from "lucide-react";
@@ -462,13 +461,14 @@ export const TextToImageCorporate: React.FC = () => {
   
     const TutorialScreen = () => {
       const step = tutorialSteps[currentStep];
+      if (!step) return null;
       const isLast = currentStep === tutorialSteps.length - 1;
   
       const colors: Record<string, string> = {
         blue: "text-blue-400 bg-blue-500/10 border-blue-500/20",
         emerald: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
       };
-      const currentTheme = colors[step.color];
+      const currentTheme = colors[step.color] ?? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
   
       return (
         <div className="max-w-3xl mx-auto animate-fade-in h-full flex flex-col">

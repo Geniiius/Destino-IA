@@ -16,6 +16,10 @@ export const TutorialScreen: React.FC<TutorialScreenProps> = ({
   onSkip,
 }) => {
   const step = TUTORIAL_STEPS[currentStep];
+  
+  // Guard against undefined step (TypeScript strict mode)
+  if (!step) return null;
+  
   const colorStyle = COLOR_STYLES[step.color];
   const { tutorial } = UI_TEXTS;
 
