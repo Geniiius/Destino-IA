@@ -7,4 +7,5 @@ export { AdminHeader } from "./AdminHeader";
 export { ParticipantList } from "./ParticipantList";
 export { ExerciseManagement } from "./ExerciseManagement";
 export { SendMessageModal } from "./SendMessageModal";
+export { BroadcastMessageModal } from "./BroadcastMessageModal";
 export { EXERCISES, type ExerciseId, type Exercise } from "./exerciseData";

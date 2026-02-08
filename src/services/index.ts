@@ -10,3 +10,6 @@ export * from "./supabase";
 
 // Direct Messages
 export * from "./directMessages";
+
+// Session State (temps réel)
+export * from "./sessionState";

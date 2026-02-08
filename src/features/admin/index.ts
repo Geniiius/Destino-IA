@@ -4,6 +4,7 @@
  */
 
 export { AdminDashboard } from "./components/AdminDashboard";
+export { AdminAuth } from "./components/AdminAuth";
 export { useSlideGeneration } from "./hooks/useSlideGeneration";
 export {
   mockSlides,

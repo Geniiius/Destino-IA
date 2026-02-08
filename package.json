@@ -11,7 +11,10 @@
     "build:check-console": "npm run build && findstr /s /i \"console.log\" dist\\*.js || echo No console.log encontrados",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
-    "clean": "rimraf dist node_modules/.vite"
+    "clean": "rimraf dist node_modules/.vite",
+    "slides": "npx tsx scripts/pdf-to-webp.ts",
+    "slides:clean": "npx tsx scripts/pdf-to-webp.ts --clean",
+    "slides:hq": "npx tsx scripts/pdf-to-webp.ts -q 90 -w 2560 -d 250 --clean"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.47.10",
@@ -22,13 +25,17 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
+    "@types/node": "^22.19.10",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.20",
+    "pdf2pic": "^3.2.0",
     "postcss": "^8.4.47",
+    "sharp": "^0.34.5",
     "tailwindcss": "^3.4.14",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
     "vite-plugin-remove-console": "^2.2.0"

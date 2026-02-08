@@ -130,3 +130,8 @@ export * from "./gallery";
 // ============================================
 export * from "./aiExamples";
 
+// ============================================
+// SESSION TEMPS RÉEL
+// ============================================
+export type { SessionMode, LiveSessionState, SlideTheme, LiveSessionActions, UseLiveSessionReturn } from './session';
+export { DEFAULT_SESSION_ID, DEFAULT_LIVE_STATE } from './session';

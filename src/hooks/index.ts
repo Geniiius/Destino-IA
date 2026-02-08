@@ -33,4 +33,13 @@ export type {
   UseParticipantsResult 
 } from "./useParticipants";
 
+// Hook de slides (PDF → WebP)
+export { useSlideManifest } from "./useSlideManifest";
+
+// Hook de session temps réel
+export { useLiveSession } from "./useLiveSession";
+
+// Hook de présence participant (heartbeat + beforeunload)
+export { useParticipantPresence } from "./useParticipantPresence";
+
 // Los tipos de AI Examples se exportan desde @/types/aiExamples
