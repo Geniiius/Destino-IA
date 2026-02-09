@@ -151,21 +151,37 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
   if (!supabase) return null;
 
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) return null;
 
     const profile = await getProfile(user.id);
 
-    // Mettre à jour last_seen
-    if (profile) {
-      await supabase
-        .from('profiles')
-        .update({ is_online: true, last_seen_at: new Date().toISOString() })
-        .eq('id', user.id);
+    // Si le profil n'existe pas encore (trigger pas encore exécuté), créer un profil minimal
+    if (!profile) {
+      console.warn('[Auth] Profil non trouvé pour', user.id, '- retour sans profil');
+      return {
+        id: user.id,
+        email: user.email || '',
+        display_name: user.user_metadata?.display_name || user.email?.split('@')[0] || '',
+        role: user.user_metadata?.role || 'participant',
+        is_online: true,
+        last_seen_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        current_session_id: 'destino-ia-workshop',
+        metadata: {},
+      } as UserProfile;
     }
 
+    // Mettre à jour last_seen
+    await supabase
+      .from('profiles')
+      .update({ is_online: true, last_seen_at: new Date().toISOString() })
+      .eq('id', user.id);
+
     return profile;
-  } catch {
+  } catch (err) {
+    console.error('[Auth] Erreur getCurrentUser:', err);
     return null;
   }
 }

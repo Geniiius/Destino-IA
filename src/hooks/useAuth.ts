@@ -74,14 +74,34 @@ export function useAuth(): UseAuthReturn {
     let isMounted = true;
 
     async function init() {
-      const user = await getCurrentUser();
-      if (isMounted) {
-        setUser(user);
-        if (user) startHeartbeat(user.id);
+      try {
+        const user = await getCurrentUser();
+        if (isMounted) {
+          setUser(user);
+          if (user) startHeartbeat(user.id);
+        }
+      } catch (err) {
+        console.warn('[Auth] Erreur init:', err);
+        if (isMounted) {
+          setState(prev => ({ ...prev, isLoading: false, isAuthenticated: false }));
+        }
       }
     }
 
-    init();
+    // Timeout de sécurité : ne jamais rester bloqué plus de 5s
+    const safetyTimeout = setTimeout(() => {
+      if (isMounted) {
+        setState(prev => {
+          if (prev.isLoading) {
+            console.warn('[Auth] Timeout de sécurité atteint');
+            return { ...prev, isLoading: false };
+          }
+          return prev;
+        });
+      }
+    }, 5000);
+
+    init().finally(() => clearTimeout(safetyTimeout));
 
     // Écouter les changements d'auth
     cleanupRef.current = onAuthStateChange((user) => {
