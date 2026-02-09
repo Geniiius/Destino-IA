@@ -88,18 +88,18 @@ export function useAuth(): UseAuthReturn {
       }
     }
 
-    // Timeout de sécurité : ne jamais rester bloqué plus de 5s
+    // Timeout de sécurité : ne jamais rester bloqué plus de 3s
     const safetyTimeout = setTimeout(() => {
       if (isMounted) {
         setState(prev => {
           if (prev.isLoading) {
-            console.warn('[Auth] Timeout de sécurité atteint');
-            return { ...prev, isLoading: false };
+            console.warn('[Auth] Timeout de sécurité atteint — déblocage forcé');
+            return { ...prev, isLoading: false, isAuthenticated: false, user: null };
           }
           return prev;
         });
       }
-    }, 5000);
+    }, 3000);
 
     init().finally(() => clearTimeout(safetyTimeout));
 

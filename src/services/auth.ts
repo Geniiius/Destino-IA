@@ -146,15 +146,51 @@ export async function signOut(): Promise<void> {
 /**
  * Vérifie si une session existe déjà (utilisateur déjà connecté).
  */
+/**
+ * Helper : promesse avec timeout
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`[Auth] Timeout ${label} (${ms}ms)`)), ms)
+    ),
+  ]);
+}
+
 export async function getCurrentUser(): Promise<UserProfile | null> {
   const supabase = getSupabaseClient();
   if (!supabase) return null;
 
   try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) return null;
+    // Timeout agressif sur getUser — si Supabase ne répond pas en 3s, on abandonne
+    const { data: { user }, error: userError } = await withTimeout(
+      supabase.auth.getUser(),
+      3000,
+      'getUser'
+    );
+    if (userError || !user) {
+      if (userError) {
+        console.warn('[Auth] getUser error:', userError.message);
+        // Si le token est invalide/expiré, forcer la déconnexion
+        if (
+          userError.message.includes('token') ||
+          userError.message.includes('expired') ||
+          userError.message.includes('invalid') ||
+          userError.message.includes('refresh')
+        ) {
+          console.warn('[Auth] Session corrompue détectée, nettoyage...');
+          await supabase.auth.signOut().catch(() => {});
+        }
+      }
+      return null;
+    }
 
-    const profile = await getProfile(user.id);
+    const profile = await withTimeout(
+      getProfile(user.id),
+      3000,
+      'getProfile'
+    );
 
     // Si le profil n'existe pas encore (trigger pas encore exécuté), créer un profil minimal
     if (!profile) {
@@ -173,11 +209,12 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
       } as UserProfile;
     }
 
-    // Mettre à jour last_seen
-    await supabase
+    // Mettre à jour last_seen (fire & forget — pas de timeout)
+    supabase
       .from('profiles')
       .update({ is_online: true, last_seen_at: new Date().toISOString() })
-      .eq('id', user.id);
+      .eq('id', user.id)
+      .then(() => {}, () => {});
 
     return profile;
   } catch (err) {
@@ -340,14 +377,26 @@ export function onAuthStateChange(
 
   const { data: { subscription } } = supabase.auth.onAuthStateChange(
     async (event, session) => {
+      console.log('[Auth] onAuthStateChange:', event);
       if (event === 'SIGNED_IN' && session?.user) {
-        const profile = await getProfile(session.user.id);
-        callback(profile);
+        try {
+          const profile = await withTimeout(getProfile(session.user.id), 3000, 'onAuthChange:getProfile');
+          callback(profile);
+        } catch {
+          console.warn('[Auth] getProfile timeout dans onAuthStateChange');
+          callback(null);
+        }
       } else if (event === 'SIGNED_OUT') {
         callback(null);
       } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-        const profile = await getProfile(session.user.id);
-        callback(profile);
+        try {
+          const profile = await withTimeout(getProfile(session.user.id), 3000, 'onAuthChange:tokenRefresh');
+          callback(profile);
+        } catch {
+          console.warn('[Auth] getProfile timeout après TOKEN_REFRESHED');
+          // Ne pas rappeler callback(null) ici — le token a été rafraîchi,
+          // l'utilisateur est toujours authentifié
+        }
       }
     }
   );
