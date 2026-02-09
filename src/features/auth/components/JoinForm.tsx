@@ -82,6 +82,12 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
           setIsLoading(false);
           return;
         }
+        // Aussi insérer dans la table participants pour le dashboard admin
+        try {
+          await joinSession(DEFAULT_SESSION_ID, trimmedName, trimmedEmail);
+        } catch (e) {
+          console.warn('Participant table sync:', e);
+        }
         setSuccess("Inscription réussie ! Redirection...");
         setTimeout(() => {
           onJoin(trimmedName, trimmedEmail, auth.user?.id);
@@ -92,6 +98,12 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
           setError(authError || "Erreur de connexion");
           setIsLoading(false);
           return;
+        }
+        // Aussi mettre à jour le statut dans la table participants
+        try {
+          await joinSession(DEFAULT_SESSION_ID, auth.user?.display_name || trimmedEmail, trimmedEmail);
+        } catch (e) {
+          console.warn('Participant table sync:', e);
         }
         onJoin(auth.user?.display_name || trimmedEmail, trimmedEmail, auth.user?.id);
       }
