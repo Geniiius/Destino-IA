@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 // ─── Types ─────────────────────────────────────────────────────
 
@@ -49,93 +49,152 @@ const MANIFEST_URL = '/slides/slides-manifest.json';
 const SLIDES_BASE_URL = '/slides';
 const DEFAULT_PRELOAD_AHEAD = 3;
 
+// ─── Cache Singleton (module-level) ────────────────────────────
+// Partagé entre TOUTES les instances du hook — un seul fetch réseau
+
+/** Manifest déjà chargé */
+let cachedManifest: SlideManifest | null = null;
+/** Promise en cours pour dédupliquer les fetches concurrents */
+let manifestPromise: Promise<SlideManifest> | null = null;
+/** Erreur du dernier chargement */
+let cachedError: string | null = null;
+/** Index rapide slide.index → SlideInfo (O(1) lookup) */
+let slideIndexMap: Map<number, SlideInfo> | null = null;
+
 // Cache global pour éviter de re-créer les Image objects
 const preloadedImages = new Set<string>();
+
+// ─── Fonctions module-level ────────────────────────────────────
+
+/** Effectue le fetch réseau du manifest et met en cache */
+async function fetchAndCacheManifest(): Promise<SlideManifest> {
+  const response = await fetch(MANIFEST_URL);
+
+  if (!response.ok) {
+    throw new Error(`Manifest introuvable (HTTP ${response.status})`);
+  }
+
+  const data: SlideManifest = await response.json();
+
+  if (!data.slides || data.slides.length === 0) {
+    throw new Error('Manifest vide : aucun slide trouvé');
+  }
+
+  // Stocker en cache singleton + construire l'index
+  cachedManifest = data;
+  cachedError = null;
+  slideIndexMap = new Map(data.slides.map((s) => [s.index, s]));
+
+  return data;
+}
+
+/**
+ * Charge le manifest une seule fois. Les appels concurrents
+ * réutilisent la même Promise (déduplication).
+ */
+function loadManifestOnce(): Promise<SlideManifest> {
+  // Déjà en cache → retour immédiat
+  if (cachedManifest) return Promise.resolve(cachedManifest);
+
+  // Fetch déjà en cours → réutiliser la même Promise
+  if (manifestPromise) return manifestPromise;
+
+  manifestPromise = fetchAndCacheManifest()
+    .catch((err) => {
+      const message = err instanceof Error ? err.message : 'Erreur inconnue';
+      cachedError = message;
+      throw err;
+    })
+    .finally(() => {
+      // Libérer la promise en cas d'erreur pour permettre un retry
+      if (!cachedManifest) {
+        manifestPromise = null;
+      }
+    });
+
+  return manifestPromise;
+}
+
+/** Lookup O(1) d'un slide par index */
+function getSlideByIndex(index: number): SlideInfo | undefined {
+  return slideIndexMap?.get(index);
+}
+
+/** Construit l'URL CDN d'un slide (1-based index) */
+function buildSlideUrl(index: number): string {
+  const slide = getSlideByIndex(index);
+  if (slide) {
+    return `${SLIDES_BASE_URL}/${slide.file}`;
+  }
+  // Fallback convention-based
+  const padded = index.toString().padStart(3, '0');
+  return `${SLIDES_BASE_URL}/slide-${padded}.webp`;
+}
 
 // ─── Hook ──────────────────────────────────────────────────────
 
 export function useSlideManifest(): UseSlideManifestReturn {
-  const [manifest, setManifest] = useState<SlideManifest | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isReady, setIsReady] = useState(false);
+  const [manifest, setManifest] = useState<SlideManifest | null>(cachedManifest);
+  const [error, setError] = useState<string | null>(cachedError);
+  const [isReady, setIsReady] = useState(cachedManifest !== null);
 
-  // Charger le manifest au montage
+  const mountedRef = useRef(true);
+
+  // Charger le manifest (une seule fois grâce au singleton)
   useEffect(() => {
-    let cancelled = false;
+    mountedRef.current = true;
 
-    async function loadManifest(): Promise<void> {
-      try {
-        const response = await fetch(MANIFEST_URL);
-
-        if (!response.ok) {
-          throw new Error(`Manifest introuvable (HTTP ${response.status})`);
-        }
-
-        const data: SlideManifest = await response.json();
-
-        if (cancelled) return;
-
-        if (!data.slides || data.slides.length === 0) {
-          throw new Error('Manifest vide : aucun slide trouvé');
-        }
-
-        setManifest(data);
-        setIsReady(true);
-        setError(null);
-
-        console.log(
-          `📋 Slides manifest chargé: ${data.totalSlides} slides, ${formatSize(data.totalSize)}`
-        );
-      } catch (err) {
-        if (cancelled) return;
-
-        const message = err instanceof Error ? err.message : 'Erreur inconnue';
-        setError(message);
-        setIsReady(false);
-        console.warn(`⚠️ Impossible de charger le manifest:`, message);
-      }
+    // Déjà en cache → sync immédiat, pas de fetch
+    if (cachedManifest) {
+      setManifest(cachedManifest);
+      setIsReady(true);
+      setError(null);
+      return;
     }
 
-    loadManifest();
+    loadManifestOnce()
+      .then((data) => {
+        if (mountedRef.current) {
+          setManifest(data);
+          setIsReady(true);
+          setError(null);
+        }
+      })
+      .catch((err) => {
+        if (mountedRef.current) {
+          const message = err instanceof Error ? err.message : 'Erreur inconnue';
+          setError(message);
+          setIsReady(false);
+        }
+      });
 
     return () => {
-      cancelled = true;
+      mountedRef.current = false;
     };
-  }, []);
+  }, []); // ← Pas de dépendances — le manifest ne change jamais en runtime
 
   // Obtenir l'URL CDN d'un slide (1-based index)
   const getSlideUrl = useCallback(
     (index: number): string => {
-      if (!manifest) {
-        // Fallback avant chargement du manifest
-        const padded = index.toString().padStart(3, '0');
-        return `${SLIDES_BASE_URL}/slide-${padded}.webp`;
-      }
-
-      const slide = manifest.slides.find((s) => s.index === index);
-      if (!slide) {
-        console.warn(`⚠️ Slide ${index} introuvable dans le manifest`);
-        const padded = index.toString().padStart(3, '0');
-        return `${SLIDES_BASE_URL}/slide-${padded}.webp`;
-      }
-
-      return `${SLIDES_BASE_URL}/${slide.file}`;
+      return buildSlideUrl(index);
     },
+    // Stable après le premier chargement
     [manifest]
   );
 
-  // Précharger les N+3 slides suivants
+  // Précharger les N slides suivants
   const preload = useCallback(
     (currentIndex: number, ahead: number = DEFAULT_PRELOAD_AHEAD): void => {
-      if (!manifest) return;
+      const m = cachedManifest;
+      if (!m) return;
 
-      const maxIndex = manifest.totalSlides;
+      const maxIndex = m.totalSlides;
 
       for (let i = 1; i <= ahead; i++) {
         const targetIndex = currentIndex + i;
         if (targetIndex > maxIndex) break;
 
-        const url = getSlideUrl(targetIndex);
+        const url = buildSlideUrl(targetIndex);
         if (preloadedImages.has(url)) continue;
 
         const img = new Image();
@@ -143,17 +202,18 @@ export function useSlideManifest(): UseSlideManifestReturn {
         preloadedImages.add(url);
       }
     },
-    [manifest, getSlideUrl]
+    [manifest]
   );
 
   // Précharger TOUS les slides (salle d'attente)
   const preloadAll = useCallback((): void => {
-    if (!manifest) return;
+    const m = cachedManifest;
+    if (!m) return;
 
     let loaded = 0;
-    const total = manifest.totalSlides;
+    const total = m.totalSlides;
 
-    for (const slide of manifest.slides) {
+    for (const slide of m.slides) {
       const url = `${SLIDES_BASE_URL}/${slide.file}`;
       if (preloadedImages.has(url)) {
         loaded++;
@@ -164,7 +224,7 @@ export function useSlideManifest(): UseSlideManifestReturn {
       img.onload = () => {
         loaded++;
         if (loaded === total) {
-          console.log(`✅ ${total} slides préchargés en cache`);
+          console.log(`✅ ${total} slides préchargés en cache navigateur`);
         }
       };
       img.src = url;
@@ -172,9 +232,9 @@ export function useSlideManifest(): UseSlideManifestReturn {
     }
   }, [manifest]);
 
-  // Métadonnées dérivées
-  const totalSlides = useMemo(() => manifest?.totalSlides ?? 0, [manifest]);
-  const totalSize = useMemo(() => manifest?.totalSize ?? 0, [manifest]);
+  // Métadonnées dérivées (pas besoin de useMemo — ce sont des primitives)
+  const totalSlides = manifest?.totalSlides ?? 0;
+  const totalSize = manifest?.totalSize ?? 0;
 
   return {
     isReady,
@@ -186,14 +246,4 @@ export function useSlideManifest(): UseSlideManifestReturn {
     preload,
     preloadAll,
   };
-}
-
-// ─── Utilitaire ────────────────────────────────────────────────
-
-function formatSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  const kb = bytes / 1024;
-  if (kb < 1024) return `${kb.toFixed(1)} KB`;
-  const mb = kb / 1024;
-  return `${mb.toFixed(2)} MB`;
 }
