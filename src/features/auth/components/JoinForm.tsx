@@ -14,7 +14,7 @@ import { isAuthConfigured } from "@/services/auth";
 import { joinSession } from "@/services/participants";
 
 interface JoinFormProps {
-  onJoin: (name: string, email: string, id?: string) => void;
+  onJoin: (name: string, email: string, id?: string, participantTableId?: string) => void;
 }
 
 const DEFAULT_SESSION_ID = "destino-ia-workshop";
@@ -83,14 +83,16 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
           return;
         }
         // Aussi insérer dans la table participants pour le dashboard admin
+        let participantTableId: string | undefined;
         try {
-          await joinSession(DEFAULT_SESSION_ID, trimmedName, trimmedEmail);
+          const p = await joinSession(DEFAULT_SESSION_ID, trimmedName, trimmedEmail);
+          participantTableId = p?.id;
         } catch (e) {
           console.warn('Participant table sync:', e);
         }
         setSuccess("Inscription réussie ! Redirection...");
         setTimeout(() => {
-          onJoin(trimmedName, trimmedEmail, auth.user?.id);
+          onJoin(trimmedName, trimmedEmail, auth.user?.id, participantTableId);
         }, 800);
       } else {
         const { success: ok, error: authError } = await auth.signIn(trimmedEmail, password);
@@ -100,12 +102,14 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
           return;
         }
         // Aussi mettre à jour le statut dans la table participants
+        let participantTableId: string | undefined;
         try {
-          await joinSession(DEFAULT_SESSION_ID, auth.user?.display_name || trimmedEmail, trimmedEmail);
+          const p = await joinSession(DEFAULT_SESSION_ID, auth.user?.display_name || trimmedEmail, trimmedEmail);
+          participantTableId = p?.id;
         } catch (e) {
           console.warn('Participant table sync:', e);
         }
-        onJoin(auth.user?.display_name || trimmedEmail, trimmedEmail, auth.user?.id);
+        onJoin(auth.user?.display_name || trimmedEmail, trimmedEmail, auth.user?.id, participantTableId);
       }
 
       setIsLoading(false);
@@ -114,7 +118,7 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
       setIsLoading(true);
       try {
         const participant = await joinSession(DEFAULT_SESSION_ID, trimmedName, trimmedEmail);
-        onJoin(trimmedName, trimmedEmail, participant?.id);
+        onJoin(trimmedName, trimmedEmail, participant?.id, participant?.id);
       } catch (err) {
         console.warn("Supabase non disponible:", err);
         onJoin(trimmedName, trimmedEmail);

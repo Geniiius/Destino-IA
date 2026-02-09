@@ -26,18 +26,20 @@ const App: React.FC = () => {
   const [view, setView] = useState<ViewType>("home");
   const [participantName, setParticipantName] = useState<string>("");
   const [participantId, setParticipantId] = useState<string | null>(null);
+  /** ID dans la table participants (pour la messagerie) */
+  const [participantTableId, setParticipantTableId] = useState<string | null>(null);
 
   // Auth Supabase
   const auth = useAuth();
 
-  // Hook de messagerie pour les participants
+  // Hook de messagerie pour les participants — utilise l'ID de la table participants
   const {
     messages,
     unreadCount,
     isOpen: isMessagePanelOpen,
     togglePanel: toggleMessagePanel,
     closePanel: closeMessagePanel,
-  } = useParticipantMessages(participantId);
+  } = useParticipantMessages(participantTableId || participantId);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -61,6 +63,11 @@ const App: React.FC = () => {
       setParticipantName(auth.user.display_name || auth.user.email);
       localStorage.setItem("destino_participant_id", auth.user.id);
       localStorage.setItem("destino_participant_name", auth.user.display_name || auth.user.email);
+      // Restaurer le participantTableId depuis localStorage
+      const storedTableId = localStorage.getItem("destino_participant_table_id");
+      if (storedTableId) {
+        setParticipantTableId(storedTableId);
+      }
     }
   }, [auth.isAuthenticated, auth.user]);
 
@@ -69,17 +76,23 @@ const App: React.FC = () => {
     if (!auth.isAuthenticated) {
       const storedParticipantId = localStorage.getItem("destino_participant_id");
       const storedName = localStorage.getItem("destino_participant_name");
+      const storedTableId = localStorage.getItem("destino_participant_table_id");
       if (storedParticipantId) setParticipantId(storedParticipantId);
       if (storedName) setParticipantName(storedName);
+      if (storedTableId) setParticipantTableId(storedTableId);
     }
   }, [auth.isAuthenticated]);
 
-  const handleJoin = (name: string, _email: string, id?: string) => {
+  const handleJoin = (name: string, _email: string, id?: string, tableId?: string) => {
     setParticipantName(name);
     if (id) {
       setParticipantId(id);
       localStorage.setItem("destino_participant_id", id);
       localStorage.setItem("destino_participant_name", name);
+    }
+    if (tableId) {
+      setParticipantTableId(tableId);
+      localStorage.setItem("destino_participant_table_id", tableId);
     }
     // Rediriger vers le workshop après l'inscription
     window.location.hash = "#workshop";
