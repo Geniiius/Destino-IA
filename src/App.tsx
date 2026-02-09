@@ -89,8 +89,8 @@ const App: React.FC = () => {
     window.location.hash = "";
   };
 
-  // Afficher le bouton de messagerie seulement si on a un participant connecté
-  const showMessaging = participantId && view !== "admin";
+  // Afficher le bouton de messagerie seulement dans le workshop
+  const showMessaging = participantId && (view === "workshop" || view === "test");
 
   return (
     <div className="min-h-screen bg-[#050508] relative overflow-hidden flex flex-col items-center justify-center">
