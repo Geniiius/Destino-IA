@@ -145,7 +145,7 @@ export const TextToVideoFromScratch: React.FC = () => {
   // 1. INTRO
   if (step === "intro") {
     return (
-      <div className="min-h-screen bg-[#050505] text-white p-6 font-sans flex flex-col items-center justify-center animate-fade-in">
+      <div className="min-h-full bg-[#050505] text-white p-6 font-sans flex flex-col items-center justify-center animate-fade-in">
         <div className="max-w-5xl w-full text-center space-y-8">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-900/30 border border-indigo-500/50 text-indigo-300 text-xs font-bold tracking-wider uppercase">
             <Wand2 className="w-3 h-3" /> Text to Video: From Scratch
@@ -198,7 +198,7 @@ export const TextToVideoFromScratch: React.FC = () => {
   // 2. FASE ESTRATEGIA (LOS 5 PILARES)
   if (step === "strategy") {
     return (
-      <div className="min-h-screen bg-[#050505] text-white p-6 font-sans animate-fade-in">
+      <div className="min-h-full bg-[#050505] text-white p-6 font-sans animate-fade-in">
         <div className="max-w-3xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
             <button
@@ -331,7 +331,7 @@ Visual Style & Camera: ${inputs.estilo}.
 Format requirements: ${inputs.salida}. Cinematic lighting, photorealistic render.`;
 
     return (
-      <div className="min-h-screen bg-[#050505] text-white p-6 font-sans animate-fade-in">
+      <div className="min-h-full bg-[#050505] text-white p-6 font-sans animate-fade-in">
         <div className="max-w-3xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
             <button

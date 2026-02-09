@@ -16,7 +16,7 @@
  * - Continuité : le slide en cours est mémorisé lors des pauses exercice/quiz
  */
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { GamifiedQuiz } from "@/features/quiz";
 import { AgenciaViajesExercise } from "@/features/workshop/components/exercises/AgenciaViajesExercise";
 import { TextToImageIntro } from "@/features/workshop/components/exercises/TextToImageIntro";
@@ -89,6 +89,14 @@ export const AdminDashboard: React.FC = () => {
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  // ── Auto-switch to exercises tab when exercise is active ──
+  useEffect(() => {
+    if (isSessionReady && liveState.current_mode === 'exercise') {
+      setActiveTab('exercises');
+    }
+  }, [isSessionReady, liveState.current_mode]);
 
   // ── Participants (réels via hook) ──────────
   const participants: Participant[] = (participantsData ?? []).map((p) => ({
@@ -129,8 +137,25 @@ export const AdminDashboard: React.FC = () => {
   );
 
   const handleStopExercise = useCallback(async () => {
-    await actions.resumePresentation();
-    console.log("⏹️ Exercice arrêté, reprise de la présentation");
+    setActionError(null);
+    try {
+      await actions.resumePresentation();
+      console.log("⏹️ Exercice arrêté, reprise de la présentation");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Erreur inconnue';
+      console.error("❌ Erreur arrêt exercice:", msg);
+      setActionError(`Erreur: ${msg}. Réessayez.`);
+      // Retry une fois après 1s
+      setTimeout(async () => {
+        try {
+          await actions.resumePresentation();
+          setActionError(null);
+          console.log("✅ Exercice arrêté au retry");
+        } catch {
+          setActionError("L'exercice n'a pas pu être arrêté. Rechargez la page.");
+        }
+      }, 1000);
+    }
   }, [actions]);
 
   // ── Navigation retour ─────────────────────────
@@ -198,6 +223,30 @@ export const AdminDashboard: React.FC = () => {
           {isPaused && pausedAt && (
             <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse">
               ⏸ Slide {pausedAt} en pause — reprendra ici
+            </span>
+          )}
+
+          {/* ── Bouton d'arrêt toujours visible quand exercice/quiz actif ── */}
+          {isPaused && (
+            <>
+              <div className="w-px h-4 bg-white/10" />
+              <button
+                onClick={handleStopExercise}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors animate-pulse"
+                title="Arrêter l'exercice / quiz et reprendre la présentation"
+              >
+                <Square className="w-3 h-3" />
+                <span>
+                  {liveState.current_mode === 'exercise' ? 'Arrêter exercice' : 'Arrêter quiz'}
+                </span>
+              </button>
+            </>
+          )}
+
+          {/* Erreur action */}
+          {actionError && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
+              ⚠️ {actionError}
             </span>
           )}
         </div>

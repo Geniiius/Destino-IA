@@ -616,7 +616,7 @@ export const TextToImageCorporate: React.FC = () => {
     );
   
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-white p-4 md:p-8">
+      <div className="min-h-full bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-white p-4 md:p-8">
         {mode === "intro" && <IntroScreen />}
         {mode === "tutorial" && <TutorialScreen />}
         {mode === "example" && <ExampleScreen />}

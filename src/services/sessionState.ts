@@ -281,6 +281,9 @@ export async function resumePresentation(
 // ABONNEMENT REALTIME
 // ============================================
 
+/** Compteur pour des noms de canal uniques (évite les conflits après remontage React) */
+let channelCounter = 0;
+
 /**
  * S'abonne aux changements de l'état de session en temps réel.
  *
@@ -306,7 +309,9 @@ export function subscribeToSessionState(
   const supabase = getSupabaseClient();
   if (!supabase) return () => {};
 
-  const channelName = `session_state:${sessionId}`;
+  // Nom de canal unique pour éviter les conflits lors de remontages React
+  channelCounter += 1;
+  const channelName = `session_state:${sessionId}:${channelCounter}`;
 
   const channel = supabase
     .channel(channelName)

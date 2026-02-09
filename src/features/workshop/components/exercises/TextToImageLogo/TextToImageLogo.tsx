@@ -764,7 +764,7 @@ Output Format: ${inputs.sal}
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-950 via-gray-900 to-purple-950 text-white p-4 md:p-8 font-sans selection:bg-rose-500/30">
+    <div className="min-h-full bg-gradient-to-br from-rose-950 via-gray-900 to-purple-950 text-white p-4 md:p-8 font-sans selection:bg-rose-500/30">
       {mode === "intro" && <IntroScreen setMode={setMode} />}
       {mode === "tutorial" && (
         <TutorialScreen

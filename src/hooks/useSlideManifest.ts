@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from "react";
 
 // ─── Types ─────────────────────────────────────────────────────
 
@@ -45,8 +45,8 @@ interface UseSlideManifestReturn {
 
 // ─── Constantes ────────────────────────────────────────────────
 
-const MANIFEST_URL = '/slides/slides-manifest.json';
-const SLIDES_BASE_URL = '/slides';
+const MANIFEST_URL = "/slides/slides-manifest.json";
+const SLIDES_BASE_URL = "/slides";
 const DEFAULT_PRELOAD_AHEAD = 3;
 
 // ─── Cache Singleton (module-level) ────────────────────────────
@@ -77,7 +77,7 @@ async function fetchAndCacheManifest(): Promise<SlideManifest> {
   const data: SlideManifest = await response.json();
 
   if (!data.slides || data.slides.length === 0) {
-    throw new Error('Manifest vide : aucun slide trouvé');
+    throw new Error("Manifest vide : aucun slide trouvé");
   }
 
   // Stocker en cache singleton + construire l'index
@@ -101,7 +101,7 @@ function loadManifestOnce(): Promise<SlideManifest> {
 
   manifestPromise = fetchAndCacheManifest()
     .catch((err) => {
-      const message = err instanceof Error ? err.message : 'Erreur inconnue';
+      const message = err instanceof Error ? err.message : "Erreur inconnue";
       cachedError = message;
       throw err;
     })
@@ -127,14 +127,16 @@ function buildSlideUrl(index: number): string {
     return `${SLIDES_BASE_URL}/${slide.file}`;
   }
   // Fallback convention-based
-  const padded = index.toString().padStart(3, '0');
+  const padded = index.toString().padStart(3, "0");
   return `${SLIDES_BASE_URL}/slide-${padded}.webp`;
 }
 
 // ─── Hook ──────────────────────────────────────────────────────
 
 export function useSlideManifest(): UseSlideManifestReturn {
-  const [manifest, setManifest] = useState<SlideManifest | null>(cachedManifest);
+  const [manifest, setManifest] = useState<SlideManifest | null>(
+    cachedManifest,
+  );
   const [error, setError] = useState<string | null>(cachedError);
   const [isReady, setIsReady] = useState(cachedManifest !== null);
 
@@ -162,7 +164,8 @@ export function useSlideManifest(): UseSlideManifestReturn {
       })
       .catch((err) => {
         if (mountedRef.current) {
-          const message = err instanceof Error ? err.message : 'Erreur inconnue';
+          const message =
+            err instanceof Error ? err.message : "Erreur inconnue";
           setError(message);
           setIsReady(false);
         }
@@ -179,7 +182,7 @@ export function useSlideManifest(): UseSlideManifestReturn {
       return buildSlideUrl(index);
     },
     // Stable après le premier chargement
-    [manifest]
+    [manifest],
   );
 
   // Précharger les N slides suivants
@@ -202,7 +205,7 @@ export function useSlideManifest(): UseSlideManifestReturn {
         preloadedImages.add(url);
       }
     },
-    [manifest]
+    [manifest],
   );
 
   // Précharger TOUS les slides (salle d'attente)

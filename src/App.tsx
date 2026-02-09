@@ -92,15 +92,28 @@ const App: React.FC = () => {
   // Afficher le bouton de messagerie seulement dans le workshop
   const showMessaging = participantId && (view === "workshop" || view === "test");
 
+  // Views plein écran : admin, workshop, test — pas de centrage
+  const isFullScreenView = view === 'admin' || view === 'workshop' || view === 'test';
+
   return (
-    <div className="min-h-screen bg-[#050508] relative overflow-hidden flex flex-col items-center justify-center">
+    <div
+      className={`bg-[#050508] relative ${
+        isFullScreenView
+          ? 'h-full flex flex-col'
+          : 'min-h-screen overflow-hidden flex flex-col items-center justify-center'
+      }`}
+    >
       {/* Effet curseur fluide uniquement sur home et join */}
       {(view === "home" || view === "join") && <SplashCursor />}
 
-      {/* Background Ambience */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.04)_0%,transparent_70%)] pointer-events-none" />
-      <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-emerald-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-emerald-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
+      {/* Background Ambience (home/join uniquement) */}
+      {!isFullScreenView && (
+        <>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.04)_0%,transparent_70%)] pointer-events-none" />
+          <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-emerald-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-emerald-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
+        </>
+      )}
 
       {/* Views */}
       {view === "home" && <HomePage />}

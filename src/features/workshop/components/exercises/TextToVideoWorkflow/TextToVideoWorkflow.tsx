@@ -170,7 +170,7 @@ const TextToVideoWorkflow: React.FC<TextToVideoWorkflowProps> = ({
   // 1. INTRO
   if (step === "intro") {
     return (
-      <div className="min-h-screen bg-[#050505] text-white p-6 font-sans flex flex-col items-center justify-center animate-fade-in">
+      <div className="min-h-full bg-[#050505] text-white p-6 font-sans flex flex-col items-center justify-center animate-fade-in">
         <div className="max-w-4xl w-full text-center space-y-8">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-900/30 border border-indigo-500/50 text-indigo-300 text-xs font-bold tracking-wider uppercase">
             <Film className="w-3 h-3" /> Image to Video
@@ -232,7 +232,7 @@ const TextToVideoWorkflow: React.FC<TextToVideoWorkflowProps> = ({
   // 2. ESTRATEGIA (SOLO IMAGEN BASE)
   if (step === "strategy") {
     return (
-      <div className="min-h-screen bg-[#050505] text-white p-6 font-sans animate-fade-in">
+      <div className="min-h-full bg-[#050505] text-white p-6 font-sans animate-fade-in">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
             <button
@@ -398,7 +398,7 @@ const TextToVideoWorkflow: React.FC<TextToVideoWorkflowProps> = ({
     const imagePrompt = `Actúa como ${inputs.rol || "[ROL]"}.\nGenera una imagen fotorrealista para: ${inputs.objetivo || "[OBJETIVO]"}.\n\nESCENA: ${inputs.escena || "[ESCENA]"}\nFORMATO: ${inputs.salida || "[FORMATO]"}\n\nAsegura alta resolución, iluminación cinematográfica y composición profesional.`;
 
     return (
-      <div className="min-h-screen bg-[#050505] text-white p-6 font-sans animate-fade-in">
+      <div className="min-h-full bg-[#050505] text-white p-6 font-sans animate-fade-in">
         <div className="max-w-3xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
             <button
@@ -501,7 +501,7 @@ Entrega:
 - Incluye: movimiento de cámara + atmósfera + tempo + detalles técnicos`;
 
     return (
-      <div className="min-h-screen bg-[#050505] text-white p-6 font-sans animate-fade-in">
+      <div className="min-h-full bg-[#050505] text-white p-6 font-sans animate-fade-in">
         <div className="max-w-3xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
             <button
@@ -582,7 +582,7 @@ Entrega:
   // 5. ANIMAR VIDEO
   if (step === "video") {
     return (
-      <div className="min-h-screen bg-[#050505] text-white p-6 font-sans animate-fade-in">
+      <div className="min-h-full bg-[#050505] text-white p-6 font-sans animate-fade-in">
         <div className="max-w-3xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
             <button
@@ -668,7 +668,7 @@ Entrega:
   // 6. FINISHED
   if (step === "finished") {
     return (
-      <div className="min-h-screen bg-[#050505] text-white p-6 font-sans flex flex-col items-center justify-center animate-fade-in">
+      <div className="min-h-full bg-[#050505] text-white p-6 font-sans flex flex-col items-center justify-center animate-fade-in">
         <div className="text-center space-y-6">
           <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mx-auto border border-green-500/50">
             <Rocket className="w-12 h-12 text-green-400" />

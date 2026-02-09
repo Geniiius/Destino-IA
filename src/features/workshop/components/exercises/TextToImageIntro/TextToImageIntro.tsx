@@ -626,7 +626,7 @@ Salida: Prompt técnico detallado en inglés para Midjourney v6 (SALIDA).`,
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-slate-900 to-blue-950 text-white p-4 md:p-8">
+    <div className="min-h-full bg-gradient-to-br from-purple-950 via-slate-900 to-blue-950 text-white p-4 md:p-8">
       {mode === "intro" && <IntroScreen />}
       {mode === "tutorial" && <TutorialScreen />}
       {mode === "example" && <ExampleScreen />}

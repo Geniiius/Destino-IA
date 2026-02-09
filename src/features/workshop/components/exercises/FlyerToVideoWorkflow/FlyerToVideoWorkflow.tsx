@@ -206,7 +206,7 @@ const FlyerToVideoWorkflow = () => {
   // 1. INTRO
   if (step === "intro") {
     return (
-      <div className="min-h-screen bg-[#050505] text-white p-6 font-sans flex flex-col items-center justify-center animate-fade-in">
+      <div className="min-h-full bg-[#050505] text-white p-6 font-sans flex flex-col items-center justify-center animate-fade-in">
         <div className="max-w-4xl w-full text-center space-y-8">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-900/30 border border-cyan-500/50 text-cyan-300 text-xs font-bold tracking-wider uppercase">
             <Megaphone className="w-3 h-3" /> Flyer to Video
@@ -268,7 +268,7 @@ const FlyerToVideoWorkflow = () => {
     const temaActual = selectedTema ? TEMAS_EJEMPLOS[selectedTema] : null;
     
     return (
-      <div className="min-h-screen bg-[#050505] text-white p-6 font-sans animate-fade-in">
+      <div className="min-h-full bg-[#050505] text-white p-6 font-sans animate-fade-in">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
             <button
@@ -545,7 +545,7 @@ ENTREGABLE:
 Por favor, genera el guion técnico detallado para cada escena (Prompt visual + Locución sugerida).`;
 
     return (
-      <div className="min-h-screen bg-[#050505] text-white p-6 font-sans animate-fade-in">
+      <div className="min-h-full bg-[#050505] text-white p-6 font-sans animate-fade-in">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
             <button
@@ -661,7 +661,7 @@ Por favor, genera el guion técnico detallado para cada escena (Prompt visual + 
   // 4. PRODUCCIÓN / FINAL
   if (step === "finished") {
     return (
-      <div className="min-h-screen bg-[#050505] text-white p-6 font-sans flex flex-col items-center justify-center animate-fade-in">
+      <div className="min-h-full bg-[#050505] text-white p-6 font-sans flex flex-col items-center justify-center animate-fade-in">
         <div className="text-center space-y-6 max-w-2xl">
           <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mx-auto border border-green-500/50 animate-bounce-slow">
             <Rocket className="w-12 h-12 text-green-400" />

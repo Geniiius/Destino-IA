@@ -59,37 +59,37 @@ Destino IA vise à démocratiser l'apprentissage de l'IA générative à travers
 
 ### 1.3 Contexte d'Utilisation
 
-| Acteur                       | Rôle            | Fonctionnalités Clés                                                                              |
-| ---------------------------- | --------------- | ------------------------------------------------------------------------------------------------- |
-| **Administrateur/Formateur** | Anime l'atelier | Pilotage slides temps réel, lancement exercices/quiz, monitoring présence, messagerie broadcast    |
-| **Participant**              | Suit l'atelier  | Visualisation synchronisée, exercices pratiques, quiz gamifié, messagerie directe                  |
+| Acteur                       | Rôle            | Fonctionnalités Clés                                                                            |
+| ---------------------------- | --------------- | ----------------------------------------------------------------------------------------------- |
+| **Administrateur/Formateur** | Anime l'atelier | Pilotage slides temps réel, lancement exercices/quiz, monitoring présence, messagerie broadcast |
+| **Participant**              | Suit l'atelier  | Visualisation synchronisée, exercices pratiques, quiz gamifié, messagerie directe               |
 
 ### 1.4 Méthodologie Pédagogique [NOUVEAU]
 
 L'atelier est basé sur le **Framework 5 Éléments** pour structurer un prompt efficace :
 
-| # | Élément            | Abréviation | Description                                 |
-|---|---------------------|-------------|---------------------------------------------|
-| 1 | **ROL**            | R           | Rôle assigné à l'IA (ex: photographe)       |
-| 2 | **OBJETIVO**       | O (ou C)    | Objectif/Contexte de la création             |
-| 3 | **ESCENA+EMOCIÓN** | E (ou T)    | Scène visuelle + émotion transmise           |
-| 4 | **ESTILO VISUAL**  | E (ou F)    | Style artistique, format, technique          |
-| 5 | **SALIDA ESPERADA**| S           | Format de sortie attendu (ratio, résolution) |
+| #   | Élément             | Abréviation | Description                                  |
+| --- | ------------------- | ----------- | -------------------------------------------- |
+| 1   | **ROL**             | R           | Rôle assigné à l'IA (ex: photographe)        |
+| 2   | **OBJETIVO**        | O (ou C)    | Objectif/Contexte de la création             |
+| 3   | **ESCENA+EMOCIÓN**  | E (ou T)    | Scène visuelle + émotion transmise           |
+| 4   | **ESTILO VISUAL**   | E (ou F)    | Style artistique, format, technique          |
+| 5   | **SALIDA ESPERADA** | S           | Format de sortie attendu (ratio, résolution) |
 
 > Aussi connu sous les acronymes **ROEES** ou **RCTF** selon le contexte.
 
 ### 1.5 Outils IA Couverts dans l'Atelier [NOUVEAU]
 
-| Outil        | Catégorie          | Usage dans l'atelier                    |
-|--------------|--------------------|-----------------------------------------|
-| **ChatGPT**  | Text/Prompting     | Génération de prompts, chain of thought |
-| **Ideogram** | Image Generation   | Text-to-image, logos, publicité         |
-| **Grok**     | Video Generation   | Image-to-video, text-to-video           |
-| **Kling AI** | Video Generation   | Vidéos avancées                         |
-| **Hailuo**   | Video Generation   | Vidéos créatives                        |
-| **CapCut**   | Video Editing      | Montage et post-production              |
+| Outil          | Catégorie        | Usage dans l'atelier                    |
+| -------------- | ---------------- | --------------------------------------- |
+| **ChatGPT**    | Text/Prompting   | Génération de prompts, chain of thought |
+| **Ideogram**   | Image Generation | Text-to-image, logos, publicité         |
+| **Grok**       | Video Generation | Image-to-video, text-to-video           |
+| **Kling AI**   | Video Generation | Vidéos avancées                         |
+| **Hailuo**     | Video Generation | Vidéos créatives                        |
+| **CapCut**     | Video Editing    | Montage et post-production              |
 | **ElevenLabs** | Audio/Voice      | Voix off IA                             |
-| **Suno**     | Music Generation   | Musique IA pour vidéos                  |
+| **Suno**       | Music Generation | Musique IA pour vidéos                  |
 
 ---
 
@@ -97,21 +97,21 @@ L'atelier est basé sur le **Framework 5 Éléments** pour structurer un prompt 
 
 ### 2.1 Objectifs Principaux
 
-| ID     | Objectif                       | Description                                                                   | Priorité    | Statut         |
-| ------ | ------------------------------ | ----------------------------------------------------------------------------- | ----------- | -------------- |
-| **O1** | Présentation Interactive       | Permettre au formateur de piloter une présentation synchronisée en temps réel | 🔴 Critique | ✅ Implémenté  |
-| **O2** | Participation Active           | Offrir aux participants une interface immersive pour suivre et interagir      | 🔴 Critique | ✅ Implémenté  |
-| **O3** | Gestion de Contenu             | Slides WebP pré-générées servies via Vercel CDN                               | 🟠 Haute    | ✅ Implémenté  |
-| **O4** | Communication Temps Réel       | Messagerie directe + broadcast via Supabase Realtime                          | 🟠 Haute    | ✅ Implémenté  |
+| ID     | Objectif                 | Description                                                                   | Priorité    | Statut        |
+| ------ | ------------------------ | ----------------------------------------------------------------------------- | ----------- | ------------- |
+| **O1** | Présentation Interactive | Permettre au formateur de piloter une présentation synchronisée en temps réel | 🔴 Critique | ✅ Implémenté |
+| **O2** | Participation Active     | Offrir aux participants une interface immersive pour suivre et interagir      | 🔴 Critique | ✅ Implémenté |
+| **O3** | Gestion de Contenu       | Slides WebP pré-générées servies via Vercel CDN                               | 🟠 Haute    | ✅ Implémenté |
+| **O4** | Communication Temps Réel | Messagerie directe + broadcast via Supabase Realtime                          | 🟠 Haute    | ✅ Implémenté |
 
 ### 2.2 Objectifs Secondaires
 
-| ID     | Objectif               | Description                                          | Priorité   | Statut            |
-| ------ | ---------------------- | ---------------------------------------------------- | ---------- | ----------------- |
-| **O5** | Gestion des Ressources | Exemples IA statiques via CDN                        | 🟡 Moyenne | ✅ Implémenté     |
-| **O6** | Quiz Gamifié           | Quiz interactif avec score, streaks, timer            | 🟡 Moyenne | ✅ Implémenté     |
-| **O7** | Exercices Pratiques    | 8 exercices RCTF avec lazy loading et registry        | 🟡 Moyenne | ✅ Implémenté     |
-| **O8** | Analytics              | Suivre la participation et l'engagement               | 🟢 Basse   | 📋 Planifié       |
+| ID     | Objectif               | Description                                    | Priorité   | Statut        |
+| ------ | ---------------------- | ---------------------------------------------- | ---------- | ------------- |
+| **O5** | Gestion des Ressources | Exemples IA statiques via CDN                  | 🟡 Moyenne | ✅ Implémenté |
+| **O6** | Quiz Gamifié           | Quiz interactif avec score, streaks, timer     | 🟡 Moyenne | ✅ Implémenté |
+| **O7** | Exercices Pratiques    | 8 exercices RCTF avec lazy loading et registry | 🟡 Moyenne | ✅ Implémenté |
+| **O8** | Analytics              | Suivre la participation et l'engagement        | 🟢 Basse   | 📋 Planifié   |
 
 ### 2.3 Indicateurs de Réussite (KPIs)
 
@@ -142,50 +142,50 @@ Indicateurs UX:
 
 ### 3.1 Éléments Déjà Réalisés ✅
 
-| Composant                           | Description                                                  | Statut     |
-| ----------------------------------- | ------------------------------------------------------------ | ---------- |
-| **Architecture Feature-First**      | Structure modulaire par fonctionnalité                       | ✅ Complet |
-| **Page d'Accueil**                  | Landing page avec SplashCursor et Aurora effects              | ✅ Complet |
-| **Dashboard Admin**                 | Interface complète avec pilotage live, monitoring, broadcast  | ✅ Complet |
-| **Vue Participant (WorkshopView)**  | Interface immersive synchronisée en temps réel                | ✅ Complet |
-| **Formulaire d'Inscription**        | JoinForm avec validation et persistance localStorage          | ✅ Complet |
-| **Système de Types**                | TypeScript strict — types session, gallery, aiExamples        | ✅ Complet |
-| **Pipeline PDF → WebP**             | Sharp + pdf2pic, manifest JSON, `/public/slides/`             | ✅ Complet |
-| **UI Components**                   | Button, Card, Input, Aurora, SplashCursor                     | ✅ Complet |
-| **Configuration Supabase**          | Client singleton, fallback local, 4 migrations SQL            | ✅ Complet |
-| **Styles CSS**                      | Dark mode, Glassmorphism, animations avancées                 | ✅ Complet |
-| **Authentification Admin**          | Protection par mot de passe `VITE_ADMIN_PASSWORD`             | ✅ Complet |
-| **Synchronisation Realtime**        | `useLiveSession` + `subscribeToSessionState` via Supabase     | ✅ Complet |
-| **Messagerie Directe**              | Admin → Participant via `direct_messages` table               | ✅ Complet |
-| **Messagerie Broadcast**            | `BroadcastMessageModal` avec templates et progression         | ✅ Complet |
-| **Gestion Participants**            | CRUD + heartbeat 30s + disconnect auto (`sendBeacon`)         | ✅ Complet |
-| **Présence Participant**            | `useParticipantPresence` — heartbeat + `visibilitychange`     | ✅ Complet |
-| **Module Quiz Gamifié**             | `GamifiedQuiz.tsx` — score, streaks, timer, feedback visuel   | ✅ Complet |
-| **Module Exercices (8 types)**      | Registry avec lazy loading, filtrage par outil/catégorie      | ✅ Complet |
-| **Système de Cache**                | `cache.ts` + `useCache` — TTL, déduplication, stale-while-revalidate | ✅ Complet |
-| **Exemples IA (CDN statique)**      | Assets `/public/assets/ai-examples/` + hook `useAIExamples`  | ✅ Complet |
-| **SlidePresenter**                  | Composant slides avec preloading, états de chargement, modes  | ✅ Complet |
-| **Mode Test**                       | Vue `#test` pour simuler un participant                       | ✅ Complet |
-| **Context Session**                 | `SessionContext` avec `useReducer`, actions typées            | ✅ Complet |
+| Composant                          | Description                                                          | Statut     |
+| ---------------------------------- | -------------------------------------------------------------------- | ---------- |
+| **Architecture Feature-First**     | Structure modulaire par fonctionnalité                               | ✅ Complet |
+| **Page d'Accueil**                 | Landing page avec SplashCursor et Aurora effects                     | ✅ Complet |
+| **Dashboard Admin**                | Interface complète avec pilotage live, monitoring, broadcast         | ✅ Complet |
+| **Vue Participant (WorkshopView)** | Interface immersive synchronisée en temps réel                       | ✅ Complet |
+| **Formulaire d'Inscription**       | JoinForm avec validation et persistance localStorage                 | ✅ Complet |
+| **Système de Types**               | TypeScript strict — types session, gallery, aiExamples               | ✅ Complet |
+| **Pipeline PDF → WebP**            | Sharp + pdf2pic, manifest JSON, `/public/slides/`                    | ✅ Complet |
+| **UI Components**                  | Button, Card, Input, Aurora, SplashCursor                            | ✅ Complet |
+| **Configuration Supabase**         | Client singleton, fallback local, 4 migrations SQL                   | ✅ Complet |
+| **Styles CSS**                     | Dark mode, Glassmorphism, animations avancées                        | ✅ Complet |
+| **Authentification Admin**         | Protection par mot de passe `VITE_ADMIN_PASSWORD`                    | ✅ Complet |
+| **Synchronisation Realtime**       | `useLiveSession` + `subscribeToSessionState` via Supabase            | ✅ Complet |
+| **Messagerie Directe**             | Admin → Participant via `direct_messages` table                      | ✅ Complet |
+| **Messagerie Broadcast**           | `BroadcastMessageModal` avec templates et progression                | ✅ Complet |
+| **Gestion Participants**           | CRUD + heartbeat 30s + disconnect auto (`sendBeacon`)                | ✅ Complet |
+| **Présence Participant**           | `useParticipantPresence` — heartbeat + `visibilitychange`            | ✅ Complet |
+| **Module Quiz Gamifié**            | `GamifiedQuiz.tsx` — score, streaks, timer, feedback visuel          | ✅ Complet |
+| **Module Exercices (8 types)**     | Registry avec lazy loading, filtrage par outil/catégorie             | ✅ Complet |
+| **Système de Cache**               | `cache.ts` + `useCache` — TTL, déduplication, stale-while-revalidate | ✅ Complet |
+| **Exemples IA (CDN statique)**     | Assets `/public/assets/ai-examples/` + hook `useAIExamples`          | ✅ Complet |
+| **SlidePresenter**                 | Composant slides avec preloading, états de chargement, modes         | ✅ Complet |
+| **Mode Test**                      | Vue `#test` pour simuler un participant                              | ✅ Complet |
+| **Context Session**                | `SessionContext` avec `useReducer`, actions typées                   | ✅ Complet |
 
 ### 3.2 Éléments En Cours 🔄
 
-| Composant                    | Description                                | Progression |
-| ---------------------------- | ------------------------------------------ | ----------- |
-| **Galerie Collaborative**    | Upload et partage d'images entre participants | 60%        |
-| **Sync Exercices Avancée**   | `useExerciseSync` pour progression temps réel | 50%        |
-| **Audit RLS Supabase**       | Row Level Security policies à renforcer     | 40%        |
+| Composant                  | Description                                   | Progression |
+| -------------------------- | --------------------------------------------- | ----------- |
+| **Galerie Collaborative**  | Upload et partage d'images entre participants | 60%         |
+| **Sync Exercices Avancée** | `useExerciseSync` pour progression temps réel | 50%         |
+| **Audit RLS Supabase**     | Row Level Security policies à renforcer       | 40%         |
 
 ### 3.3 Éléments À Faire 📋
 
-| Composant                  | Description                              | Priorité   |
-| -------------------------- | ---------------------------------------- | ---------- |
-| **Optimisation Galerie**   | Compression images, fix memory leaks     | 🔴 Haute   |
-| **RLS Production**         | Audit et durcissement des policies       | 🔴 Haute   |
-| **Analytics Dashboard**    | Métriques participation et engagement    | 🟡 Moyenne |
-| **Export Session**         | Génération rapport PDF de session        | 🟡 Moyenne |
-| **Emails Jetables**        | Envoi credentials aux participants       | 🟢 Basse   |
-| **Mode Hors-Ligne**        | PWA capabilities                         | 🟢 Basse   |
+| Composant                | Description                           | Priorité   |
+| ------------------------ | ------------------------------------- | ---------- |
+| **Optimisation Galerie** | Compression images, fix memory leaks  | 🔴 Haute   |
+| **RLS Production**       | Audit et durcissement des policies    | 🔴 Haute   |
+| **Analytics Dashboard**  | Métriques participation et engagement | 🟡 Moyenne |
+| **Export Session**       | Génération rapport PDF de session     | 🟡 Moyenne |
+| **Emails Jetables**      | Envoi credentials aux participants    | 🟢 Basse   |
+| **Mode Hors-Ligne**      | PWA capabilities                      | 🟢 Basse   |
 
 ### 3.4 Diagramme de Progression [MIS À JOUR]
 
@@ -208,12 +208,12 @@ Par Module:
 
 ### 3.5 Dette Technique Identifiée [NOUVEAU]
 
-| Problème                            | Sévérité   | Impact                                 |
-| ----------------------------------- | ---------- | -------------------------------------- |
-| Memory leaks dans galerie           | 🔴 Haute   | Fuite mémoire en session longue        |
-| Images galerie non compressées      | 🟠 Moyenne | Bande passante et performance          |
-| RLS policies à auditer              | 🔴 Haute   | Sécurité données participants          |
-| `aiExamples.ts` deprecated non nettoyé | 🟢 Basse | Code mort à supprimer                  |
+| Problème                               | Sévérité   | Impact                          |
+| -------------------------------------- | ---------- | ------------------------------- |
+| Memory leaks dans galerie              | 🔴 Haute   | Fuite mémoire en session longue |
+| Images galerie non compressées         | 🟠 Moyenne | Bande passante et performance   |
+| RLS policies à auditer                 | 🔴 Haute   | Sécurité données participants   |
+| `aiExamples.ts` deprecated non nettoyé | 🟢 Basse   | Code mort à supprimer           |
 
 ---
 
@@ -239,16 +239,16 @@ Par Module:
 
 #### Types d'Exercices Disponibles [NOUVEAU]
 
-| ID                      | Nom                          | Outil(s)          | Catégorie         | Difficulté   |
-|-------------------------|------------------------------|--------------------|-------------------|--------------|
-| `text-to-image-intro`   | Introducción a Text-to-Image | Ideogram, ChatGPT  | Prompt Engineering| Beginner     |
-| `agencia-viajes`        | Campaña Agencia de Viajes    | Ideogram            | Image Generation  | Intermediate |
-| `text-to-image-ads`     | Publicidad Visual            | Ideogram, ChatGPT  | Image Generation  | Intermediate |
-| `text-to-image-corporate` | Imagen Corporativa         | Ideogram, Gemini    | Image Generation  | Intermediate |
-| `text-to-image-logo`    | Diseño de Logotipos          | Ideogram, ChatGPT  | Image Generation  | Advanced     |
-| `text-to-video-workflow` | Imagen a Video              | Grok                | Video Generation  | Intermediate |
-| `text-to-video-scratch` | Video desde Cero             | Grok                | Video Generation  | Advanced     |
-| `flyer-to-video`        | Del Flyer al Video           | Ideogram, Grok      | Workflow          | Advanced     |
+| ID                        | Nom                          | Outil(s)          | Catégorie          | Difficulté   |
+| ------------------------- | ---------------------------- | ----------------- | ------------------ | ------------ |
+| `text-to-image-intro`     | Introducción a Text-to-Image | Ideogram, ChatGPT | Prompt Engineering | Beginner     |
+| `agencia-viajes`          | Campaña Agencia de Viajes    | Ideogram          | Image Generation   | Intermediate |
+| `text-to-image-ads`       | Publicidad Visual            | Ideogram, ChatGPT | Image Generation   | Intermediate |
+| `text-to-image-corporate` | Imagen Corporativa           | Ideogram, Gemini  | Image Generation   | Intermediate |
+| `text-to-image-logo`      | Diseño de Logotipos          | Ideogram, ChatGPT | Image Generation   | Advanced     |
+| `text-to-video-workflow`  | Imagen a Video               | Grok              | Video Generation   | Intermediate |
+| `text-to-video-scratch`   | Video desde Cero             | Grok              | Video Generation   | Advanced     |
+| `flyer-to-video`          | Del Flyer al Video           | Ideogram, Grok    | Workflow           | Advanced     |
 
 #### Aspects Techniques
 
@@ -358,9 +358,9 @@ Par Module:
   - Les slides sont servis statiquement via Vercel CDN
 
 0.3 Commandes disponibles:
-  - npm run slides        # Qualité standard (85%, 1920px, 200 DPI)
-  - npm run slides:clean  # Nettoyer et regénérer
-  - npm run slides:hq     # Haute qualité (90%, 2560px, 250 DPI)
+  - npm run slides # Qualité standard (85%, 1920px, 200 DPI)
+  - npm run slides:clean # Nettoyer et regénérer
+  - npm run slides:hq # Haute qualité (90%, 2560px, 250 DPI)
 ```
 
 #### Phase 1 : Préparation (Admin)
@@ -369,7 +369,7 @@ Par Module:
 1.1 Accès Admin:
   - Accéder au Dashboard Admin (#admin)
   - S'authentifier avec le mot de passe (VITE_ADMIN_PASSWORD)
-  - Le dashboard affiche les slides WebP pré-générés  # [MIS À JOUR]
+  - Le dashboard affiche les slides WebP pré-générés # [MIS À JOUR]
 
 1.2 Configuration de la Session:
   - Vérifier le manifest et le nombre de slides
@@ -388,38 +388,38 @@ Par Module:
   - Les participants rejoignent via #join
   - Saisie du nom + email → Accès à WorkshopView
   - Heartbeat automatique (30s) marque la présence
-  - L'admin voit les connexions en temps réel  # [MIS À JOUR]
+  - L'admin voit les connexions en temps réel # [MIS À JOUR]
 
 2.2 Navigation:
   - L'admin navigue entre les slides (actions.goToSlide)
   - Les participants voient le slide actif via Supabase Realtime
-  - Le current_slide_index est synchronisé (~150 bytes)  # [MIS À JOUR]
+  - Le current_slide_index est synchronisé (~150 bytes) # [MIS À JOUR]
   - Preloading intelligent des N slides suivants
 
 2.3 Communication:
-  - Messages directs : Admin → Participant spécifique
-  - Messages broadcast : Admin → Tous les participants
-  - Templates de messages prédéfinis disponibles  # [MIS À JOUR]
+  - Messages directs: Admin → Participant spécifique
+  - Messages broadcast: Admin → Tous les participants
+  - Templates de messages prédéfinis disponibles # [MIS À JOUR]
 ```
 
 #### Phase 3 : Engagement (Pendant la session)
 
 ```yaml
-3.1 Exercices Pratiques:  # [MIS À JOUR]
+3.1 Exercices Pratiques: # [MIS À JOUR]
   - L'admin exécute actions.pauseForExercise('exerciseId')
   - Le slide courant est mémorisé (paused_slide_index)
   - L'exercice se charge en lazy loading chez les participants
   - 8 types d'exercices disponibles (image, video, workflow)
   - Chaque exercice suit le framework RCTF / 5 éléments
 
-3.2 Quiz Gamifié:  # [MIS À JOUR]
+3.2 Quiz Gamifié: # [MIS À JOUR]
   - L'admin exécute actions.pauseForQuiz()
-  - GamifiedQuiz.tsx avec :
-    - Système de score + multiplicateurs
-    - Streaks de bonnes réponses
-    - Timer par question
-    - Feedback visuel immédiat
-    - Écran de résultats avec statistiques
+  - GamifiedQuiz.tsx avec:
+      - Système de score + multiplicateurs
+      - Streaks de bonnes réponses
+      - Timer par question
+      - Feedback visuel immédiat
+      - Écran de résultats avec statistiques
   - Questions basées sur le Framework 5 éléments
 
 3.3 Reprise de la Présentation:
@@ -632,18 +632,18 @@ destino-ia/
 
 ### 6.2 Conventions de Nommage
 
-| Type                | Convention                   | Exemple                       |
-| ------------------- | ---------------------------- | ----------------------------- |
-| **Composant React** | PascalCase                   | `AdminDashboard.tsx`          |
-| **Hook**            | camelCase avec préfixe `use` | `useLiveSession.ts`           |
-| **Service**         | camelCase                    | `sessionState.ts`             |
-| **Utilitaire**      | camelCase                    | `cache.ts`                    |
-| **Constante**       | SCREAMING_SNAKE_CASE         | `MAX_PARTICIPANTS`            |
-| **Type/Interface**  | PascalCase                   | `LiveSessionState`            |
-| **SQL migration**   | `NNN_nom.sql`                | `004_session_state.sql`       |
-| **Fichier barrel**  | `index.ts`                   | `index.ts`                    |
-| **Dossier feature** | kebab-case                   | `features/admin/`             |
-| **Dossier exercice**| PascalCase                   | `AgenciaViajesExercise/`      |
+| Type                 | Convention                   | Exemple                  |
+| -------------------- | ---------------------------- | ------------------------ |
+| **Composant React**  | PascalCase                   | `AdminDashboard.tsx`     |
+| **Hook**             | camelCase avec préfixe `use` | `useLiveSession.ts`      |
+| **Service**          | camelCase                    | `sessionState.ts`        |
+| **Utilitaire**       | camelCase                    | `cache.ts`               |
+| **Constante**        | SCREAMING_SNAKE_CASE         | `MAX_PARTICIPANTS`       |
+| **Type/Interface**   | PascalCase                   | `LiveSessionState`       |
+| **SQL migration**    | `NNN_nom.sql`                | `004_session_state.sql`  |
+| **Fichier barrel**   | `index.ts`                   | `index.ts`               |
+| **Dossier feature**  | kebab-case                   | `features/admin/`        |
+| **Dossier exercice** | PascalCase                   | `AgenciaViajesExercise/` |
 
 ### 6.3 Règles d'Import
 
@@ -700,10 +700,10 @@ import { useLiveSession } from "@/hooks/useLiveSession";
 --type-challenge: #8b5cf6; /* Violet */
 
 /* Couleurs Outils IA [NOUVEAU] */
---tool-ideogram: #a855f7;  /* Purple */
---tool-grok: #3b82f6;       /* Blue */
---tool-gemini: #06b6d4;     /* Cyan */
---tool-chatgpt: #10b981;    /* Green */
+--tool-ideogram: #a855f7; /* Purple */
+--tool-grok: #3b82f6; /* Blue */
+--tool-gemini: #06b6d4; /* Cyan */
+--tool-chatgpt: #10b981; /* Green */
 ```
 
 #### Mode Sombre et Glassmorphism [MIS À JOUR]
@@ -735,9 +735,15 @@ background: radial-gradient(
 );
 
 /* Animations CSS avancées [NOUVEAU] */
-@keyframes fadeInUp { /* ... */ }
-@keyframes slideIn { /* ... */ }
-@keyframes pulse-glow { /* ... */ }
+@keyframes fadeInUp {
+  /* ... */
+}
+@keyframes slideIn {
+  /* ... */
+}
+@keyframes pulse-glow {
+  /* ... */
+}
 ```
 
 #### Typographie
@@ -756,7 +762,12 @@ font-family: "Inter", sans-serif;
 --text-3xl: 1.875rem; /* 30px */
 
 /* Poids */
-font-weight: 400 (normal), 500 (medium), 600 (semibold), 700 (bold), 900 (black);
+font-weight:
+  400 (normal),
+  500 (medium),
+  600 (semibold),
+  700 (bold),
+  900 (black);
 ```
 
 ### 7.2 Ton Narratif
@@ -795,17 +806,17 @@ Objectifs:
   - Largest Contentful Paint: < 2.5s
   - Time to Interactive: < 3.0s
   - Bundle size (gzip): < 200KB
-  - Slides WebP: ~140KB/slide (moyenne)  # [NOUVEAU]
-  - Payload Realtime: ~150 bytes/message  # [NOUVEAU]
+  - Slides WebP: ~140KB/slide (moyenne) # [NOUVEAU]
+  - Payload Realtime: ~150 bytes/message # [NOUVEAU]
 
 Pratiques:
-  - Lazy loading des exercices (React.lazy)  # [MIS À JOUR]
-  - Slides WebP pré-optimisées (Sharp)       # [MIS À JOUR]
-  - Preloading intelligent (N slides ahead)  # [NOUVEAU]
+  - Lazy loading des exercices (React.lazy) # [MIS À JOUR]
+  - Slides WebP pré-optimisées (Sharp) # [MIS À JOUR]
+  - Preloading intelligent (N slides ahead) # [NOUVEAU]
   - Code splitting par route
   - Minification CSS/JS
-  - Console.log supprimés en prod (vite-plugin-remove-console)  # [NOUVEAU]
-  - Cache en mémoire avec TTL (useCache)     # [NOUVEAU]
+  - Console.log supprimés en prod (vite-plugin-remove-console) # [NOUVEAU]
+  - Cache en mémoire avec TTL (useCache) # [NOUVEAU]
 ```
 
 #### Compatibilité
@@ -828,13 +839,13 @@ Résolutions:
 ```yaml
 Règles:
   - Variables d'environnement pour secrets (VITE_*)
-  - Authentification admin par mot de passe (VITE_ADMIN_PASSWORD)  # [MIS À JOUR]
-  - Session admin persistée via sessionStorage  # [NOUVEAU]
+  - Authentification admin par mot de passe (VITE_ADMIN_PASSWORD) # [MIS À JOUR]
+  - Session admin persistée via sessionStorage # [NOUVEAU]
   - Validation côté client ET serveur
   - Sanitization des inputs utilisateur
   - HTTPS obligatoire en production
-  - Row Level Security (Supabase) — audit en cours  # [MIS À JOUR]
-  - sendBeacon pour déconnexion fiable  # [NOUVEAU]
+  - Row Level Security (Supabase) — audit en cours # [MIS À JOUR]
+  - sendBeacon pour déconnexion fiable # [NOUVEAU]
 ```
 
 #### Code Quality
@@ -844,16 +855,16 @@ TypeScript:
   - Mode strict activé
   - Pas de 'any' explicite (sauf exceptions commentées eslint-disable)
   - Interfaces pour toutes les props
-  - Types session dédiés (session.ts, gallery.ts, aiExamples.ts)  # [MIS À JOUR]
+  - Types session dédiés (session.ts, gallery.ts, aiExamples.ts) # [MIS À JOUR]
 
 Patterns:
   - Composants fonctionnels uniquement
   - Hooks pour la logique réutilisable
   - Props destructurées
   - Early returns pour conditions
-  - Registry pattern pour exercices  # [NOUVEAU]
-  - Service Result pattern { data, error }  # [NOUVEAU]
-  - Fallback local sans Supabase  # [NOUVEAU]
+  - Registry pattern pour exercices # [NOUVEAU]
+  - Service Result pattern { data, error } # [NOUVEAU]
+  - Fallback local sans Supabase # [NOUVEAU]
 ```
 
 ---
@@ -1075,8 +1086,8 @@ Analyse le code suivant selon les critères:
 | Nouveau standard adopté  | Mettre à jour §7 (Standards)         |
 | Nouveau prompt utile     | Ajouter à §8 (Prompts)               |
 | Terme technique ajouté   | Ajouter à §10 (Glossaire)            |
-| Nouvel exercice créé     | Mettre à jour §4.1 tableau exercices  |
-| Nouvelle migration SQL   | Mettre à jour §6.1 supabase/          |
+| Nouvel exercice créé     | Mettre à jour §4.1 tableau exercices |
+| Nouvelle migration SQL   | Mettre à jour §6.1 supabase/         |
 
 #### Processus de Mise à Jour
 
@@ -1138,12 +1149,12 @@ Historique:
 | **Broadcast**            | Message envoyé par l'admin à tous les participants simultanément [NOUVEAU]                   |
 | **CDN**                  | Content Delivery Network — réseau de distribution de contenu (Vercel) [NOUVEAU]              |
 | **Egress**               | Trafic sortant d'un service cloud, souvent facturé [NOUVEAU]                                 |
-| **Exercise Registry**    | Pattern centralisant la configuration des exercices avec lazy loading [NOUVEAU]               |
+| **Exercise Registry**    | Pattern centralisant la configuration des exercices avec lazy loading [NOUVEAU]              |
 | **Feature-First**        | Architecture où le code est organisé par fonctionnalité métier plutôt que par type technique |
 | **FinOps**               | Optimisation des coûts cloud et infrastructure [NOUVEAU]                                     |
-| **Framework 5 éléments** | Méthode pédagogique : ROL + OBJETIVO + ESCENA+EMOCIÓN + ESTILO + SALIDA [NOUVEAU]           |
+| **Framework 5 éléments** | Méthode pédagogique : ROL + OBJETIVO + ESCENA+EMOCIÓN + ESTILO + SALIDA [NOUVEAU]            |
 | **Glassmorphism**        | Style visuel avec effet de verre dépoli (blur + transparence)                                |
-| **Heartbeat**            | Signal périodique (30s) envoyé par le participant pour confirmer sa présence [NOUVEAU]        |
+| **Heartbeat**            | Signal périodique (30s) envoyé par le participant pour confirmer sa présence [NOUVEAU]       |
 | **Hook**                 | Fonction React permettant d'utiliser l'état et les effets dans les composants fonctionnels   |
 | **Lazy Loading**         | Chargement différé d'un composant — uniquement quand nécessaire [NOUVEAU]                    |
 | **LiveSessionState**     | Interface TypeScript représentant l'état complet de la session synchronisée [NOUVEAU]        |
@@ -1152,9 +1163,9 @@ Historique:
 | **Realtime**             | Fonctionnalité Supabase pour synchronisation en temps réel via WebSocket                     |
 | **RLS**                  | Row Level Security — Sécurité au niveau des lignes dans PostgreSQL/Supabase [NOUVEAU]        |
 | **sendBeacon**           | API navigateur fire-and-forget pour envoyer des données à la fermeture d'onglet [NOUVEAU]    |
-| **SessionMode**          | Type union : `'presentation' \| 'exercise' \| 'quiz'` [NOUVEAU]                             |
+| **SessionMode**          | Type union : `'presentation' \| 'exercise' \| 'quiz'` [NOUVEAU]                              |
 | **Sharp**                | Bibliothèque Node.js haute performance pour le traitement d'images [NOUVEAU]                 |
-| **Slide**                | Image WebP 1920×1080 représentant une diapositive de la présentation [MIS À JOUR]           |
+| **Slide**                | Image WebP 1920×1080 représentant une diapositive de la présentation [MIS À JOUR]            |
 | **Supabase**             | Backend-as-a-Service open source (PostgreSQL + Realtime + Auth + Storage)                    |
 | **TTL**                  | Time To Live — durée de validité d'une entrée en cache [NOUVEAU]                             |
 | **TypeScript**           | Sur-ensemble de JavaScript avec typage statique                                              |
@@ -1354,12 +1365,12 @@ VITE_ENABLE_REALTIME=true
 
 ### C. Tables Supabase [NOUVEAU]
 
-| Table                   | Migration | Description                                    |
-|-------------------------|-----------|------------------------------------------------|
-| `participants`          | 001       | Participants avec session, statut, heartbeat   |
-| `exercise_ai_examples`  | 002       | Exemples IA par exercice (deprecated → CDN)    |
-| `direct_messages`       | 003       | Messages Admin → Participant                   |
-| `session_state`         | 004       | État session temps réel (slide, mode, live)     |
+| Table                  | Migration | Description                                  |
+| ---------------------- | --------- | -------------------------------------------- |
+| `participants`         | 001       | Participants avec session, statut, heartbeat |
+| `exercise_ai_examples` | 002       | Exemples IA par exercice (deprecated → CDN)  |
+| `direct_messages`      | 003       | Messages Admin → Participant                 |
+| `session_state`        | 004       | État session temps réel (slide, mode, live)  |
 
 ### D. Liens Utiles
 

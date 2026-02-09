@@ -138,7 +138,7 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
 
   if (!isReady) {
     return (
-      <div className="min-h-screen bg-[#050508] flex flex-col items-center justify-center">
+      <div className="h-full bg-[#050508] flex flex-col items-center justify-center">
         <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mb-4" />
         <p className="text-gray-400">Connexion à la session...</p>
         <p className="text-gray-600 text-sm mt-2">
@@ -152,7 +152,7 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
 
   if (!state.is_live) {
     return (
-      <div className="min-h-screen bg-[#050508] flex flex-col items-center justify-center">
+      <div className="h-full bg-[#050508] flex flex-col items-center justify-center">
         <div className="text-center max-w-md">
           <div className="w-20 h-20 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <Presentation className="w-10 h-10 text-emerald-500" />
@@ -197,7 +197,7 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
   // ── Rendu selon le mode ────────────────────────
 
   return (
-    <div className="min-h-screen bg-[#050508] flex flex-col">
+    <div className="w-full h-full bg-[#050508] flex flex-col">
       {/* ── Barre de statut ──────────────────────── */}
       <header className="flex-shrink-0 flex items-center justify-between px-4 py-2 bg-black/40 border-b border-white/10">
         {/* Info mode */}
@@ -228,10 +228,10 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
       </header>
 
       {/* ── Contenu principal ────────────────────── */}
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 flex flex-col min-h-0">
         {/* MODE PRÉSENTATION */}
         {state.current_mode === 'presentation' && (
-          <div className="w-full h-full p-4">
+          <div className="w-full flex-1 p-4">
             <SlidePresenter
               slideIndex={state.current_slide_index}
               preloadAhead={5}
@@ -242,7 +242,7 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
 
         {/* MODE EXERCICE */}
         {state.current_mode === 'exercise' && state.active_exercise_id && (
-          <div className="w-full h-full overflow-y-auto">
+          <div className="w-full flex-1 overflow-y-auto">
             {(() => {
               const exerciseId = state.active_exercise_id!;
 

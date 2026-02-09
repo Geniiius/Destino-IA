@@ -56,7 +56,7 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({
               {/* Indicateur de statut */}
               <div
                 className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#0a0a0f] ${
-              {participant.status === "connected"
+                  participant.status === "online"
                     ? "bg-emerald-500"
                     : "bg-gray-500"
                 }`}
@@ -69,7 +69,7 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({
                 {participant.name}
               </p>
               <p className="text-gray-400 text-xs">
-                {participant.status === "connected" ? "Connecté" : "Hors ligne"}
+                {participant.status === "online" ? "Connecté" : "Hors ligne"}
               </p>
             </div>
 

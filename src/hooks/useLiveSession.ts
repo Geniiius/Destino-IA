@@ -13,7 +13,7 @@
  *   // state se met à jour automatiquement via Realtime
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type {
   LiveSessionState,
   SessionMode,
@@ -221,12 +221,33 @@ export function useLiveSession(
   }, [sessionId, state.current_slide_index]);
 
   const resumePresentation = useCallback(async () => {
-    const { data, error: resumeError } = await resumePresentationService(sessionId);
+    // Tentative avec retry automatique
+    let lastError: string | null = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const { data, error: resumeError } = await resumePresentationService(sessionId);
 
-    if (resumeError) {
-      setError(resumeError);
-    } else if (data && mountedRef.current) {
-      setState(data);
+      if (resumeError) {
+        lastError = resumeError;
+        console.warn(`[useLiveSession] Tentative ${attempt + 1} échouée:`, resumeError);
+        if (attempt === 0) {
+          // Attendre 500ms avant le retry
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          continue;
+        }
+      } else if (data && mountedRef.current) {
+        setState(data);
+        return; // Succès
+      }
+    }
+
+    // Les deux tentatives ont échoué
+    if (lastError) {
+      setError(lastError);
+      // Forcer un rechargement de l'état réel
+      const { data: freshData } = await getSessionState(sessionId);
+      if (freshData && mountedRef.current) {
+        setState(freshData);
+      }
     }
   }, [sessionId]);
 
@@ -248,12 +269,8 @@ export function useLiveSession(
 
   // ── Valeur retournée ───────────────────────────
 
-  return {
-    state,
-    isReady,
-    isConnected,
-    error,
-    actions: {
+  const actions = useMemo(
+    () => ({
       goToSlide,
       nextSlide,
       previousSlide,
@@ -263,6 +280,25 @@ export function useLiveSession(
       resumePresentation,
       setTheme,
       toggleLive,
-    },
+    }),
+    [
+      goToSlide,
+      nextSlide,
+      previousSlide,
+      setMode,
+      pauseForExercise,
+      pauseForQuiz,
+      resumePresentation,
+      setTheme,
+      toggleLive,
+    ]
+  );
+
+  return {
+    state,
+    isReady,
+    isConnected,
+    error,
+    actions,
   };
 }
