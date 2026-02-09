@@ -42,4 +42,7 @@ export { useLiveSession } from "./useLiveSession";
 // Hook de présence participant (heartbeat + beforeunload)
 export { useParticipantPresence } from "./useParticipantPresence";
 
+// Hook d'authentification
+export { useAuth } from "./useAuth";
+
 // Los tipos de AI Examples se exportan desde @/types/aiExamples

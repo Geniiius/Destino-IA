@@ -1,11 +1,12 @@
 /**
  * @file App.tsx
- * @description Componente raíz de la aplicación
+ * @description Composant racine de l'application
  *
- * Responsabilidades:
+ * Responsabilités :
  * - Routing principal (home, admin, join, workshop)
- * - Providers globales
- * - Layout base
+ * - Auth Supabase (session persistante)
+ * - Providers globaux
+ * - Layout de base
  */
 
 import React, { useState, useEffect } from "react";
@@ -17,6 +18,7 @@ import { WorkshopView } from "@/features/workshop/components/WorkshopView";
 import SplashCursor from "@/components/effects/SplashCursor";
 import { MessageButton, MessagePanel } from "@/components/messaging";
 import { useParticipantMessages } from "@/hooks";
+import { useAuth } from "@/hooks/useAuth";
 
 type ViewType = 'home' | 'admin' | 'join' | 'workshop' | 'test';
 
@@ -24,6 +26,9 @@ const App: React.FC = () => {
   const [view, setView] = useState<ViewType>("home");
   const [participantName, setParticipantName] = useState<string>("");
   const [participantId, setParticipantId] = useState<string | null>(null);
+
+  // Auth Supabase
+  const auth = useAuth();
 
   // Hook de messagerie pour les participants
   const {
@@ -49,17 +54,25 @@ const App: React.FC = () => {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  // Récupérer le participantId et nom depuis le localStorage au chargement
+  // Synchroniser l'auth Supabase avec l'état local
   useEffect(() => {
-    const storedParticipantId = localStorage.getItem("destino_participant_id");
-    const storedName = localStorage.getItem("destino_participant_name");
-    if (storedParticipantId) {
-      setParticipantId(storedParticipantId);
+    if (auth.isAuthenticated && auth.user) {
+      setParticipantId(auth.user.id);
+      setParticipantName(auth.user.display_name || auth.user.email);
+      localStorage.setItem("destino_participant_id", auth.user.id);
+      localStorage.setItem("destino_participant_name", auth.user.display_name || auth.user.email);
     }
-    if (storedName) {
-      setParticipantName(storedName);
+  }, [auth.isAuthenticated, auth.user]);
+
+  // Récupérer depuis localStorage (fallback)
+  useEffect(() => {
+    if (!auth.isAuthenticated) {
+      const storedParticipantId = localStorage.getItem("destino_participant_id");
+      const storedName = localStorage.getItem("destino_participant_name");
+      if (storedParticipantId) setParticipantId(storedParticipantId);
+      if (storedName) setParticipantName(storedName);
     }
-  }, []);
+  }, [auth.isAuthenticated]);
 
   const handleJoin = (name: string, _email: string, id?: string) => {
     setParticipantName(name);

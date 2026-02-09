@@ -135,3 +135,8 @@ export * from "./aiExamples";
 // ============================================
 export type { SessionMode, LiveSessionState, SlideTheme, LiveSessionActions, UseLiveSessionReturn } from './session';
 export { DEFAULT_SESSION_ID, DEFAULT_LIVE_STATE } from './session';
+
+// ============================================
+// AUTHENTIFICATION
+// ============================================
+export type { UserRole, UserProfile, AuthState, AuthActions, UseAuthReturn, AdminUserActions } from './auth';
