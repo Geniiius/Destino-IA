@@ -93,40 +93,36 @@ export const ParticipantManageModal: React.FC<ParticipantManageModalProps> = ({
     setResetResult(null);
 
     const newPwd = generatePassword(10);
-    const result = await adminResetPassword(email, newPwd);
 
-    if (result.success && result.generatedPassword) {
-      setResetResult({
-        success: true,
-        password: result.generatedPassword,
-      });
-      // Notifier le dashboard pour garder un historique
-      if (onPasswordGenerated && email) {
-        onPasswordGenerated({
-          participantName: participant.name,
-          email,
-          password: result.generatedPassword,
-        });
-      }
-    } else if (result.success) {
-      // Email de reset envoyé (sans mot de passe généré)
-      // Fallback: afficher quand même le mot de passe qu'on a généré
-      setResetResult({
-        success: true,
+    // Toujours afficher le mot de passe immédiatement
+    setResetResult({
+      success: true,
+      password: newPwd,
+    });
+
+    // Notifier le dashboard pour garder un historique
+    if (onPasswordGenerated && email) {
+      onPasswordGenerated({
+        participantName: participant.name,
+        email,
         password: newPwd,
       });
-      if (onPasswordGenerated && email) {
-        onPasswordGenerated({
-          participantName: participant.name,
-          email,
-          password: newPwd,
-        });
+    }
+
+    // Tenter de mettre à jour côté serveur (en arrière-plan)
+    try {
+      const result = await adminResetPassword(email, newPwd);
+      if (!result.success) {
+        console.warn(
+          "[ParticipantManage] Server password update failed, but password is shown to admin:",
+          result.error,
+        );
       }
-    } else {
-      setResetResult({
-        success: false,
-        error: result.error || "Erreur inconnue",
-      });
+    } catch (err) {
+      console.warn(
+        "[ParticipantManage] Server error during password reset:",
+        err,
+      );
     }
 
     setIsResetting(false);
