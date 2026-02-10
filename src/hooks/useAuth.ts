@@ -9,7 +9,7 @@
  * - Actions (signUp, signIn, signOut, etc.)
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   signUp as authSignUp,
   signIn as authSignIn,
@@ -20,8 +20,8 @@ import {
   onAuthStateChange,
   heartbeat,
   markOffline,
-} from '@/services/auth';
-import type { UserProfile, AuthState, UseAuthReturn } from '@/types/auth';
+} from "@/services/auth";
+import type { UserProfile, AuthState, UseAuthReturn } from "@/types/auth";
 
 /** Intervalle du heartbeat (30 secondes) */
 const HEARTBEAT_INTERVAL = 30_000;
@@ -49,7 +49,7 @@ export function useAuth(): UseAuthReturn {
       user,
       email: user?.email || null,
       role: user?.role || null,
-      isAdmin: user?.role === 'admin',
+      isAdmin: user?.role === "admin",
       error: null,
     });
   }, []);
@@ -58,7 +58,10 @@ export function useAuth(): UseAuthReturn {
 
   const startHeartbeat = useCallback((userId: string) => {
     if (heartbeatRef.current) clearInterval(heartbeatRef.current);
-    heartbeatRef.current = setInterval(() => heartbeat(userId), HEARTBEAT_INTERVAL);
+    heartbeatRef.current = setInterval(
+      () => heartbeat(userId),
+      HEARTBEAT_INTERVAL,
+    );
   }, []);
 
   const stopHeartbeat = useCallback(() => {
@@ -81,9 +84,13 @@ export function useAuth(): UseAuthReturn {
           if (user) startHeartbeat(user.id);
         }
       } catch (err) {
-        console.warn('[Auth] Erreur init:', err);
+        console.warn("[Auth] Erreur init:", err);
         if (isMounted) {
-          setState(prev => ({ ...prev, isLoading: false, isAuthenticated: false }));
+          setState((prev) => ({
+            ...prev,
+            isLoading: false,
+            isAuthenticated: false,
+          }));
         }
       }
     }
@@ -91,10 +98,17 @@ export function useAuth(): UseAuthReturn {
     // Timeout de sécurité : ne jamais rester bloqué plus de 3s
     const safetyTimeout = setTimeout(() => {
       if (isMounted) {
-        setState(prev => {
+        setState((prev) => {
           if (prev.isLoading) {
-            console.warn('[Auth] Timeout de sécurité atteint — déblocage forcé');
-            return { ...prev, isLoading: false, isAuthenticated: false, user: null };
+            console.warn(
+              "[Auth] Timeout de sécurité atteint — déblocage forcé",
+            );
+            return {
+              ...prev,
+              isLoading: false,
+              isAuthenticated: false,
+              user: null,
+            };
           }
           return prev;
         });
@@ -121,55 +135,61 @@ export function useAuth(): UseAuthReturn {
         markOffline(state.user.id);
       }
     };
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
       isMounted = false;
       stopHeartbeat();
       cleanupRef.current?.();
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Actions ─────────────────────────────────────
 
-  const signUp = useCallback(async (
-    email: string,
-    password: string,
-    displayName: string
-  ): Promise<{ success: boolean; error?: string }> => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
+  const signUp = useCallback(
+    async (
+      email: string,
+      password: string,
+      displayName: string,
+    ): Promise<{ success: boolean; error?: string }> => {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-    const { user, error } = await authSignUp(email, password, displayName);
+      const { user, error } = await authSignUp(email, password, displayName);
 
-    if (error) {
-      setState(prev => ({ ...prev, isLoading: false, error }));
-      return { success: false, error };
-    }
+      if (error) {
+        setState((prev) => ({ ...prev, isLoading: false, error }));
+        return { success: false, error };
+      }
 
-    setUser(user);
-    if (user) startHeartbeat(user.id);
-    return { success: true };
-  }, [setUser, startHeartbeat]);
+      setUser(user);
+      if (user) startHeartbeat(user.id);
+      return { success: true };
+    },
+    [setUser, startHeartbeat],
+  );
 
-  const signIn = useCallback(async (
-    email: string,
-    password: string
-  ): Promise<{ success: boolean; error?: string }> => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
+  const signIn = useCallback(
+    async (
+      email: string,
+      password: string,
+    ): Promise<{ success: boolean; error?: string }> => {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-    const { user, error } = await authSignIn(email, password);
+      const { user, error } = await authSignIn(email, password);
 
-    if (error) {
-      setState(prev => ({ ...prev, isLoading: false, error }));
-      return { success: false, error };
-    }
+      if (error) {
+        setState((prev) => ({ ...prev, isLoading: false, error }));
+        return { success: false, error };
+      }
 
-    setUser(user);
-    if (user) startHeartbeat(user.id);
-    return { success: true };
-  }, [setUser, startHeartbeat]);
+      setUser(user);
+      if (user) startHeartbeat(user.id);
+      return { success: true };
+    },
+    [setUser, startHeartbeat],
+  );
 
   const signOutAction = useCallback(async () => {
     if (state.user) {
@@ -180,20 +200,26 @@ export function useAuth(): UseAuthReturn {
     setUser(null);
   }, [state.user, stopHeartbeat, setUser]);
 
-  const resetPasswordAction = useCallback(async (
-    email: string
-  ): Promise<{ success: boolean; error?: string }> => {
-    const { success, error } = await authResetPassword(email);
-    return { success, error: error || undefined };
-  }, []);
+  const resetPasswordAction = useCallback(
+    async (email: string): Promise<{ success: boolean; error?: string }> => {
+      const { success, error } = await authResetPassword(email);
+      return { success, error: error || undefined };
+    },
+    [],
+  );
 
-  const updateProfileAction = useCallback(async (
-    updates: Partial<Pick<UserProfile, 'display_name' | 'avatar_url' | 'metadata'>>
-  ) => {
-    if (!state.user) return;
-    const updated = await authUpdateProfile(state.user.id, updates);
-    if (updated) setUser(updated);
-  }, [state.user, setUser]);
+  const updateProfileAction = useCallback(
+    async (
+      updates: Partial<
+        Pick<UserProfile, "display_name" | "avatar_url" | "metadata">
+      >,
+    ) => {
+      if (!state.user) return;
+      const updated = await authUpdateProfile(state.user.id, updates);
+      if (updated) setUser(updated);
+    },
+    [state.user, setUser],
+  );
 
   return {
     ...state,

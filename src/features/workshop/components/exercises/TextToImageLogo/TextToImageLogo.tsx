@@ -295,7 +295,9 @@ const TutorialScreen: React.FC<TutorialScreenProps> = ({
     purple: "text-purple-400 bg-purple-500/10 border-purple-500/20",
     cyan: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
   };
-  const currentTheme = colors[step.color] ?? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
+  const currentTheme =
+    colors[step.color] ??
+    "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
 
   return (
     <div className="max-w-3xl mx-auto animate-fade-in h-full flex flex-col">
@@ -549,18 +551,20 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
       setInputs((prev) => ({ ...prev, [id]: value }));
     };
 
-    const isComplete = Object.values(inputs).every(v => v.trim().length > 0);
-    const completedCount = Object.values(inputs).filter(v => v.trim().length > 0).length;
+    const isComplete = Object.values(inputs).every((v) => v.trim().length > 0);
+    const completedCount = Object.values(inputs).filter(
+      (v) => v.trim().length > 0,
+    ).length;
 
     return (
       <div className="w-full max-w-6xl mx-auto h-full flex flex-col justify-center">
         {/* Header Compacto */}
         <div className="flex items-center justify-between mb-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-md">
           <button
-              onClick={() => setMode("intro")}
-              className="text-gray-500 hover:text-white text-sm"
+            onClick={() => setMode("intro")}
+            className="text-gray-500 hover:text-white text-sm"
           >
-              <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-5 h-5" />
           </button>
           <div>
             <h1 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -569,21 +573,33 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
                 {completedCount}/{FIELDS.length}
               </span>
             </h1>
-            <p className="text-gray-400 text-sm hidden md:block">Rellena los 6 pilares de branding</p>
+            <p className="text-gray-400 text-sm hidden md:block">
+              Rellena los 6 pilares de branding
+            </p>
           </div>
-          
+
           {/* Progress Bar Compacta */}
           <div className="flex gap-1">
             {FIELDS.map((f, index) => (
               <div
                 key={index}
                 className={`w-6 h-2 rounded-full transition-all ${
-                  index < completedCount ? "bg-" + f.color + "-500 shadow-[0_0_10px_rgba(200,200,200,0.5)]" : "bg-white/10"
+                  index < completedCount
+                    ? "bg-" +
+                      f.color +
+                      "-500 shadow-[0_0_10px_rgba(200,200,200,0.5)]"
+                    : "bg-white/10"
                 }`}
-                style={{ backgroundColor: index < completedCount ? "" : undefined, opacity: index < completedCount ? 1 : 0.2 }}
+                style={{
+                  backgroundColor: index < completedCount ? "" : undefined,
+                  opacity: index < completedCount ? 1 : 0.2,
+                }}
               >
-                  {/* Tailwind dynamic colors note: ensure safelist if needed, otherwise use style for dynamic colors if generic class names fail */}
-                  <div className={`w-full h-full rounded-full bg-${f.color}-500`} style={{ display: index < completedCount ? 'block' : 'none' }}></div>
+                {/* Tailwind dynamic colors note: ensure safelist if needed, otherwise use style for dynamic colors if generic class names fail */}
+                <div
+                  className={`w-full h-full rounded-full bg-${f.color}-500`}
+                  style={{ display: index < completedCount ? "block" : "none" }}
+                ></div>
               </div>
             ))}
           </div>
@@ -594,7 +610,7 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
           {FIELDS.map((field) => {
             const value = inputs[field.id as keyof typeof inputs] || "";
             const isFilled = value.trim().length > 0;
-            
+
             const colorStyle = COLOR_STYLES[field.color] || COLOR_STYLES.indigo;
             const Icon = ICON_MAP[field.id] || Sparkles;
 
@@ -605,7 +621,7 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
                   relative group transition-all duration-300
                   bg-black/20 backdrop-blur-sm border rounded-xl p-4
                   ${isFilled ? colorStyle.border : "border-white/5 hover:border-white/20"}
-                  ${isFilled ? colorStyle.bg.replace('/20', '/10') : ""}
+                  ${isFilled ? colorStyle.bg.replace("/20", "/10") : ""}
                 `}
               >
                 <div className="flex gap-3">
@@ -651,12 +667,13 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
             );
           })}
         </div>
-        
+
         {/* Helper Note / Preview */}
         {!isComplete && (
-            <div className="text-center text-sm text-gray-500 mb-6 font-mono">
-                💡 Completa los {FIELDS.length} campos para generar el prompt perfecto.
-            </div>
+          <div className="text-center text-sm text-gray-500 mb-6 font-mono">
+            💡 Completa los {FIELDS.length} campos para generar el prompt
+            perfecto.
+          </div>
         )}
 
         {/* Botones de acción */}
@@ -666,18 +683,22 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
             disabled={!isComplete}
             className={`
               group flex items-center gap-3 px-8 py-3 rounded-xl font-bold text-white transition-all
-              ${isComplete 
-                ? "bg-gradient-to-r from-rose-600 to-orange-600 hover:scale-105 shadow-lg shadow-rose-900/20" 
-                : "bg-gray-800 text-gray-500 cursor-not-allowed"}
+              ${
+                isComplete
+                  ? "bg-gradient-to-r from-rose-600 to-orange-600 hover:scale-105 shadow-lg shadow-rose-900/20"
+                  : "bg-gray-800 text-gray-500 cursor-not-allowed"
+              }
             `}
           >
             <span>Generar Prompt de Branding</span>
-            <Zap className={`w-5 h-5 ${isComplete ? "group-hover:translate-x-1" : ""} transition-transform`} />
+            <Zap
+              className={`w-5 h-5 ${isComplete ? "group-hover:translate-x-1" : ""} transition-transform`}
+            />
           </button>
         </div>
       </div>
     );
-  }
+  },
 );
 
 // --- PANTALLA DE RESULTADO (NUEVA) ---

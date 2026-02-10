@@ -31,6 +31,7 @@ import { FlyerToVideoWorkflow } from "@/features/workshop/components/exercises/F
 import {
   AdminHeader,
   ParticipantList,
+  ParticipantManageModal,
   ExerciseManagement,
   SendMessageModal,
   BroadcastMessageModal,
@@ -38,11 +39,14 @@ import {
 } from "./dashboard";
 
 import { sendDirectMessage } from "@/services/directMessages";
+import { forceDisconnectAll } from "@/services/adminUsers";
 
 // Hooks temps réel
 import { useLiveSession } from "@/hooks/useLiveSession";
 import { useSlideManifest } from "@/hooks/useSlideManifest";
 import { SlidePresenter, SlideThumbnail } from "@/components/SlidePresenter";
+import { useAuth } from "@/hooks/useAuth";
+import { isAuthConfigured } from "@/services/auth";
 
 // Vue participant (pour preview admin)
 import { WorkshopView } from "@/features/workshop/components/WorkshopView";
@@ -73,12 +77,31 @@ import {
 import type { Participant, ActiveTab } from "@/types";
 import { useParticipants } from "@/hooks/useParticipants";
 
+const ADMIN_STORAGE_KEY = "destino_admin_auth";
+
 export const AdminDashboard: React.FC = () => {
+  // ── Auth (pour déconnexion) ────────────────────
+  const auth = useAuth();
+
+  const handleSignOut = useCallback(async () => {
+    if (isAuthConfigured()) {
+      await auth.signOut();
+    } else {
+      sessionStorage.removeItem(ADMIN_STORAGE_KEY);
+    }
+    window.location.hash = "";
+  }, [auth]);
+
   // ── Hooks temps réel ──────────────────────────
-  const { state: liveState, isReady: isSessionReady, isConnected, actions } = useLiveSession();
+  const {
+    state: liveState,
+    isReady: isSessionReady,
+    isConnected,
+    actions,
+  } = useLiveSession();
   const { totalSlides, isReady: isSlidesReady } = useSlideManifest();
-  const { participants: participantsData, onlineCount } = useParticipants({
-    sessionId: liveState.session_id || 'destino-ia-workshop',
+  const { participants: participantsData, onlineCount, refetch: refetchParticipants } = useParticipants({
+    sessionId: liveState.session_id || "destino-ia-workshop",
   });
 
   // ── État local UI ─────────────────────────────
@@ -86,15 +109,19 @@ export const AdminDashboard: React.FC = () => {
   const [showQuizPreview, setShowQuizPreview] = useState(false);
   const [showExercisePreview, setShowExercisePreview] = useState(false);
   const [showParticipantView, setShowParticipantView] = useState(false);
-  const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
+  const [selectedParticipant, setSelectedParticipant] =
+    useState<Participant | null>(null);
+  const [managedParticipant, setManagedParticipant] =
+    useState<Participant | null>(null);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
+  const [isDisconnectingAll, setIsDisconnectingAll] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
   // ── Auto-switch to exercises tab when exercise is active ──
   useEffect(() => {
-    if (isSessionReady && liveState.current_mode === 'exercise') {
-      setActiveTab('exercises');
+    if (isSessionReady && liveState.current_mode === "exercise") {
+      setActiveTab("exercises");
     }
   }, [isSessionReady, liveState.current_mode]);
 
@@ -102,7 +129,9 @@ export const AdminDashboard: React.FC = () => {
   const participants: Participant[] = (participantsData ?? []).map((p) => ({
     id: p.id,
     name: p.name,
-    status: (p.status === 'connected' ? 'online' : 'offline') as 'online' | 'offline',
+    status: (p.status === "connected" ? "online" : "offline") as
+      | "online"
+      | "offline",
     assigned_email: p.email,
     joined_at: p.joined_at,
   }));
@@ -110,9 +139,9 @@ export const AdminDashboard: React.FC = () => {
   // ── Données dérivées ──────────────────────────
   const currentIdx = liveState.current_slide_index; // 1-based
   const sessionId = liveState.session_id;
-  const isExerciseActive = liveState.current_mode === 'exercise';
+  const isExerciseActive = liveState.current_mode === "exercise";
   const currentExercise = liveState.active_exercise_id as ExerciseId | null;
-  const isPaused = liveState.current_mode !== 'presentation';
+  const isPaused = liveState.current_mode !== "presentation";
   const pausedAt = liveState.paused_slide_index;
 
   // ── Navigation slides ─────────────────────────
@@ -124,16 +153,18 @@ export const AdminDashboard: React.FC = () => {
         await actions.nextSlide();
       }
     },
-    [actions]
+    [actions],
   );
 
   // ── Exercices ─────────────────────────────────
   const handleLaunchExercise = useCallback(
     async (exercise: ExerciseId) => {
       await actions.pauseForExercise(exercise);
-      console.log(`🚀 Exercice ${exercise} lancé (slide ${currentIdx} en pause)`);
+      console.log(
+        `🚀 Exercice ${exercise} lancé (slide ${currentIdx} en pause)`,
+      );
     },
-    [actions, currentIdx]
+    [actions, currentIdx],
   );
 
   const handleStopExercise = useCallback(async () => {
@@ -142,7 +173,7 @@ export const AdminDashboard: React.FC = () => {
       await actions.resumePresentation();
       console.log("⏹️ Exercice arrêté, reprise de la présentation");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Erreur inconnue';
+      const msg = err instanceof Error ? err.message : "Erreur inconnue";
       console.error("❌ Erreur arrêt exercice:", msg);
       setActionError(`Erreur: ${msg}. Réessayez.`);
       // Retry une fois après 1s
@@ -152,7 +183,9 @@ export const AdminDashboard: React.FC = () => {
           setActionError(null);
           console.log("✅ Exercice arrêté au retry");
         } catch {
-          setActionError("L'exercice n'a pas pu être arrêté. Rechargez la page.");
+          setActionError(
+            "L'exercice n'a pas pu être arrêté. Rechargez la page.",
+          );
         }
       }, 1000);
     }
@@ -178,6 +211,19 @@ export const AdminDashboard: React.FC = () => {
     setShowBroadcastModal(true);
   };
 
+  // ── Gestion participants ──────────────────────
+  const handleManageParticipant = (participant: Participant) => {
+    setManagedParticipant(participant);
+  };
+
+  const handleDisconnectAll = useCallback(async () => {
+    setIsDisconnectingAll(true);
+    const sid = sessionId || 'destino-ia-workshop';
+    await forceDisconnectAll(sid);
+    await refetchParticipants();
+    setIsDisconnectingAll(false);
+  }, [sessionId, refetchParticipants]);
+
   // ── Chargement ────────────────────────────────
   const isLoading = !isSessionReady || !isSlidesReady;
 
@@ -188,6 +234,7 @@ export const AdminDashboard: React.FC = () => {
         onTabChange={setActiveTab}
         onBack={handleBack}
         onlineCount={onlineCount}
+        onSignOut={handleSignOut}
       />
 
       {/* ── Barre de statut Live (compacte) ─────── */}
@@ -200,8 +247,10 @@ export const AdminDashboard: React.FC = () => {
             ) : (
               <WifiOff className="w-3 h-3 text-amber-500 animate-pulse" />
             )}
-            <span className={`text-xs ${isConnected ? 'text-emerald-400' : 'text-amber-400'}`}>
-              {isConnected ? 'Connecté' : 'Hors ligne'}
+            <span
+              className={`text-xs ${isConnected ? "text-emerald-400" : "text-amber-400"}`}
+            >
+              {isConnected ? "Connecté" : "Hors ligne"}
             </span>
           </div>
 
@@ -209,14 +258,20 @@ export const AdminDashboard: React.FC = () => {
           <div className="w-px h-4 bg-white/10" />
 
           {/* Mode courant */}
-          <span className={`text-xs px-2 py-0.5 rounded-full ${
-            liveState.current_mode === 'presentation' ? 'bg-emerald-500/10 text-emerald-400' :
-            liveState.current_mode === 'exercise' ? 'bg-amber-500/10 text-amber-400' :
-            'bg-purple-500/10 text-purple-400'
-          }`}>
-            {liveState.current_mode === 'presentation' ? '🖥️ Présentation' :
-             liveState.current_mode === 'exercise' ? '✏️ Exercice' :
-             '❓ Quiz'}
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full ${
+              liveState.current_mode === "presentation"
+                ? "bg-emerald-500/10 text-emerald-400"
+                : liveState.current_mode === "exercise"
+                  ? "bg-amber-500/10 text-amber-400"
+                  : "bg-purple-500/10 text-purple-400"
+            }`}
+          >
+            {liveState.current_mode === "presentation"
+              ? "🖥️ Présentation"
+              : liveState.current_mode === "exercise"
+                ? "✏️ Exercice"
+                : "❓ Quiz"}
           </span>
 
           {/* Slide en pause — indicateur proéminent */}
@@ -237,7 +292,9 @@ export const AdminDashboard: React.FC = () => {
               >
                 <Square className="w-3 h-3" />
                 <span>
-                  {liveState.current_mode === 'exercise' ? 'Arrêter exercice' : 'Arrêter quiz'}
+                  {liveState.current_mode === "exercise"
+                    ? "Arrêter exercice"
+                    : "Arrêter quiz"}
                 </span>
               </button>
             </>
@@ -270,8 +327,8 @@ export const AdminDashboard: React.FC = () => {
             onClick={() => actions.toggleLive()}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
               liveState.is_live
-                ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30'
-                : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30'
+                ? "bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
+                : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30"
             }`}
           >
             {liveState.is_live ? (
@@ -318,6 +375,9 @@ export const AdminDashboard: React.FC = () => {
           participants={participants}
           onSendToParticipant={handleSendToParticipant}
           onSendToAll={handleSendToAll}
+          onManageParticipant={handleManageParticipant}
+          onDisconnectAll={handleDisconnectAll}
+          isDisconnectingAll={isDisconnectingAll}
         />
 
         {/* ============================================ */}
@@ -352,7 +412,9 @@ export const AdminDashboard: React.FC = () => {
                     <div className="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-emerald-500 rounded-full transition-all duration-300"
-                        style={{ width: `${(currentIdx / totalSlides) * 100}%` }}
+                        style={{
+                          width: `${(currentIdx / totalSlides) * 100}%`,
+                        }}
                       />
                     </div>
                     <span className="text-gray-500 text-xs">
@@ -382,13 +444,13 @@ export const AdminDashboard: React.FC = () => {
                   </button>
 
                   {/* Bouton mode : Diffuser / Pause / Reprendre */}
-                  {liveState.current_mode === 'presentation' ? (
+                  {liveState.current_mode === "presentation" ? (
                     <button
                       onClick={() => actions.toggleLive()}
                       className={`flex items-center gap-2 px-6 py-2 rounded-lg text-white font-semibold transition-colors text-sm ${
                         liveState.is_live
-                          ? 'bg-amber-500 hover:bg-amber-400'
-                          : 'bg-emerald-500 hover:bg-emerald-400'
+                          ? "bg-amber-500 hover:bg-amber-400"
+                          : "bg-emerald-500 hover:bg-emerald-400"
                       }`}
                     >
                       {liveState.is_live ? (
@@ -452,7 +514,8 @@ export const AdminDashboard: React.FC = () => {
                         Quiz 5 Pasos
                       </h2>
                       <p className="text-gray-400 text-xs">
-                        🎭 ROL · 🎯 OBJETIVO · 🎬 ESCENA · 🎨 ESTILO · 📐 FORMATO
+                        🎭 ROL · 🎯 OBJETIVO · 🎬 ESCENA · 🎨 ESTILO · 📐
+                        FORMATO
                       </p>
                     </div>
                   </div>
@@ -522,9 +585,19 @@ export const AdminDashboard: React.FC = () => {
                   <div className="grid grid-cols-5 gap-2">
                     {[
                       { key: "R", label: "Rol", color: "blue", count: 3 },
-                      { key: "C", label: "Contexto", color: "purple", count: 3 },
+                      {
+                        key: "C",
+                        label: "Contexto",
+                        color: "purple",
+                        count: 3,
+                      },
                       { key: "T", label: "Tarea", color: "amber", count: 3 },
-                      { key: "F", label: "Formato", color: "emerald", count: 3 },
+                      {
+                        key: "F",
+                        label: "Formato",
+                        color: "emerald",
+                        count: 3,
+                      },
                       { key: "G", label: "General", color: "pink", count: 3 },
                     ].map((cat) => (
                       <div
@@ -532,17 +605,25 @@ export const AdminDashboard: React.FC = () => {
                         className="rounded-lg p-3 text-center"
                         style={{
                           backgroundColor:
-                            cat.color === "blue" ? "rgba(59, 130, 246, 0.1)" :
-                            cat.color === "purple" ? "rgba(168, 85, 247, 0.1)" :
-                            cat.color === "amber" ? "rgba(245, 158, 11, 0.1)" :
-                            cat.color === "emerald" ? "rgba(16, 185, 129, 0.1)" :
-                            "rgba(236, 72, 153, 0.1)",
+                            cat.color === "blue"
+                              ? "rgba(59, 130, 246, 0.1)"
+                              : cat.color === "purple"
+                                ? "rgba(168, 85, 247, 0.1)"
+                                : cat.color === "amber"
+                                  ? "rgba(245, 158, 11, 0.1)"
+                                  : cat.color === "emerald"
+                                    ? "rgba(16, 185, 129, 0.1)"
+                                    : "rgba(236, 72, 153, 0.1)",
                           borderColor:
-                            cat.color === "blue" ? "rgba(59, 130, 246, 0.2)" :
-                            cat.color === "purple" ? "rgba(168, 85, 247, 0.2)" :
-                            cat.color === "amber" ? "rgba(245, 158, 11, 0.2)" :
-                            cat.color === "emerald" ? "rgba(16, 185, 129, 0.2)" :
-                            "rgba(236, 72, 153, 0.2)",
+                            cat.color === "blue"
+                              ? "rgba(59, 130, 246, 0.2)"
+                              : cat.color === "purple"
+                                ? "rgba(168, 85, 247, 0.2)"
+                                : cat.color === "amber"
+                                  ? "rgba(245, 158, 11, 0.2)"
+                                  : cat.color === "emerald"
+                                    ? "rgba(16, 185, 129, 0.2)"
+                                    : "rgba(236, 72, 153, 0.2)",
                           border: "1px solid",
                         }}
                       >
@@ -550,11 +631,15 @@ export const AdminDashboard: React.FC = () => {
                           className="text-xl font-black"
                           style={{
                             color:
-                              cat.color === "blue" ? "#60a5fa" :
-                              cat.color === "purple" ? "#c084fc" :
-                              cat.color === "amber" ? "#fbbf24" :
-                              cat.color === "emerald" ? "#34d399" :
-                              "#f472b6",
+                              cat.color === "blue"
+                                ? "#60a5fa"
+                                : cat.color === "purple"
+                                  ? "#c084fc"
+                                  : cat.color === "amber"
+                                    ? "#fbbf24"
+                                    : cat.color === "emerald"
+                                      ? "#34d399"
+                                      : "#f472b6",
                           }}
                         >
                           {cat.key}
@@ -656,7 +741,7 @@ export const AdminDashboard: React.FC = () => {
                   isActive={currentIdx === slideIndex}
                   onClick={() => actions.goToSlide(slideIndex)}
                 />
-              )
+              ),
             )}
           </div>
 
@@ -689,22 +774,26 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex-shrink-0 flex items-center justify-between px-4 py-2 bg-blue-600/90 backdrop-blur-sm">
             <div className="flex items-center gap-2 text-white text-sm">
               <Monitor className="w-4 h-4" />
-              <span className="font-medium">Mode Preview — Vue participant en temps réel</span>
+              <span className="font-medium">
+                Mode Preview — Vue participant en temps réel
+              </span>
             </div>
-            <button
-              onClick={() => setShowParticipantView(false)}
-              className="flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-white text-sm font-medium transition-colors"
-            >
-              <X className="w-4 h-4" />
-              Retour admin
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowParticipantView(false)}
+                className="flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-white text-sm font-medium transition-colors"
+              >
+                <X className="w-4 h-4" />
+                Retour admin
+              </button>
+            </div>
           </div>
           {/* Vue participant exacte */}
           <div className="flex-1 overflow-hidden">
             <WorkshopView
               participantName="Admin Preview"
               participantId="admin-preview"
-              sessionId={sessionId || 'destino-ia-workshop'}
+              sessionId={sessionId || "destino-ia-workshop"}
             />
           </div>
         </div>
@@ -799,6 +888,22 @@ export const AdminDashboard: React.FC = () => {
           participants={participants}
           sessionId={sessionId}
           onClose={() => setShowBroadcastModal(false)}
+        />
+      )}
+
+      {/* Modal gestion participant (déconnexion, reset mdp) */}
+      {managedParticipant && (
+        <ParticipantManageModal
+          participant={managedParticipant}
+          onClose={() => setManagedParticipant(null)}
+          onDisconnected={() => {
+            setManagedParticipant(null);
+            refetchParticipants();
+          }}
+          onSendMessage={(p) => {
+            setManagedParticipant(null);
+            handleSendToParticipant(p);
+          }}
         />
       )}
     </div>

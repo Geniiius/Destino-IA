@@ -20,14 +20,16 @@ import { MessageButton, MessagePanel } from "@/components/messaging";
 import { useParticipantMessages } from "@/hooks";
 import { useAuth } from "@/hooks/useAuth";
 
-type ViewType = 'home' | 'admin' | 'join' | 'workshop' | 'test';
+type ViewType = "home" | "admin" | "join" | "workshop" | "test";
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewType>("home");
   const [participantName, setParticipantName] = useState<string>("");
   const [participantId, setParticipantId] = useState<string | null>(null);
   /** ID dans la table participants (pour la messagerie) */
-  const [participantTableId, setParticipantTableId] = useState<string | null>(null);
+  const [participantTableId, setParticipantTableId] = useState<string | null>(
+    null,
+  );
 
   // Auth Supabase
   const auth = useAuth();
@@ -62,9 +64,14 @@ const App: React.FC = () => {
       setParticipantId(auth.user.id);
       setParticipantName(auth.user.display_name || auth.user.email);
       localStorage.setItem("destino_participant_id", auth.user.id);
-      localStorage.setItem("destino_participant_name", auth.user.display_name || auth.user.email);
+      localStorage.setItem(
+        "destino_participant_name",
+        auth.user.display_name || auth.user.email,
+      );
       // Restaurer le participantTableId depuis localStorage
-      const storedTableId = localStorage.getItem("destino_participant_table_id");
+      const storedTableId = localStorage.getItem(
+        "destino_participant_table_id",
+      );
       if (storedTableId) {
         setParticipantTableId(storedTableId);
       }
@@ -74,16 +81,25 @@ const App: React.FC = () => {
   // Récupérer depuis localStorage (fallback)
   useEffect(() => {
     if (!auth.isAuthenticated) {
-      const storedParticipantId = localStorage.getItem("destino_participant_id");
+      const storedParticipantId = localStorage.getItem(
+        "destino_participant_id",
+      );
       const storedName = localStorage.getItem("destino_participant_name");
-      const storedTableId = localStorage.getItem("destino_participant_table_id");
+      const storedTableId = localStorage.getItem(
+        "destino_participant_table_id",
+      );
       if (storedParticipantId) setParticipantId(storedParticipantId);
       if (storedName) setParticipantName(storedName);
       if (storedTableId) setParticipantTableId(storedTableId);
     }
   }, [auth.isAuthenticated]);
 
-  const handleJoin = (name: string, _email: string, id?: string, tableId?: string) => {
+  const handleJoin = (
+    name: string,
+    _email: string,
+    id?: string,
+    tableId?: string,
+  ) => {
     setParticipantName(name);
     if (id) {
       setParticipantId(id);
@@ -103,17 +119,19 @@ const App: React.FC = () => {
   };
 
   // Afficher le bouton de messagerie seulement dans le workshop
-  const showMessaging = participantId && (view === "workshop" || view === "test");
+  const showMessaging =
+    participantId && (view === "workshop" || view === "test");
 
   // Views plein écran : admin, workshop, test — pas de centrage
-  const isFullScreenView = view === 'admin' || view === 'workshop' || view === 'test';
+  const isFullScreenView =
+    view === "admin" || view === "workshop" || view === "test";
 
   return (
     <div
       className={`bg-[#050508] relative ${
         isFullScreenView
-          ? 'h-full flex flex-col'
-          : 'min-h-screen overflow-hidden flex flex-col items-center justify-center'
+          ? "h-full flex flex-col"
+          : "min-h-screen overflow-hidden flex flex-col items-center justify-center"
       }`}
     >
       {/* Effet curseur fluide uniquement sur home et join */}

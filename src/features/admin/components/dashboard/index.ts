@@ -5,6 +5,7 @@
 
 export { AdminHeader } from "./AdminHeader";
 export { ParticipantList } from "./ParticipantList";
+export { ParticipantManageModal } from "./ParticipantManageModal";
 export { ExerciseManagement } from "./ExerciseManagement";
 export { SendMessageModal } from "./SendMessageModal";
 export { BroadcastMessageModal } from "./BroadcastMessageModal";

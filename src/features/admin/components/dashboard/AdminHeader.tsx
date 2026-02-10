@@ -11,6 +11,7 @@ import {
   BookOpen,
   HelpCircle,
   Trophy,
+  LogOut,
 } from "lucide-react";
 import type { ActiveTab } from "@/types";
 
@@ -19,6 +20,7 @@ interface AdminHeaderProps {
   onTabChange: (tab: ActiveTab) => void;
   onBack: () => void;
   onlineCount: number;
+  onSignOut?: () => void;
 }
 
 const TABS: { id: ActiveTab; label: string; icon: React.ElementType }[] = [
@@ -33,6 +35,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
   onTabChange,
   onBack,
   onlineCount,
+  onSignOut,
 }) => {
   return (
     <header className="flex-shrink-0 border-b border-white/10 bg-black/40 backdrop-blur-xl">
@@ -76,12 +79,27 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
           })}
         </nav>
 
-        {/* Compteur de participants */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-full">
-          <Users className="w-3.5 h-3.5 text-emerald-500" />
-          <span className="text-white text-xs font-medium">
-            {onlineCount} connectés
-          </span>
+        {/* Compteur de participants + Déconnexion */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-full">
+            <Users className="w-3.5 h-3.5 text-emerald-500" />
+            <span className="text-white text-xs font-medium">
+              {onlineCount} connectés
+            </span>
+          </div>
+          {onSignOut && (
+            <button
+              onClick={onSignOut}
+              className="flex items-center gap-1.5 px-3 py-1.5
+                bg-white/5 hover:bg-white/10 border border-white/10
+                rounded-full text-gray-400 hover:text-white text-xs
+                transition-all"
+              title="Déconnexion admin"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Déconnexion</span>
+            </button>
+          )}
         </div>
       </div>
     </header>

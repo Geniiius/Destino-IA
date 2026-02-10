@@ -10,20 +10,20 @@
  * - Persistance : à la reconnexion, retrouve l'état exact
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { useLiveSession } from '@/hooks/useLiveSession';
-import { useSlideManifest } from '@/hooks/useSlideManifest';
-import { useParticipantPresence } from '@/hooks/useParticipantPresence';
-import { SlidePresenter } from '@/components/SlidePresenter';
-import { GamifiedQuiz } from '@/features/quiz';
-import { AgenciaViajesExercise } from '@/features/workshop/components/exercises/AgenciaViajesExercise';
-import { TextToImageIntro } from '@/features/workshop/components/exercises/TextToImageIntro';
-import { TextToImageCorporate } from '@/features/workshop/components/exercises/TextToImageCorporate';
-import { TextToImageAds } from '@/features/workshop/components/exercises/TextToImageAds';
-import { TextToImageLogo } from '@/features/workshop/components/exercises/TextToImageLogo';
-import { TextToVideoFromScratch } from '@/features/workshop/components/exercises/TextToVideoFromScratch';
-import { TextToVideoWorkflow } from '@/features/workshop/components/exercises/TextToVideoWorkflow';
-import { FlyerToVideoWorkflow } from '@/features/workshop/components/exercises/FlyerToVideoWorkflow';
+import React, { useEffect, useMemo } from "react";
+import { useLiveSession } from "@/hooks/useLiveSession";
+import { useSlideManifest } from "@/hooks/useSlideManifest";
+import { useParticipantPresence } from "@/hooks/useParticipantPresence";
+import { SlidePresenter } from "@/components/SlidePresenter";
+import { GamifiedQuiz } from "@/features/quiz";
+import { AgenciaViajesExercise } from "@/features/workshop/components/exercises/AgenciaViajesExercise";
+import { TextToImageIntro } from "@/features/workshop/components/exercises/TextToImageIntro";
+import { TextToImageCorporate } from "@/features/workshop/components/exercises/TextToImageCorporate";
+import { TextToImageAds } from "@/features/workshop/components/exercises/TextToImageAds";
+import { TextToImageLogo } from "@/features/workshop/components/exercises/TextToImageLogo";
+import { TextToVideoFromScratch } from "@/features/workshop/components/exercises/TextToVideoFromScratch";
+import { TextToVideoWorkflow } from "@/features/workshop/components/exercises/TextToVideoWorkflow";
+import { FlyerToVideoWorkflow } from "@/features/workshop/components/exercises/FlyerToVideoWorkflow";
 import {
   Wifi,
   WifiOff,
@@ -31,8 +31,8 @@ import {
   BookOpen,
   HelpCircle,
   Loader2,
-} from 'lucide-react';
-import type { SessionMode } from '@/types/session';
+} from "lucide-react";
+import type { SessionMode } from "@/types/session";
 
 // ============================================
 // TYPES
@@ -55,7 +55,11 @@ interface WorkshopViewProps {
 
 const EXERCISE_COMPONENTS: Record<
   string,
-  React.FC<{ participantId: string; participantName: string; sessionId: string }>
+  React.FC<{
+    participantId: string;
+    participantName: string;
+    sessionId: string;
+  }>
 > = {
   agencia: AgenciaViajesExercise,
 };
@@ -106,29 +110,32 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
     iconClass: string;
     textClass: string;
   } => {
-    const modeMap: Record<SessionMode, {
-      icon: React.ElementType;
-      label: string;
-      iconClass: string;
-      textClass: string;
-    }> = {
+    const modeMap: Record<
+      SessionMode,
+      {
+        icon: React.ElementType;
+        label: string;
+        iconClass: string;
+        textClass: string;
+      }
+    > = {
       presentation: {
         icon: Presentation,
-        label: 'Présentation',
-        iconClass: 'w-4 h-4 text-emerald-500',
-        textClass: 'text-emerald-400 text-sm font-medium',
+        label: "Présentation",
+        iconClass: "w-4 h-4 text-emerald-500",
+        textClass: "text-emerald-400 text-sm font-medium",
       },
       exercise: {
         icon: BookOpen,
-        label: 'Exercice en cours',
-        iconClass: 'w-4 h-4 text-amber-500',
-        textClass: 'text-amber-400 text-sm font-medium',
+        label: "Exercice en cours",
+        iconClass: "w-4 h-4 text-amber-500",
+        textClass: "text-amber-400 text-sm font-medium",
       },
       quiz: {
         icon: HelpCircle,
-        label: 'Quiz en cours',
-        iconClass: 'w-4 h-4 text-purple-500',
-        textClass: 'text-purple-400 text-sm font-medium',
+        label: "Quiz en cours",
+        iconClass: "w-4 h-4 text-purple-500",
+        textClass: "text-purple-400 text-sm font-medium",
       },
     };
     return modeMap[state.current_mode] ?? modeMap.presentation;
@@ -162,7 +169,8 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
           </h2>
           <p className="text-gray-400 mb-6">
             La session va bientôt commencer. Restez sur cette page, le contenu
-            apparaîtra automatiquement quand le formateur lancera la présentation.
+            apparaîtra automatiquement quand le formateur lancera la
+            présentation.
           </p>
 
           {/* Indicateur de connexion */}
@@ -170,7 +178,9 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
             {isConnected ? (
               <>
                 <Wifi className="w-4 h-4 text-emerald-500" />
-                <span className="text-emerald-400 text-sm">Connecté — En attente</span>
+                <span className="text-emerald-400 text-sm">
+                  Connecté — En attente
+                </span>
               </>
             ) : (
               <>
@@ -205,13 +215,11 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
           {React.createElement(modeInfo.icon, {
             className: modeInfo.iconClass,
           })}
-          <span className={modeInfo.textClass}>
-            {modeInfo.label}
-          </span>
+          <span className={modeInfo.textClass}>{modeInfo.label}</span>
         </div>
 
         {/* Slide courant */}
-        {state.current_mode === 'presentation' && (
+        {state.current_mode === "presentation" && (
           <span className="text-gray-500 text-xs">
             Slide {state.current_slide_index} / {state.total_slides}
           </span>
@@ -230,7 +238,7 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
       {/* ── Contenu principal ────────────────────── */}
       <main className="flex-1 flex flex-col min-h-0">
         {/* MODE PRÉSENTATION */}
-        {state.current_mode === 'presentation' && (
+        {state.current_mode === "presentation" && (
           <div className="w-full flex-1 p-4">
             <SlidePresenter
               slideIndex={state.current_slide_index}
@@ -241,7 +249,7 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
         )}
 
         {/* MODE EXERCICE */}
-        {state.current_mode === 'exercise' && state.active_exercise_id && (
+        {state.current_mode === "exercise" && state.active_exercise_id && (
           <div className="w-full flex-1 overflow-y-auto">
             {(() => {
               const exerciseId = state.active_exercise_id!;
@@ -278,7 +286,7 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
         )}
 
         {/* MODE QUIZ */}
-        {state.current_mode === 'quiz' && state.is_quiz_active && (
+        {state.current_mode === "quiz" && state.is_quiz_active && (
           <GamifiedQuiz
             participantName={participantName}
             onClose={() => {

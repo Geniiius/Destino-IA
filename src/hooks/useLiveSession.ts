@@ -13,21 +13,21 @@
  *   // state se met à jour automatiquement via Realtime
  */
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import type {
   LiveSessionState,
   SessionMode,
   SlideTheme,
   UseLiveSessionReturn,
-} from '@/types/session';
-import { DEFAULT_SESSION_ID, DEFAULT_LIVE_STATE } from '@/types/session';
+} from "@/types/session";
+import { DEFAULT_SESSION_ID, DEFAULT_LIVE_STATE } from "@/types/session";
 import {
   getSessionState,
   updateSessionState,
   changeMode,
   resumePresentation as resumePresentationService,
   subscribeToSessionState,
-} from '@/services/sessionState';
+} from "@/services/sessionState";
 
 // ============================================
 // HOOK PRINCIPAL
@@ -41,7 +41,7 @@ interface UseLiveSessionOptions {
 }
 
 export function useLiveSession(
-  options: UseLiveSessionOptions = {}
+  options: UseLiveSessionOptions = {},
 ): UseLiveSessionReturn {
   const { sessionId = DEFAULT_SESSION_ID, realtime = true } = options;
 
@@ -65,7 +65,10 @@ export function useLiveSession(
 
       if (loadError) {
         setError(loadError);
-        console.warn('[useLiveSession] Erreur chargement, fallback local:', loadError);
+        console.warn(
+          "[useLiveSession] Erreur chargement, fallback local:",
+          loadError,
+        );
       }
 
       if (data) {
@@ -93,7 +96,7 @@ export function useLiveSession(
         setIsConnected(true);
 
         if (import.meta.env.DEV) {
-          console.log('[useLiveSession] 📡 État synchronisé:', {
+          console.log("[useLiveSession] 📡 État synchronisé:", {
             slide: newState.current_slide_index,
             mode: newState.current_mode,
             live: newState.is_live,
@@ -124,11 +127,14 @@ export function useLiveSession(
       setState((prev) => ({ ...prev, ...updates }));
 
       // Synchronisation Supabase
-      const { data, error: updateError } = await updateSessionState(updates, sessionId);
+      const { data, error: updateError } = await updateSessionState(
+        updates,
+        sessionId,
+      );
 
       if (updateError) {
         setError(updateError);
-        console.error('[useLiveSession] Erreur sync:', updateError);
+        console.error("[useLiveSession] Erreur sync:", updateError);
         // Recharger l'état réel en cas d'erreur
         const { data: freshData } = await getSessionState(sessionId);
         if (freshData && mountedRef.current) {
@@ -140,7 +146,7 @@ export function useLiveSession(
         setState(data);
       }
     },
-    [sessionId]
+    [sessionId],
   );
 
   // ── Actions de pilotage ────────────────────────
@@ -150,7 +156,7 @@ export function useLiveSession(
       const clampedIndex = Math.max(1, Math.min(index, state.total_slides));
       await optimisticUpdate({ current_slide_index: clampedIndex });
     },
-    [optimisticUpdate, state.total_slides]
+    [optimisticUpdate, state.total_slides],
   );
 
   const nextSlide = useCallback(async () => {
@@ -170,9 +176,10 @@ export function useLiveSession(
       const { data, error: modeError } = await changeMode(
         mode,
         {
-          pausedSlideIndex: mode !== 'presentation' ? state.current_slide_index : undefined,
+          pausedSlideIndex:
+            mode !== "presentation" ? state.current_slide_index : undefined,
         },
-        sessionId
+        sessionId,
       );
 
       if (modeError) {
@@ -181,18 +188,18 @@ export function useLiveSession(
         setState(data);
       }
     },
-    [sessionId, state.current_slide_index]
+    [sessionId, state.current_slide_index],
   );
 
   const pauseForExercise = useCallback(
     async (exerciseId: string) => {
       const { data, error: exError } = await changeMode(
-        'exercise',
+        "exercise",
         {
           exerciseId,
           pausedSlideIndex: state.current_slide_index,
         },
-        sessionId
+        sessionId,
       );
 
       if (exError) {
@@ -201,16 +208,16 @@ export function useLiveSession(
         setState(data);
       }
     },
-    [sessionId, state.current_slide_index]
+    [sessionId, state.current_slide_index],
   );
 
   const pauseForQuiz = useCallback(async () => {
     const { data, error: quizError } = await changeMode(
-      'quiz',
+      "quiz",
       {
         pausedSlideIndex: state.current_slide_index,
       },
-      sessionId
+      sessionId,
     );
 
     if (quizError) {
@@ -224,11 +231,15 @@ export function useLiveSession(
     // Tentative avec retry automatique
     let lastError: string | null = null;
     for (let attempt = 0; attempt < 2; attempt++) {
-      const { data, error: resumeError } = await resumePresentationService(sessionId);
+      const { data, error: resumeError } =
+        await resumePresentationService(sessionId);
 
       if (resumeError) {
         lastError = resumeError;
-        console.warn(`[useLiveSession] Tentative ${attempt + 1} échouée:`, resumeError);
+        console.warn(
+          `[useLiveSession] Tentative ${attempt + 1} échouée:`,
+          resumeError,
+        );
         if (attempt === 0) {
           // Attendre 500ms avant le retry
           await new Promise((resolve) => setTimeout(resolve, 500));
@@ -260,7 +271,7 @@ export function useLiveSession(
         current_slide_index: 1, // Reset au premier slide du nouveau thème
       });
     },
-    [optimisticUpdate, state.total_slides]
+    [optimisticUpdate, state.total_slides],
   );
 
   const toggleLive = useCallback(async () => {
@@ -291,7 +302,7 @@ export function useLiveSession(
       resumePresentation,
       setTheme,
       toggleLive,
-    ]
+    ],
   );
 
   return {

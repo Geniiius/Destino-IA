@@ -7,25 +7,40 @@
  */
 
 import React, { useState } from "react";
-import { ArrowRight, User, Mail, Lock, Loader2, Eye, EyeOff, UserPlus, LogIn } from "lucide-react";
+import {
+  ArrowRight,
+  User,
+  Mail,
+  Lock,
+  Loader2,
+  Eye,
+  EyeOff,
+  UserPlus,
+  LogIn,
+} from "lucide-react";
 import { LIMITS, ROUTES } from "@/config";
 import { useAuth } from "@/hooks/useAuth";
 import { isAuthConfigured } from "@/services/auth";
 import { joinSession } from "@/services/participants";
 
 interface JoinFormProps {
-  onJoin: (name: string, email: string, id?: string, participantTableId?: string) => void;
+  onJoin: (
+    name: string,
+    email: string,
+    id?: string,
+    participantTableId?: string,
+  ) => void;
 }
 
 const DEFAULT_SESSION_ID = "destino-ia-workshop";
 
-type FormMode = 'signup' | 'signin';
+type FormMode = "signup" | "signin";
 
 export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
   const auth = useAuth();
   const useSupabaseAuth = isAuthConfigured();
 
-  const [mode, setMode] = useState<FormMode>('signup');
+  const [mode, setMode] = useState<FormMode>("signup");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,12 +64,16 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
     const trimmedEmail = email.trim().toLowerCase();
 
     // Validations communes
-    if (mode === 'signup' && trimmedName.length < LIMITS.MIN_NAME_LENGTH) {
-      setError(`Le nom doit contenir au moins ${LIMITS.MIN_NAME_LENGTH} caractères`);
+    if (mode === "signup" && trimmedName.length < LIMITS.MIN_NAME_LENGTH) {
+      setError(
+        `Le nom doit contenir au moins ${LIMITS.MIN_NAME_LENGTH} caractères`,
+      );
       return;
     }
-    if (mode === 'signup' && trimmedName.length > LIMITS.MAX_NAME_LENGTH) {
-      setError(`Le nom ne peut pas dépasser ${LIMITS.MAX_NAME_LENGTH} caractères`);
+    if (mode === "signup" && trimmedName.length > LIMITS.MAX_NAME_LENGTH) {
+      setError(
+        `Le nom ne peut pas dépasser ${LIMITS.MAX_NAME_LENGTH} caractères`,
+      );
       return;
     }
     if (!trimmedEmail) {
@@ -75,8 +94,12 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
 
       setIsLoading(true);
 
-      if (mode === 'signup') {
-        const { success: ok, error: authError } = await auth.signUp(trimmedEmail, password, trimmedName);
+      if (mode === "signup") {
+        const { success: ok, error: authError } = await auth.signUp(
+          trimmedEmail,
+          password,
+          trimmedName,
+        );
         if (!ok) {
           setError(authError || "Erreur lors de l'inscription");
           setIsLoading(false);
@@ -85,17 +108,24 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
         // Aussi insérer dans la table participants pour le dashboard admin
         let participantTableId: string | undefined;
         try {
-          const p = await joinSession(DEFAULT_SESSION_ID, trimmedName, trimmedEmail);
+          const p = await joinSession(
+            DEFAULT_SESSION_ID,
+            trimmedName,
+            trimmedEmail,
+          );
           participantTableId = p?.id;
         } catch (e) {
-          console.warn('Participant table sync:', e);
+          console.warn("Participant table sync:", e);
         }
         setSuccess("Inscription réussie ! Redirection...");
         setTimeout(() => {
           onJoin(trimmedName, trimmedEmail, auth.user?.id, participantTableId);
         }, 800);
       } else {
-        const { success: ok, error: authError } = await auth.signIn(trimmedEmail, password);
+        const { success: ok, error: authError } = await auth.signIn(
+          trimmedEmail,
+          password,
+        );
         if (!ok) {
           setError(authError || "Erreur de connexion");
           setIsLoading(false);
@@ -104,12 +134,21 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
         // Aussi mettre à jour le statut dans la table participants
         let participantTableId: string | undefined;
         try {
-          const p = await joinSession(DEFAULT_SESSION_ID, auth.user?.display_name || trimmedEmail, trimmedEmail);
+          const p = await joinSession(
+            DEFAULT_SESSION_ID,
+            auth.user?.display_name || trimmedEmail,
+            trimmedEmail,
+          );
           participantTableId = p?.id;
         } catch (e) {
-          console.warn('Participant table sync:', e);
+          console.warn("Participant table sync:", e);
         }
-        onJoin(auth.user?.display_name || trimmedEmail, trimmedEmail, auth.user?.id, participantTableId);
+        onJoin(
+          auth.user?.display_name || trimmedEmail,
+          trimmedEmail,
+          auth.user?.id,
+          participantTableId,
+        );
       }
 
       setIsLoading(false);
@@ -117,7 +156,11 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
       // Fallback sans Supabase
       setIsLoading(true);
       try {
-        const participant = await joinSession(DEFAULT_SESSION_ID, trimmedName, trimmedEmail);
+        const participant = await joinSession(
+          DEFAULT_SESSION_ID,
+          trimmedName,
+          trimmedEmail,
+        );
         onJoin(trimmedName, trimmedEmail, participant?.id, participant?.id);
       } catch (err) {
         console.warn("Supabase non disponible:", err);
@@ -133,7 +176,7 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
   };
 
   const toggleMode = () => {
-    setMode(prev => prev === 'signup' ? 'signin' : 'signup');
+    setMode((prev) => (prev === "signup" ? "signin" : "signup"));
     setError(null);
     setSuccess(null);
   };
@@ -148,7 +191,7 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-            {mode === 'signup' ? (
+            {mode === "signup" ? (
               <UserPlus className="w-6 h-6 text-emerald-500" />
             ) : (
               <LogIn className="w-6 h-6 text-emerald-500" />
@@ -156,10 +199,12 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-white">
-              {mode === 'signup' ? "Rejoindre l'atelier" : "Se reconnecter"}
+              {mode === "signup" ? "Rejoindre l'atelier" : "Se reconnecter"}
             </h2>
             <p className="text-gray-400 text-sm">
-              {mode === 'signup' ? "Créez votre compte pour participer" : "Retrouvez votre session"}
+              {mode === "signup"
+                ? "Créez votre compte pour participer"
+                : "Retrouvez votre session"}
             </p>
           </div>
         </div>
@@ -167,9 +212,12 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Nom (seulement en inscription) */}
-          {mode === 'signup' && (
+          {mode === "signup" && (
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-300 mb-2"
+              >
                 Votre nom
               </label>
               <div className="relative">
@@ -192,7 +240,10 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-300 mb-2"
+            >
               Email
             </label>
             <div className="relative">
@@ -207,7 +258,7 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
                 placeholder="Ex : maria@ejemplo.com"
                 className="input-elegant pl-11 relative z-30 bg-black/80 backdrop-blur-md"
                 autoComplete="email"
-                autoFocus={mode === 'signin'}
+                autoFocus={mode === "signin"}
               />
             </div>
           </div>
@@ -215,7 +266,10 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
           {/* Mot de passe (seulement avec Supabase) */}
           {useSupabaseAuth && (
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-300 mb-2"
+              >
                 Mot de passe
               </label>
               <div className="relative">
@@ -227,9 +281,15 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
                   onChange={(e) => setPassword(e.target.value)}
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
-                  placeholder={mode === 'signup' ? "Minimum 6 caractères" : "Votre mot de passe"}
+                  placeholder={
+                    mode === "signup"
+                      ? "Minimum 6 caractères"
+                      : "Votre mot de passe"
+                  }
                   className="input-elegant pl-11 pr-11 relative z-30 bg-black/80 backdrop-blur-md"
-                  autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                  autoComplete={
+                    mode === "signup" ? "new-password" : "current-password"
+                  }
                 />
                 <button
                   type="button"
@@ -237,10 +297,14 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 z-30"
                   tabIndex={-1}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
-              {mode === 'signup' && (
+              {mode === "signup" && (
                 <p className="mt-1.5 text-xs text-gray-500">
                   Ce mot de passe vous permettra de vous reconnecter
                 </p>
@@ -278,11 +342,11 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  {mode === 'signup' ? 'Inscription...' : 'Connexion...'}
+                  {mode === "signup" ? "Inscription..." : "Connexion..."}
                 </>
               ) : (
                 <>
-                  {mode === 'signup' ? "S'inscrire" : "Se connecter"}
+                  {mode === "signup" ? "S'inscrire" : "Se connecter"}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -297,8 +361,8 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
                 onClick={toggleMode}
                 className="text-gray-500 text-sm hover:text-emerald-400 transition-colors"
               >
-                {mode === 'signup' 
-                  ? "Déjà inscrit ? Se connecter" 
+                {mode === "signup"
+                  ? "Déjà inscrit ? Se connecter"
                   : "Pas encore de compte ? S'inscrire"}
               </button>
             </div>

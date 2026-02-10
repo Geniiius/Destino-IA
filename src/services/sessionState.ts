@@ -15,13 +15,16 @@
 
 /* eslint-disable no-console, camelcase */
 
-import { getSupabaseClient, isSupabaseConfigured } from '@/services/supabase/client';
+import {
+  getSupabaseClient,
+  isSupabaseConfigured,
+} from "@/services/supabase/client";
 import {
   DEFAULT_SESSION_ID,
   DEFAULT_LIVE_STATE,
   type LiveSessionState,
   type SessionMode,
-} from '@/types/session';
+} from "@/types/session";
 
 // ============================================
 // TYPES INTERNES
@@ -73,7 +76,7 @@ function setLocalState(sessionId: string, state: LiveSessionState): void {
  */
 
 export async function getSessionState(
-  sessionId: string = DEFAULT_SESSION_ID
+  sessionId: string = DEFAULT_SESSION_ID,
 ): Promise<ServiceResult<LiveSessionState>> {
   const supabase = isSupabaseConfigured() ? getSupabaseClient() : null;
 
@@ -83,20 +86,20 @@ export async function getSessionState(
 
   try {
     const { data, error } = await supabase
-      .from('session_state')
-      .select('*')
-      .eq('session_id', sessionId)
+      .from("session_state")
+      .select("*")
+      .eq("session_id", sessionId)
       .single();
 
-    if (error?.code === 'PGRST116') {
+    if (error?.code === "PGRST116") {
       return createSessionState(sessionId);
     }
     if (error) throw error;
 
     return { data: data as LiveSessionState, error: null };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erreur inconnue';
-    console.error('[SessionState] Erreur lecture:', message);
+    const message = err instanceof Error ? err.message : "Erreur inconnue";
+    console.error("[SessionState] Erreur lecture:", message);
     return { data: { ...DEFAULT_LIVE_STATE }, error: message };
   }
 }
@@ -109,7 +112,7 @@ export async function getSessionState(
  * Crée un état de session initial dans Supabase.
  */
 export async function createSessionState(
-  sessionId: string = DEFAULT_SESSION_ID
+  sessionId: string = DEFAULT_SESSION_ID,
 ): Promise<ServiceResult<LiveSessionState>> {
   if (!isSupabaseConfigured()) {
     const state = getLocalState(sessionId);
@@ -119,7 +122,10 @@ export async function createSessionState(
   try {
     const supabase = getSupabaseClient();
     if (!supabase) {
-      return { data: { ...DEFAULT_LIVE_STATE, session_id: sessionId }, error: null };
+      return {
+        data: { ...DEFAULT_LIVE_STATE, session_id: sessionId },
+        error: null,
+      };
     }
 
     const initialState: Partial<LiveSessionState> = {
@@ -128,7 +134,7 @@ export async function createSessionState(
       slide_manifest_url: DEFAULT_LIVE_STATE.slide_manifest_url,
       current_slide_index: 1,
       total_slides: DEFAULT_LIVE_STATE.total_slides,
-      current_mode: 'presentation',
+      current_mode: "presentation",
       paused_slide_index: null,
       active_exercise_id: null,
       is_quiz_active: false,
@@ -137,19 +143,22 @@ export async function createSessionState(
     };
 
     const { data, error } = await supabase
-      .from('session_state')
-      .upsert(initialState, { onConflict: 'session_id' })
+      .from("session_state")
+      .upsert(initialState, { onConflict: "session_id" })
       .select()
       .single();
 
     if (error) throw error;
 
-    console.log('[SessionState] État créé pour session:', sessionId);
+    console.log("[SessionState] État créé pour session:", sessionId);
     return { data: data as LiveSessionState, error: null };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erreur création';
-    console.error('[SessionState] Erreur création:', message);
-    return { data: { ...DEFAULT_LIVE_STATE, session_id: sessionId }, error: message };
+    const message = err instanceof Error ? err.message : "Erreur création";
+    console.error("[SessionState] Erreur création:", message);
+    return {
+      data: { ...DEFAULT_LIVE_STATE, session_id: sessionId },
+      error: message,
+    };
   }
 }
 
@@ -163,7 +172,7 @@ export async function createSessionState(
  */
 export async function updateSessionState(
   updates: Partial<LiveSessionState>,
-  sessionId: string = DEFAULT_SESSION_ID
+  sessionId: string = DEFAULT_SESSION_ID,
 ): Promise<ServiceResult<LiveSessionState>> {
   const supabase = isSupabaseConfigured() ? getSupabaseClient() : null;
 
@@ -175,7 +184,6 @@ export async function updateSessionState(
   }
 
   try {
-
     // Ne pas envoyer les champs id, session_id, created_at, updated_at
     const cleanUpdates = { ...updates };
     delete cleanUpdates.id;
@@ -184,22 +192,22 @@ export async function updateSessionState(
     delete cleanUpdates.updated_at;
 
     const { data, error } = await supabase
-      .from('session_state')
+      .from("session_state")
       .update(cleanUpdates)
-      .eq('session_id', sessionId)
+      .eq("session_id", sessionId)
       .select()
       .single();
 
     if (error) throw error;
 
     if (import.meta.env.DEV) {
-      console.log('[SessionState] ✅ Mise à jour:', cleanUpdates);
+      console.log("[SessionState] ✅ Mise à jour:", cleanUpdates);
     }
 
     return { data: data as LiveSessionState, error: null };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erreur mise à jour';
-    console.error('[SessionState] Erreur update:', message);
+    const message = err instanceof Error ? err.message : "Erreur mise à jour";
+    console.error("[SessionState] Erreur update:", message);
     return { data: null, error: message };
   }
 }
@@ -213,7 +221,7 @@ export async function updateSessionState(
  */
 export function navigateToSlide(
   slideIndex: number,
-  sessionId: string = DEFAULT_SESSION_ID
+  sessionId: string = DEFAULT_SESSION_ID,
 ): Promise<ServiceResult<LiveSessionState>> {
   return updateSessionState({ current_slide_index: slideIndex }, sessionId);
 }
@@ -227,17 +235,17 @@ export function changeMode(
     exerciseId?: string;
     pausedSlideIndex?: number;
   },
-  sessionId: string = DEFAULT_SESSION_ID
+  sessionId: string = DEFAULT_SESSION_ID,
 ): Promise<ServiceResult<LiveSessionState>> {
   const updates: Partial<LiveSessionState> = {
     current_mode: mode,
   };
 
-  if (mode === 'exercise') {
+  if (mode === "exercise") {
     updates.active_exercise_id = options?.exerciseId ?? null;
     updates.paused_slide_index = options?.pausedSlideIndex ?? null;
     updates.is_quiz_active = false;
-  } else if (mode === 'quiz') {
+  } else if (mode === "quiz") {
     updates.is_quiz_active = true;
     updates.quiz_started_at = new Date().toISOString();
     updates.active_exercise_id = null;
@@ -258,22 +266,23 @@ export function changeMode(
  * Retourne au slide qui était affiché avant la pause.
  */
 export async function resumePresentation(
-  sessionId: string = DEFAULT_SESSION_ID
+  sessionId: string = DEFAULT_SESSION_ID,
 ): Promise<ServiceResult<LiveSessionState>> {
   // D'abord, lire l'état pour savoir quel slide reprendre
   const { data: current } = await getSessionState(sessionId);
-  const resumeIndex = current?.paused_slide_index ?? current?.current_slide_index ?? 1;
+  const resumeIndex =
+    current?.paused_slide_index ?? current?.current_slide_index ?? 1;
 
   return updateSessionState(
     {
-      current_mode: 'presentation',
+      current_mode: "presentation",
       current_slide_index: resumeIndex,
       paused_slide_index: null,
       active_exercise_id: null,
       is_quiz_active: false,
       quiz_started_at: null,
     },
-    sessionId
+    sessionId,
   );
 }
 
@@ -293,10 +302,10 @@ let channelCounter = 0;
  */
 export function subscribeToSessionState(
   callback: SessionStateCallback,
-  sessionId: string = DEFAULT_SESSION_ID
+  sessionId: string = DEFAULT_SESSION_ID,
 ): () => void {
   if (!isSupabaseConfigured()) {
-    console.log('[SessionState] Mode local - abonnement via store local');
+    console.log("[SessionState] Mode local - abonnement via store local");
     if (!localCallbacks.has(sessionId)) {
       localCallbacks.set(sessionId, new Set());
     }
@@ -316,31 +325,31 @@ export function subscribeToSessionState(
   const channel = supabase
     .channel(channelName)
     .on(
-      'postgres_changes',
+      "postgres_changes",
       {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'session_state',
+        event: "UPDATE",
+        schema: "public",
+        table: "session_state",
         filter: `session_id=eq.${sessionId}`,
       },
       (payload) => {
         if (import.meta.env.DEV) {
-          console.log('[SessionState] 📡 Changement reçu:', payload.new);
+          console.log("[SessionState] 📡 Changement reçu:", payload.new);
         }
         callback(payload.new as LiveSessionState);
-      }
+      },
     )
     .on(
-      'postgres_changes',
+      "postgres_changes",
       {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'session_state',
+        event: "INSERT",
+        schema: "public",
+        table: "session_state",
         filter: `session_id=eq.${sessionId}`,
       },
       (payload) => {
         callback(payload.new as LiveSessionState);
-      }
+      },
     )
     .subscribe((status) => {
       if (import.meta.env.DEV) {
