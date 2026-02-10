@@ -3,16 +3,9 @@
  * @description Liste des participants avec actions admin
  */
 
-import React from 'react';
-import {
-  Users,
-  Mail,
-  Send,
-  Settings,
-  LogOut,
-  Loader2,
-} from 'lucide-react';
-import type { Participant } from '@/types';
+import React from "react";
+import { Users, Mail, Send, Settings, LogOut, Loader2 } from "lucide-react";
+import type { Participant } from "@/types";
 
 interface ParticipantListProps {
   participants: Participant[];
@@ -39,9 +32,7 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({
   onDisconnectAll,
   isDisconnectingAll,
 }) => {
-  const onlineCount = participants.filter(
-    (p) => p.status === 'online',
-  ).length;
+  const onlineCount = participants.filter((p) => p.status === "online").length;
 
   return (
     <aside className="w-72 flex-shrink-0 border-r border-white/10 bg-black/20 flex flex-col">
@@ -72,9 +63,9 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({
               {/* Indicateur de statut */}
               <div
                 className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#0a0a0f] ${
-                  participant.status === 'online'
-                    ? 'bg-emerald-500'
-                    : 'bg-gray-500'
+                  participant.status === "online"
+                    ? "bg-emerald-500"
+                    : "bg-gray-500"
                 }`}
               />
             </div>
@@ -85,9 +76,7 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({
                 {participant.name}
               </p>
               <p className="text-gray-400 text-xs">
-                {participant.status === 'online'
-                  ? 'Connecté'
-                  : 'Hors ligne'}
+                {participant.status === "online" ? "Connecté" : "Hors ligne"}
               </p>
             </div>
 

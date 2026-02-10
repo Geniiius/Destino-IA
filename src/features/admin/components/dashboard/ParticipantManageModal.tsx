@@ -9,7 +9,7 @@
  * - Envoyer un message direct
  */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   X,
   LogOut,
@@ -22,24 +22,33 @@ import {
   User,
   Clock,
   Shield,
-} from 'lucide-react';
-import type { Participant } from '@/types';
+} from "lucide-react";
+import type { Participant } from "@/types";
 import {
   forceDisconnectParticipant,
   adminResetPassword,
   generatePassword,
-} from '@/services/adminUsers';
+} from "@/services/adminUsers";
 
 interface ParticipantManageModalProps {
   participant: Participant;
   onClose: () => void;
   onDisconnected: () => void;
   onSendMessage: (participant: Participant) => void;
+  onPasswordGenerated?: (entry: {
+    participantName: string;
+    email: string;
+    password: string;
+  }) => void;
 }
 
-export const ParticipantManageModal: React.FC<
-  ParticipantManageModalProps
-> = ({ participant, onClose, onDisconnected, onSendMessage }) => {
+export const ParticipantManageModal: React.FC<ParticipantManageModalProps> = ({
+  participant,
+  onClose,
+  onDisconnected,
+  onSendMessage,
+  onPasswordGenerated,
+}) => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [disconnectDone, setDisconnectDone] = useState(false);
@@ -53,7 +62,7 @@ export const ParticipantManageModal: React.FC<
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
 
   const email = participant.assigned_email;
-  const isOnline = participant.status === 'online';
+  const isOnline = participant.status === "online";
 
   // ── Déconnexion forcée ──
 
@@ -91,13 +100,21 @@ export const ParticipantManageModal: React.FC<
         success: true,
         password: result.generatedPassword,
       });
+      // Notifier le dashboard pour garder un historique
+      if (onPasswordGenerated && email) {
+        onPasswordGenerated({
+          participantName: participant.name,
+          email,
+          password: result.generatedPassword,
+        });
+      }
     } else if (result.success) {
       // Email de reset envoyé
       setResetResult({ success: true, emailSent: true });
     } else {
       setResetResult({
         success: false,
-        error: result.error || 'Erreur inconnue',
+        error: result.error || "Erreur inconnue",
       });
     }
 
@@ -116,7 +133,7 @@ export const ParticipantManageModal: React.FC<
     } else {
       setResetResult({
         success: false,
-        error: result.error || 'Erreur inconnue',
+        error: result.error || "Erreur inconnue",
       });
     }
 
@@ -144,9 +161,7 @@ export const ParticipantManageModal: React.FC<
               </div>
               <div
                 className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-[#12121a] ${
-                  isOnline && !disconnectDone
-                    ? 'bg-emerald-500'
-                    : 'bg-gray-500'
+                  isOnline && !disconnectDone ? "bg-emerald-500" : "bg-gray-500"
                 }`}
               />
             </div>
@@ -184,11 +199,11 @@ export const ParticipantManageModal: React.FC<
             <span
               className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                 isOnline && !disconnectDone
-                  ? 'bg-emerald-500/20 text-emerald-400'
-                  : 'bg-gray-500/20 text-gray-400'
+                  ? "bg-emerald-500/20 text-emerald-400"
+                  : "bg-gray-500/20 text-gray-400"
               }`}
             >
-              {isOnline && !disconnectDone ? 'Connecté' : 'Hors ligne'}
+              {isOnline && !disconnectDone ? "Connecté" : "Hors ligne"}
             </span>
           </div>
           {participant.joined_at && (
@@ -198,11 +213,11 @@ export const ParticipantManageModal: React.FC<
                 Rejoint le
               </span>
               <span className="text-white text-xs">
-                {new Date(participant.joined_at).toLocaleString('fr-FR', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
+                {new Date(participant.joined_at).toLocaleString("fr-FR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
                 })}
               </span>
             </div>
@@ -219,8 +234,8 @@ export const ParticipantManageModal: React.FC<
                 disabled={isDisconnecting}
                 className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                   confirmDisconnect
-                    ? 'bg-red-500/30 border border-red-500/50 text-red-300 hover:bg-red-500/40'
-                    : 'bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20'
+                    ? "bg-red-500/30 border border-red-500/50 text-red-300 hover:bg-red-500/40"
+                    : "bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20"
                 }`}
               >
                 {isDisconnecting ? (
@@ -229,8 +244,8 @@ export const ParticipantManageModal: React.FC<
                   <LogOut className="w-4 h-4" />
                 )}
                 {confirmDisconnect
-                  ? 'Confirmer la déconnexion'
-                  : 'Forcer la déconnexion'}
+                  ? "Confirmer la déconnexion"
+                  : "Forcer la déconnexion"}
               </button>
               {confirmDisconnect && (
                 <p className="text-xs text-red-400/70 text-center flex items-center justify-center gap-1">
@@ -288,8 +303,8 @@ export const ParticipantManageModal: React.FC<
                 <div
                   className={`p-3 rounded-xl text-sm space-y-2 ${
                     resetResult.success
-                      ? 'bg-emerald-500/10 border border-emerald-500/20'
-                      : 'bg-red-500/10 border border-red-500/20'
+                      ? "bg-emerald-500/10 border border-emerald-500/20"
+                      : "bg-red-500/10 border border-red-500/20"
                   }`}
                 >
                   {resetResult.success && resetResult.password && (
@@ -302,9 +317,7 @@ export const ParticipantManageModal: React.FC<
                           {resetResult.password}
                         </code>
                         <button
-                          onClick={() =>
-                            handleCopy(resetResult.password || '')
-                          }
+                          onClick={() => handleCopy(resetResult.password || "")}
                           className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
                           title="Copier"
                         >
@@ -316,8 +329,8 @@ export const ParticipantManageModal: React.FC<
                         </button>
                       </div>
                       <p className="text-xs text-gray-400">
-                        Communiquez ce mot de passe au participant.
-                        Il pourra le changer ensuite.
+                        Communiquez ce mot de passe au participant. Il pourra le
+                        changer ensuite.
                       </p>
                     </>
                   )}
@@ -341,8 +354,8 @@ export const ParticipantManageModal: React.FC<
           {!email && (
             <div className="px-4 py-3 bg-gray-500/10 border border-gray-500/20 rounded-xl">
               <p className="text-gray-400 text-xs text-center">
-                Ce participant n&apos;a pas d&apos;email associé.
-                La gestion du mot de passe n&apos;est pas disponible.
+                Ce participant n&apos;a pas d&apos;email associé. La gestion du
+                mot de passe n&apos;est pas disponible.
               </p>
             </div>
           )}

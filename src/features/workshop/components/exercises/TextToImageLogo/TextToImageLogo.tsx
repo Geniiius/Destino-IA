@@ -26,7 +26,7 @@ import {
   User,
   Eye,
   Send,
-} from 'lucide-react';
+} from "lucide-react";
 import { useCopyToClipboard } from "../../../../../hooks";
 
 // --- DATOS GLOBALES ---
@@ -507,12 +507,12 @@ interface PracticeScreenProps {
 const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
   ({ setMode, onGenerate }) => {
     const [inputs, setInputs] = useState({
-      rol: '',
-      obj: '',
-      esc: '',
-      int: '',
-      est: '',
-      sal: '',
+      rol: "",
+      obj: "",
+      esc: "",
+      int: "",
+      est: "",
+      sal: "",
     });
 
     const handleChange = (id: string, value: string) => {
@@ -525,24 +525,75 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
     ).length;
 
     // Light-theme per-field config
-    const fieldStyles: Record<string, {
-      iconBg: string; labelColor: string;
-      cardBg: string; filledBg: string;
-      cardBorder: string; focusRing: string;
-    }> = {
-      rol: { iconBg: 'bg-indigo-500',  labelColor: 'text-indigo-700',  cardBg: 'bg-indigo-50',  filledBg: 'bg-indigo-100',  cardBorder: 'border-indigo-200',  focusRing: 'focus:ring-indigo-400' },
-      obj: { iconBg: 'bg-emerald-500', labelColor: 'text-emerald-700', cardBg: 'bg-emerald-50', filledBg: 'bg-emerald-100', cardBorder: 'border-emerald-200', focusRing: 'focus:ring-emerald-400' },
-      esc: { iconBg: 'bg-amber-500',   labelColor: 'text-amber-700',   cardBg: 'bg-amber-50',   filledBg: 'bg-amber-100',   cardBorder: 'border-amber-200',   focusRing: 'focus:ring-amber-400' },
-      int: { iconBg: 'bg-rose-500',    labelColor: 'text-rose-700',    cardBg: 'bg-rose-50',    filledBg: 'bg-rose-100',    cardBorder: 'border-rose-200',    focusRing: 'focus:ring-rose-400' },
-      est: { iconBg: 'bg-purple-500',  labelColor: 'text-purple-700',  cardBg: 'bg-purple-50',  filledBg: 'bg-purple-100',  cardBorder: 'border-purple-200',  focusRing: 'focus:ring-purple-400' },
-      sal: { iconBg: 'bg-cyan-500',    labelColor: 'text-cyan-700',    cardBg: 'bg-cyan-50',    filledBg: 'bg-cyan-100',    cardBorder: 'border-cyan-200',    focusRing: 'focus:ring-cyan-400' },
+    const fieldStyles: Record<
+      string,
+      {
+        iconBg: string;
+        labelColor: string;
+        cardBg: string;
+        filledBg: string;
+        cardBorder: string;
+        focusRing: string;
+      }
+    > = {
+      rol: {
+        iconBg: "bg-indigo-500",
+        labelColor: "text-indigo-700",
+        cardBg: "bg-indigo-50",
+        filledBg: "bg-indigo-100",
+        cardBorder: "border-indigo-200",
+        focusRing: "focus:ring-indigo-400",
+      },
+      obj: {
+        iconBg: "bg-emerald-500",
+        labelColor: "text-emerald-700",
+        cardBg: "bg-emerald-50",
+        filledBg: "bg-emerald-100",
+        cardBorder: "border-emerald-200",
+        focusRing: "focus:ring-emerald-400",
+      },
+      esc: {
+        iconBg: "bg-amber-500",
+        labelColor: "text-amber-700",
+        cardBg: "bg-amber-50",
+        filledBg: "bg-amber-100",
+        cardBorder: "border-amber-200",
+        focusRing: "focus:ring-amber-400",
+      },
+      int: {
+        iconBg: "bg-rose-500",
+        labelColor: "text-rose-700",
+        cardBg: "bg-rose-50",
+        filledBg: "bg-rose-100",
+        cardBorder: "border-rose-200",
+        focusRing: "focus:ring-rose-400",
+      },
+      est: {
+        iconBg: "bg-purple-500",
+        labelColor: "text-purple-700",
+        cardBg: "bg-purple-50",
+        filledBg: "bg-purple-100",
+        cardBorder: "border-purple-200",
+        focusRing: "focus:ring-purple-400",
+      },
+      sal: {
+        iconBg: "bg-cyan-500",
+        labelColor: "text-cyan-700",
+        cardBg: "bg-cyan-50",
+        filledBg: "bg-cyan-100",
+        cardBorder: "border-cyan-200",
+        focusRing: "focus:ring-cyan-400",
+      },
     };
 
     return (
       <div className="w-full max-w-5xl mx-auto flex flex-col gap-5">
         <div
           className="relative rounded-3xl overflow-hidden shadow-2xl"
-          style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(255,245,248,0.95) 50%, rgba(255,248,240,0.95) 100%)' }}
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(255,245,248,0.95) 50%, rgba(255,248,240,0.95) 100%)",
+          }}
         >
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-rose-500 via-orange-500 to-amber-400" />
 
@@ -550,7 +601,10 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
           <div className="px-8 pt-7 pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <button onClick={() => setMode('intro')} className="text-gray-400 hover:text-gray-600">
+                <button
+                  onClick={() => setMode("intro")}
+                  className="text-gray-400 hover:text-gray-600"
+                >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <div>
@@ -561,7 +615,9 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
                       {completedCount}/{FIELDS.length}
                     </span>
                   </h1>
-                  <p className="text-gray-500 text-sm mt-1 hidden md:block">Rellena los 6 pilares de branding</p>
+                  <p className="text-gray-500 text-sm mt-1 hidden md:block">
+                    Rellena los 6 pilares de branding
+                  </p>
                 </div>
               </div>
               <div className="flex gap-1.5">
@@ -570,8 +626,8 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
                     key={index}
                     className={`w-5 h-2.5 rounded-full transition-all duration-300 ${
                       index < completedCount
-                        ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]'
-                        : 'bg-gray-300'
+                        ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"
+                        : "bg-gray-300"
                     }`}
                   />
                 ))}
@@ -582,7 +638,7 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
           {/* Field grid */}
           <div className="px-8 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4">
             {FIELDS.map((field) => {
-              const value = inputs[field.id as keyof typeof inputs] || '';
+              const value = inputs[field.id as keyof typeof inputs] || "";
               const isFilled = value.trim().length > 0;
               const s = fieldStyles[field.id] ?? fieldStyles.rol;
               if (!s) return null;
@@ -592,15 +648,25 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
                 <div
                   key={field.id}
                   className={`relative rounded-2xl border p-5 transition-all duration-300 hover:shadow-md ${
-                    isFilled ? `${s.filledBg} ${s.cardBorder}` : `${s.cardBg} border-transparent`
+                    isFilled
+                      ? `${s.filledBg} ${s.cardBorder}`
+                      : `${s.cardBg} border-transparent`
                   }`}
                 >
-                  {isFilled && <Sparkles className={`absolute top-3 right-3 w-4 h-4 ${s.labelColor} opacity-60`} />}
+                  {isFilled && (
+                    <Sparkles
+                      className={`absolute top-3 right-3 w-4 h-4 ${s.labelColor} opacity-60`}
+                    />
+                  )}
                   <div className="flex items-center gap-2.5 mb-3">
-                    <div className={`w-9 h-9 rounded-xl ${s.iconBg} flex items-center justify-center shadow-md`}>
+                    <div
+                      className={`w-9 h-9 rounded-xl ${s.iconBg} flex items-center justify-center shadow-md`}
+                    >
                       <Icon className="w-4 h-4 text-white" />
                     </div>
-                    <span className={`text-xs font-extrabold uppercase tracking-widest ${s.labelColor}`}>
+                    <span
+                      className={`text-xs font-extrabold uppercase tracking-widest ${s.labelColor}`}
+                    >
                       {field.label}
                     </span>
                   </div>
@@ -624,11 +690,13 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
                 <Eye className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-xs font-extrabold text-rose-700 uppercase tracking-widest mb-1">Vista Previa</h3>
+                <h3 className="text-xs font-extrabold text-rose-700 uppercase tracking-widest mb-1">
+                  Vista Previa
+                </h3>
                 <p className="text-gray-600 text-sm leading-relaxed truncate">
                   {isComplete
                     ? `Rol: ${inputs.rol}. Objetivo: ${inputs.obj}. Escena: ${inputs.esc}. Integración: ${inputs.int}. Estilo: ${inputs.est}. Salida: ${inputs.sal}.`
-                    : 'Completa los 6 campos para generar el prompt perfecto.'}
+                    : "Completa los 6 campos para generar el prompt perfecto."}
                 </p>
               </div>
             </div>
@@ -641,19 +709,21 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
               disabled={!isComplete}
               className={`group flex items-center gap-3 px-8 py-3.5 rounded-2xl font-bold text-white text-base transition-all duration-300 ${
                 isComplete
-                  ? 'bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-400 hover:to-orange-400 hover:scale-[1.03] hover:shadow-xl shadow-lg shadow-rose-500/25'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? "bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-400 hover:to-orange-400 hover:scale-[1.03] hover:shadow-xl shadow-lg shadow-rose-500/25"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
             >
               <span>Generar Prompt de Branding</span>
-              <Send className={`w-5 h-5 ${isComplete ? 'group-hover:translate-x-1' : ''} transition-transform`} />
+              <Send
+                className={`w-5 h-5 ${isComplete ? "group-hover:translate-x-1" : ""} transition-transform`}
+              />
             </button>
           </div>
         </div>
 
         {/* Back button */}
         <button
-          onClick={() => setMode('intro')}
+          onClick={() => setMode("intro")}
           className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors self-start px-2 py-1"
         >
           <ChevronLeft className="w-4 h-4" />

@@ -55,6 +55,8 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Play,
   Loader2,
   Presentation,
@@ -73,11 +75,74 @@ import {
   Wifi,
   WifiOff,
   Monitor,
+  KeyRound,
+  Copy,
+  Check,
 } from "lucide-react";
 import type { Participant, ActiveTab } from "@/types";
 import { useParticipants } from "@/hooks/useParticipants";
 
 const ADMIN_STORAGE_KEY = "destino_admin_auth";
+
+// ── Sous-composant: ligne du log de mots de passe ──
+const PasswordLogEntry: React.FC<{
+  entry: {
+    participantName: string;
+    email: string;
+    password: string;
+    time: string;
+  };
+}> = ({ entry }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(entry.password);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback
+      const ta = document.createElement("textarea");
+      ta.value = entry.password;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg bg-[#12121a] border border-white/5 px-3 py-2 text-xs">
+      <div className="flex items-center gap-3 min-w-0">
+        <span className="text-gray-500 shrink-0">{entry.time}</span>
+        <span className="text-white font-medium truncate">
+          {entry.participantName}
+        </span>
+        <span className="text-gray-500 truncate hidden sm:inline">
+          {entry.email}
+        </span>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <code className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 font-mono text-xs tracking-wider">
+          {entry.password}
+        </code>
+        <button
+          onClick={handleCopy}
+          className="p-1 rounded hover:bg-white/10 transition-colors text-gray-400 hover:text-white"
+          title="Copier le mot de passe"
+        >
+          {copied ? (
+            <Check className="w-3.5 h-3.5 text-emerald-400" />
+          ) : (
+            <Copy className="w-3.5 h-3.5" />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export const AdminDashboard: React.FC = () => {
   // ── Auth (pour déconnexion) ────────────────────
@@ -100,7 +165,11 @@ export const AdminDashboard: React.FC = () => {
     actions,
   } = useLiveSession();
   const { totalSlides, isReady: isSlidesReady } = useSlideManifest();
-  const { participants: participantsData, onlineCount, refetch: refetchParticipants } = useParticipants({
+  const {
+    participants: participantsData,
+    onlineCount,
+    refetch: refetchParticipants,
+  } = useParticipants({
     sessionId: liveState.session_id || "destino-ia-workshop",
   });
 
@@ -117,6 +186,10 @@ export const AdminDashboard: React.FC = () => {
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
   const [isDisconnectingAll, setIsDisconnectingAll] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [passwordLog, setPasswordLog] = useState<
+    { participantName: string; email: string; password: string; time: string }[]
+  >([]);
+  const [showPasswordLog, setShowPasswordLog] = useState(false);
 
   // ── Auto-switch to exercises tab when exercise is active ──
   useEffect(() => {
@@ -218,7 +291,7 @@ export const AdminDashboard: React.FC = () => {
 
   const handleDisconnectAll = useCallback(async () => {
     setIsDisconnectingAll(true);
-    const sid = sessionId || 'destino-ia-workshop';
+    const sid = sessionId || "destino-ia-workshop";
     await forceDisconnectAll(sid);
     await refetchParticipants();
     setIsDisconnectingAll(false);
@@ -364,6 +437,35 @@ export const AdminDashboard: React.FC = () => {
             <RotateCcw className="w-3 h-3" />
             Reprendre au slide {pausedAt}
           </button>
+        </div>
+      )}
+
+      {/* ============================================ */}
+      {/* PASSWORD LOG - Mots de passe générés */}
+      {/* ============================================ */}
+      {passwordLog.length > 0 && (
+        <div className="mx-3 mt-1 rounded-xl border border-amber-500/30 bg-amber-500/5 overflow-hidden">
+          <button
+            onClick={() => setShowPasswordLog(!showPasswordLog)}
+            className="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-amber-300 hover:bg-amber-500/10 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <KeyRound className="w-4 h-4" />
+              <span>Mots de passe générés ({passwordLog.length})</span>
+            </div>
+            {showPasswordLog ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </button>
+          {showPasswordLog && (
+            <div className="px-4 pb-3 space-y-2 max-h-48 overflow-y-auto">
+              {passwordLog.map((entry, i) => (
+                <PasswordLogEntry key={`${entry.email}-${i}`} entry={entry} />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -903,6 +1005,19 @@ export const AdminDashboard: React.FC = () => {
           onSendMessage={(p) => {
             setManagedParticipant(null);
             handleSendToParticipant(p);
+          }}
+          onPasswordGenerated={(entry) => {
+            setPasswordLog((prev) => [
+              {
+                ...entry,
+                time: new Date().toLocaleTimeString("fr-FR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }),
+              },
+              ...prev,
+            ]);
+            setShowPasswordLog(true);
           }}
         />
       )}

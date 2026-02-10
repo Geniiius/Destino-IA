@@ -3,7 +3,7 @@
  * @description Pantalla de práctica — diseño moderno con tarjetas coloridas
  */
 
-import React from 'react';
+import React from "react";
 import {
   Send,
   LogOut,
@@ -15,9 +15,9 @@ import {
   Palette,
   Hash,
   Eye,
-} from 'lucide-react';
-import type { PracticeScreenProps } from '../types';
-import { UI_TEXTS } from '../constants';
+} from "lucide-react";
+import type { PracticeScreenProps } from "../types";
+import { UI_TEXTS } from "../constants";
 
 // Configuración visual por campo
 const FIELD_CONFIG: Record<
@@ -34,57 +34,57 @@ const FIELD_CONFIG: Record<
 > = {
   rol: {
     icon: User,
-    iconBg: 'bg-blue-500',
-    labelColor: 'text-blue-700',
-    cardBg: 'bg-blue-50',
-    cardBorder: 'border-blue-200',
-    focusRing: 'focus:ring-blue-400',
-    filledBg: 'bg-blue-100',
+    iconBg: "bg-blue-500",
+    labelColor: "text-blue-700",
+    cardBg: "bg-blue-50",
+    cardBorder: "border-blue-200",
+    focusRing: "focus:ring-blue-400",
+    filledBg: "bg-blue-100",
   },
   objetivo: {
     icon: Target,
-    iconBg: 'bg-green-500',
-    labelColor: 'text-green-700',
-    cardBg: 'bg-green-50',
-    cardBorder: 'border-green-200',
-    focusRing: 'focus:ring-green-400',
-    filledBg: 'bg-green-100',
+    iconBg: "bg-green-500",
+    labelColor: "text-green-700",
+    cardBg: "bg-green-50",
+    cardBorder: "border-green-200",
+    focusRing: "focus:ring-green-400",
+    filledBg: "bg-green-100",
   },
   escena: {
     icon: MapPin,
-    iconBg: 'bg-amber-500',
-    labelColor: 'text-amber-700',
-    cardBg: 'bg-amber-50',
-    cardBorder: 'border-amber-200',
-    focusRing: 'focus:ring-amber-400',
-    filledBg: 'bg-amber-100',
+    iconBg: "bg-amber-500",
+    labelColor: "text-amber-700",
+    cardBg: "bg-amber-50",
+    cardBorder: "border-amber-200",
+    focusRing: "focus:ring-amber-400",
+    filledBg: "bg-amber-100",
   },
   emocion: {
     icon: Heart,
-    iconBg: 'bg-red-500',
-    labelColor: 'text-red-600',
-    cardBg: 'bg-red-50',
-    cardBorder: 'border-red-200',
-    focusRing: 'focus:ring-red-400',
-    filledBg: 'bg-red-100',
+    iconBg: "bg-red-500",
+    labelColor: "text-red-600",
+    cardBg: "bg-red-50",
+    cardBorder: "border-red-200",
+    focusRing: "focus:ring-red-400",
+    filledBg: "bg-red-100",
   },
   estilo: {
     icon: Palette,
-    iconBg: 'bg-indigo-500',
-    labelColor: 'text-indigo-700',
-    cardBg: 'bg-indigo-50',
-    cardBorder: 'border-indigo-200',
-    focusRing: 'focus:ring-indigo-400',
-    filledBg: 'bg-indigo-100',
+    iconBg: "bg-indigo-500",
+    labelColor: "text-indigo-700",
+    cardBg: "bg-indigo-50",
+    cardBorder: "border-indigo-200",
+    focusRing: "focus:ring-indigo-400",
+    filledBg: "bg-indigo-100",
   },
   salida: {
     icon: Hash,
-    iconBg: 'bg-pink-500',
-    labelColor: 'text-pink-600',
-    cardBg: 'bg-pink-50',
-    cardBorder: 'border-pink-200',
-    focusRing: 'focus:ring-pink-400',
-    filledBg: 'bg-pink-100',
+    iconBg: "bg-pink-500",
+    labelColor: "text-pink-600",
+    cardBg: "bg-pink-50",
+    cardBorder: "border-pink-200",
+    focusRing: "focus:ring-pink-400",
+    filledBg: "bg-pink-100",
   },
 };
 
@@ -114,7 +114,7 @@ const FieldCard: React.FC<FieldCardProps> = ({
       className={`
         relative rounded-2xl border p-5 transition-all duration-300
         ${isFilled ? config.filledBg : config.cardBg}
-        ${isFilled ? config.cardBorder : 'border-transparent'}
+        ${isFilled ? config.cardBorder : "border-transparent"}
         hover:shadow-md
       `}
     >
@@ -133,7 +133,7 @@ const FieldCard: React.FC<FieldCardProps> = ({
         <span
           className={`text-xs font-extrabold uppercase tracking-widest ${config.labelColor}`}
         >
-          {label.split(' - ')[0]}
+          {label.split(" - ")[0]}
         </span>
       </div>
 
@@ -178,7 +178,7 @@ const PracticeScreenComponent: React.FC<PracticeScreenProps> = ({
         className="relative rounded-3xl overflow-hidden shadow-2xl"
         style={{
           background:
-            'linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(240,238,255,0.95) 50%, rgba(255,240,245,0.95) 100%)',
+            "linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(240,238,255,0.95) 50%, rgba(255,240,245,0.95) 100%)",
         }}
       >
         {/* Bandeau décoratif supérieur */}
@@ -210,8 +210,8 @@ const PracticeScreenComponent: React.FC<PracticeScreenProps> = ({
                   key={index}
                   className={`w-5 h-2.5 rounded-full transition-all duration-300 ${
                     index < completedCount
-                      ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
-                      : 'bg-gray-300'
+                      ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                      : "bg-gray-300"
                   }`}
                 />
               ))}
@@ -227,12 +227,9 @@ const PracticeScreenComponent: React.FC<PracticeScreenProps> = ({
               fieldKey={field.key}
               label={field.label}
               placeholder={field.placeholder}
-              value={answers[field.key as keyof typeof answers] || ''}
+              value={answers[field.key as keyof typeof answers] || ""}
               onChange={(val) =>
-                onAnswerChange(
-                  field.key as keyof typeof answers,
-                  val,
-                )
+                onAnswerChange(field.key as keyof typeof answers, val)
               }
             />
           ))}
@@ -255,7 +252,7 @@ const PracticeScreenComponent: React.FC<PracticeScreenProps> = ({
               <p className="text-gray-600 text-sm leading-relaxed truncate">
                 {isComplete
                   ? `Actúa como ${answers.rol}. ${answers.objetivo}. La escena es ${answers.escena}. Transmite ${answers.emocion}. Estilo: ${answers.estilo}. Formato: ${answers.salida}.`
-                  : 'Actúa como... La escena es...'}
+                  : "Actúa como... La escena es..."}
               </p>
             </div>
           </div>
@@ -275,16 +272,14 @@ const PracticeScreenComponent: React.FC<PracticeScreenProps> = ({
                      hover:from-teal-400 hover:to-blue-400
                      hover:scale-[1.03] hover:shadow-xl
                      shadow-lg shadow-teal-500/25`
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }
             `}
           >
             <span>{practice.submitButton}</span>
             <Send
               className={`w-5 h-5 ${
-                isComplete
-                  ? 'group-hover:translate-x-1'
-                  : ''
+                isComplete ? "group-hover:translate-x-1" : ""
               } transition-transform`}
             />
           </button>

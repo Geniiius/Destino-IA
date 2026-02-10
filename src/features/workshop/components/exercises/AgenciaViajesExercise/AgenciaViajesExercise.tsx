@@ -53,7 +53,7 @@ export const AgenciaViajesExercise: React.FC<AgenciaViajesExerciseProps> = ({
     console.log("🔍 handleSubmit called");
     console.log("📋 Current answers:", state.answers);
     console.log("✅ Is complete?", isAnswerComplete(state.answers));
-    
+
     if (isAnswerComplete(state.answers)) {
       const prompt = generatePrompt(state.answers);
       completeExercise();
@@ -148,7 +148,11 @@ export const AgenciaViajesExercise: React.FC<AgenciaViajesExerciseProps> = ({
                     Ya has generado la idea de tu prompt.
                   </p>
                   <p className="leading-relaxed">
-                    Ahora puedes ir a <span className="text-emerald-400 font-semibold">ChatGPT</span> y decirle:
+                    Ahora puedes ir a{" "}
+                    <span className="text-emerald-400 font-semibold">
+                      ChatGPT
+                    </span>{" "}
+                    y decirle:
                   </p>
                   <div className="bg-white/5 border border-white/10 rounded-lg p-4">
                     <p className="text-white font-medium italic">
@@ -160,7 +164,9 @@ export const AgenciaViajesExercise: React.FC<AgenciaViajesExerciseProps> = ({
                   </p>
                   <div className="mt-6 pt-6 border-t border-blue-500/20">
                     <p className="leading-relaxed mb-3">
-                      Una vez que ChatGPT te haya generado el prompt final, puedes ir a la herramienta de generación de imágenes y decir:
+                      Una vez que ChatGPT te haya generado el prompt final,
+                      puedes ir a la herramienta de generación de imágenes y
+                      decir:
                     </p>
                     <div className="bg-white/5 border border-white/10 rounded-lg p-4 mb-3">
                       <p className="text-white font-medium italic">
@@ -187,7 +193,7 @@ export const AgenciaViajesExercise: React.FC<AgenciaViajesExerciseProps> = ({
       className="fixed inset-0 z-50 overflow-auto"
       style={{
         background:
-          'linear-gradient(145deg, #1a0533 0%, #2d1b4e 25%, #4a2c6a 45%, #6b3a7d 60%, #a0527a 75%, #d4886a 90%, #f0b86a 100%)',
+          "linear-gradient(145deg, #1a0533 0%, #2d1b4e 25%, #4a2c6a 45%, #6b3a7d 60%, #a0527a 75%, #d4886a 90%, #f0b86a 100%)",
       }}
     >
       {/* Background Ambience — soft light blobs */}

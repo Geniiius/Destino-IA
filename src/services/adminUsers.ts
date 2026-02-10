@@ -10,7 +10,7 @@
 
 /* eslint-disable no-console, camelcase */
 
-import { getSupabaseClient } from '@/services/supabase/client';
+import { getSupabaseClient } from "@/services/supabase/client";
 
 // ============================================
 // DÉCONNEXION FORCÉE
@@ -31,43 +31,43 @@ export async function forceDisconnectParticipant(
 ): Promise<{ success: boolean; error: string | null }> {
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return { success: false, error: 'Supabase non configuré' };
+    return { success: false, error: "Supabase non configuré" };
   }
 
   try {
     // 1. Mettre à jour la table participants
     const { error: partError } = await supabase
-      .from('participants')
+      .from("participants")
       .update({
-        status: 'disconnected',
+        status: "disconnected",
         last_seen_at: new Date().toISOString(),
       })
-      .eq('id', participantId);
+      .eq("id", participantId);
 
     if (partError) {
-      console.error('[AdminUsers] Erreur déconnexion participant:', partError);
+      console.error("[AdminUsers] Erreur déconnexion participant:", partError);
       return { success: false, error: partError.message };
     }
 
     // 2. Tenter aussi de mettre à jour le profil si lié
     //    (fire & forget — le participant n'a pas forcément de profil auth)
     await supabase
-      .from('profiles')
+      .from("profiles")
       .update({
         is_online: false,
         last_seen_at: new Date().toISOString(),
       })
-      .eq('id', participantId)
+      .eq("id", participantId)
       .then(
         () => {},
         () => {},
       );
 
-    console.log('[AdminUsers] Participant déconnecté:', participantId);
+    console.log("[AdminUsers] Participant déconnecté:", participantId);
     return { success: true, error: null };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Erreur inconnue';
-    console.error('[AdminUsers] Erreur forceDisconnect:', msg);
+    const msg = err instanceof Error ? err.message : "Erreur inconnue";
+    console.error("[AdminUsers] Erreur forceDisconnect:", msg);
     return { success: false, error: msg };
   }
 }
@@ -84,19 +84,19 @@ export async function forceDisconnectAll(
 ): Promise<{ success: boolean; count: number; error: string | null }> {
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return { success: false, count: 0, error: 'Supabase non configuré' };
+    return { success: false, count: 0, error: "Supabase non configuré" };
   }
 
   try {
     const { data, error } = await supabase
-      .from('participants')
+      .from("participants")
       .update({
-        status: 'disconnected',
+        status: "disconnected",
         last_seen_at: new Date().toISOString(),
       })
-      .eq('session_id', sessionId)
-      .eq('status', 'connected')
-      .select('id');
+      .eq("session_id", sessionId)
+      .eq("status", "connected")
+      .select("id");
 
     if (error) {
       return { success: false, count: 0, error: error.message };
@@ -106,7 +106,7 @@ export async function forceDisconnectAll(
     console.log(`[AdminUsers] ${count} participants déconnectés`);
     return { success: true, count, error: null };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Erreur inconnue';
+    const msg = err instanceof Error ? err.message : "Erreur inconnue";
     return { success: false, count: 0, error: msg };
   }
 }
@@ -119,13 +119,13 @@ export async function forceDisconnectAll(
  * Génère un mot de passe aléatoire lisible.
  */
 export function generatePassword(length = 10): string {
-  const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-  const lower = 'abcdefghjkmnpqrstuvwxyz';
-  const digits = '23456789';
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const lower = "abcdefghjkmnpqrstuvwxyz";
+  const digits = "23456789";
   const all = upper + lower + digits;
 
   // Garantir au moins 1 majuscule, 1 minuscule, 1 chiffre
-  let pwd = '';
+  let pwd = "";
   pwd += upper[Math.floor(Math.random() * upper.length)];
   pwd += lower[Math.floor(Math.random() * lower.length)];
   pwd += digits[Math.floor(Math.random() * digits.length)];
@@ -136,9 +136,9 @@ export function generatePassword(length = 10): string {
 
   // Mélanger
   return pwd
-    .split('')
+    .split("")
     .sort(() => Math.random() - 0.5)
-    .join('');
+    .join("");
 }
 
 /**
@@ -163,7 +163,7 @@ export async function adminResetPassword(
 }> {
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return { success: false, error: 'Supabase non configuré' };
+    return { success: false, error: "Supabase non configuré" };
   }
 
   try {
@@ -172,7 +172,7 @@ export async function adminResetPassword(
       // Si pas d'Edge Function, fallback sur email reset
       try {
         const { error } = await supabase.functions.invoke(
-          'admin-reset-password',
+          "admin-reset-password",
           {
             body: { email, newPassword },
           },
@@ -187,12 +187,12 @@ export async function adminResetPassword(
         }
 
         console.warn(
-          '[AdminUsers] Edge Function non dispo, fallback email:',
+          "[AdminUsers] Edge Function non dispo, fallback email:",
           error,
         );
       } catch {
         console.warn(
-          '[AdminUsers] Edge Function non dispo, fallback email reset',
+          "[AdminUsers] Edge Function non dispo, fallback email reset",
         );
       }
     }
@@ -211,8 +211,8 @@ export async function adminResetPassword(
 
     return { success: true, error: null };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Erreur inconnue';
-    console.error('[AdminUsers] Erreur reset password:', msg);
+    const msg = err instanceof Error ? err.message : "Erreur inconnue";
+    console.error("[AdminUsers] Erreur reset password:", msg);
     return { success: false, error: msg };
   }
 }
@@ -221,24 +221,26 @@ export async function adminResetPassword(
  * Obtenir les infos détaillées d'un participant
  * (table participants + profil auth si lié).
  */
-export async function getParticipantDetails(
-  participantId: string,
-): Promise<{
+export async function getParticipantDetails(participantId: string): Promise<{
   participant: Record<string, unknown> | null;
   profile: Record<string, unknown> | null;
   error: string | null;
 }> {
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return { participant: null, profile: null, error: 'Supabase non configuré' };
+    return {
+      participant: null,
+      profile: null,
+      error: "Supabase non configuré",
+    };
   }
 
   try {
     // Participant de la table participants
     const { data: participant, error: partError } = await supabase
-      .from('participants')
-      .select('*')
-      .eq('id', participantId)
+      .from("participants")
+      .select("*")
+      .eq("id", participantId)
       .single();
 
     if (partError) {
@@ -249,9 +251,9 @@ export async function getParticipantDetails(
     let profile = null;
     if (participant?.email) {
       const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('email', participant.email)
+        .from("profiles")
+        .select("*")
+        .eq("email", participant.email)
         .maybeSingle();
 
       profile = profileData;
@@ -259,7 +261,7 @@ export async function getParticipantDetails(
 
     return { participant, profile, error: null };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Erreur inconnue';
+    const msg = err instanceof Error ? err.message : "Erreur inconnue";
     return { participant: null, profile: null, error: msg };
   }
 }
