@@ -183,15 +183,22 @@ export const AgenciaViajesExercise: React.FC<AgenciaViajesExerciseProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#050508] overflow-auto">
-      {/* Background Ambience */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-emerald-500/[0.03] rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-blue-500/[0.03] rounded-full blur-[120px]" />
+    <div
+      className="fixed inset-0 z-50 overflow-auto"
+      style={{
+        background:
+          'linear-gradient(145deg, #1a0533 0%, #2d1b4e 25%, #4a2c6a 45%, #6b3a7d 60%, #a0527a 75%, #d4886a 90%, #f0b86a 100%)',
+      }}
+    >
+      {/* Background Ambience — soft light blobs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[-5%] w-[50%] h-[50%] bg-purple-400/10 rounded-full blur-[150px]" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[50%] h-[50%] bg-orange-400/10 rounded-full blur-[150px]" />
+        <div className="absolute top-[30%] right-[10%] w-[30%] h-[30%] bg-pink-400/5 rounded-full blur-[120px]" />
       </div>
 
       {/* Contenido Principal */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-8">
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-6 md:p-8">
         {renderScreen()}
       </div>
     </div>

@@ -22,7 +22,9 @@ import {
   Box,
   Terminal,
   FileText,
-} from "lucide-react";
+  Eye,
+  Send,
+} from 'lucide-react';
 import { useCopyToClipboard } from "../../../../../hooks";
 
 // --- DATOS GLOBALES ---
@@ -33,29 +35,6 @@ const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   escena: Sun,
   estilo: Palette,
   salida: FileText,
-};
-
-const COLOR_STYLES: Record<string, any> = {
-  purple: {
-    bg: "bg-purple-500/20",
-    border: "border-purple-500/30",
-    text: "text-purple-400",
-  },
-  pink: {
-    bg: "bg-pink-500/20",
-    border: "border-pink-500/30",
-    text: "text-pink-400",
-  },
-  rose: {
-    bg: "bg-rose-500/20",
-    border: "border-rose-500/30",
-    text: "text-rose-400",
-  },
-  amber: {
-    bg: "bg-amber-500/20",
-    border: "border-amber-500/30",
-    text: "text-amber-400",
-  },
 };
 
 const FIELDS = [
@@ -192,126 +171,139 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
     );
   }
 
+  // Light-theme per-field config
+  const fieldStyles: Record<string, {
+    iconBg: string; labelColor: string;
+    cardBg: string; filledBg: string;
+    cardBorder: string; focusRing: string;
+  }> = {
+    rol:      { iconBg: 'bg-purple-500', labelColor: 'text-purple-700', cardBg: 'bg-purple-50', filledBg: 'bg-purple-100', cardBorder: 'border-purple-200', focusRing: 'focus:ring-purple-400' },
+    objetivo: { iconBg: 'bg-pink-500',   labelColor: 'text-pink-700',   cardBg: 'bg-pink-50',   filledBg: 'bg-pink-100',   cardBorder: 'border-pink-200',   focusRing: 'focus:ring-pink-400' },
+    escena:   { iconBg: 'bg-amber-500',  labelColor: 'text-amber-700',  cardBg: 'bg-amber-50',  filledBg: 'bg-amber-100',  cardBorder: 'border-amber-200',  focusRing: 'focus:ring-amber-400' },
+    estilo:   { iconBg: 'bg-rose-500',   labelColor: 'text-rose-700',   cardBg: 'bg-rose-50',   filledBg: 'bg-rose-100',   cardBorder: 'border-rose-200',   focusRing: 'focus:ring-rose-400' },
+    salida:   { iconBg: 'bg-indigo-500', labelColor: 'text-indigo-700', cardBg: 'bg-indigo-50', filledBg: 'bg-indigo-100', cardBorder: 'border-indigo-200', focusRing: 'focus:ring-indigo-400' },
+  };
+
   return (
-    <div className="w-full max-w-6xl mx-auto h-full flex flex-col justify-center animate-fade-in">
-      <div className="flex items-center justify-between mb-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-md">
-        <button
-          onClick={() => setMode("intro")}
-          className="text-gray-500 hover:text-white text-sm"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
+    <div className="w-full max-w-5xl mx-auto flex flex-col gap-5 animate-fade-in">
+      {/* Main light card */}
+      <div
+        className="relative rounded-3xl overflow-hidden shadow-2xl"
+        style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(245,240,255,0.95) 50%, rgba(255,240,248,0.95) 100%)' }}
+      >
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-purple-500 via-pink-500 to-amber-400" />
 
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            Diseña tu Escena de Playa
-            <span className="text-sm font-normal text-gray-400 bg-white/10 px-2 py-1 rounded-full">
-              {completedCount}/{FIELDS.length}
-            </span>
-          </h1>
-        </div>
-
-        <div className="flex gap-1">
-          {FIELDS.map((f, index) => (
-            <div
-              key={index}
-              className={`w-6 h-2 rounded-full transition-all ${
-                index < completedCount
-                  ? "bg-" +
-                    f.color +
-                    "-500 shadow-[0_0_10px_rgba(200,80,200,0.5)]"
-                  : "bg-white/10"
-              }`}
-              style={{
-                backgroundColor: index < completedCount ? "" : undefined,
-              }}
-            >
-              {index < completedCount && (
-                <div
-                  className={`w-full h-full rounded-full bg-${f.color}-500`}
-                ></div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {FIELDS.map((f, i) => {
-          const value = answers[f.key as keyof typeof answers];
-          const isFilled = value.trim().length > 0;
-
-          const colorStyle = COLOR_STYLES[f.color] || COLOR_STYLES.purple;
-          const Icon = ICON_MAP[f.key] || Sparkles;
-
-          return (
-            <div
-              key={i}
-              className={`
-                  relative group transition-all duration-300
-                  bg-black/20 backdrop-blur-sm border rounded-xl p-4
-                  ${isFilled ? colorStyle.border : "border-white/5 hover:border-white/20"}
-                  ${isFilled ? colorStyle.bg.replace("/20", "/10") : ""}
-                `}
-            >
-              <div className="flex gap-3">
-                <div
-                  className={`
-                      flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-all
-                      ${isFilled ? colorStyle.bg : "bg-white/5 group-hover:bg-white/10"}
-                      ${isFilled ? colorStyle.text : "text-gray-500 group-hover:text-gray-300"}
-                    `}
-                >
-                  <Icon className="w-5 h-5" />
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <label
-                    className={`
-                        block text-xs font-bold uppercase tracking-wider mb-1.5
-                        ${colorStyle.text}
-                      `}
-                  >
-                    {f.label}
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={answers[f.key as keyof typeof answers]}
-                    onChange={(e) => handleAnswerChange(f.key, e.target.value)}
-                    className={`
-                        w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white 
-                        placeholder-gray-600 focus:outline-none focus:ring-1 focus:bg-black/60 transition-all resize-none
-                        ${isFilled ? "border-white/20" : ""}
-                        focus:ring-${f.color}-500
-                      `}
-                    placeholder={f.placeholder}
-                  />
-                </div>
+        {/* Header */}
+        <div className="px-8 pt-7 pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setMode('intro')} className="text-gray-400 hover:text-gray-600">
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-extrabold text-gray-800 flex items-center gap-3">
+                  <span className="text-3xl">🏖️</span>
+                  Diseña tu Escena de Playa
+                  <span className="text-sm font-semibold text-gray-500 bg-gray-200 px-3 py-1 rounded-full">
+                    {completedCount}/{FIELDS.length}
+                  </span>
+                </h1>
               </div>
             </div>
-          );
-        })}
+            <div className="flex gap-1.5">
+              {FIELDS.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-5 h-2.5 rounded-full transition-all duration-300 ${
+                    index < completedCount
+                      ? 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]'
+                      : 'bg-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Field grid */}
+        <div className="px-8 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {FIELDS.map((f) => {
+            const value = answers[f.key as keyof typeof answers];
+            const isFilled = value.trim().length > 0;
+            const s = fieldStyles[f.key] ?? fieldStyles.rol;
+            if (!s) return null;
+            const Icon = ICON_MAP[f.key] || Sparkles;
+
+            return (
+              <div
+                key={f.key}
+                className={`relative rounded-2xl border p-5 transition-all duration-300 hover:shadow-md ${
+                  isFilled ? `${s.filledBg} ${s.cardBorder}` : `${s.cardBg} border-transparent`
+                }`}
+              >
+                {isFilled && <Sparkles className={`absolute top-3 right-3 w-4 h-4 ${s.labelColor} opacity-60`} />}
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className={`w-9 h-9 rounded-xl ${s.iconBg} flex items-center justify-center shadow-md`}>
+                    <Icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className={`text-xs font-extrabold uppercase tracking-widest ${s.labelColor}`}>
+                    {f.label}
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={value}
+                  onChange={(e) => handleAnswerChange(f.key, e.target.value)}
+                  placeholder={f.placeholder}
+                  className={`w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 ${s.focusRing} focus:border-transparent transition-all duration-200 shadow-sm`}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Vista Previa */}
+        <div className="px-8 pb-6">
+          <div className="flex items-start gap-4 rounded-2xl p-5 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200">
+            <div className="w-10 h-10 rounded-xl bg-purple-500 flex items-center justify-center shadow-md flex-shrink-0">
+              <Eye className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-xs font-extrabold text-purple-700 uppercase tracking-widest mb-1">Vista Previa</h3>
+              <p className="text-gray-600 text-sm leading-relaxed truncate">
+                {isComplete
+                  ? `Actúa como ${answers.rol}. ${answers.objetivo}. ${answers.escena}. Estilo: ${answers.estilo}. ${answers.salida}.`
+                  : 'Actúa como... La escena es...'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Submit */}
+        <div className="px-8 pb-7 flex justify-end">
+          <button
+            onClick={handleSubmit}
+            disabled={!isComplete}
+            className={`group flex items-center gap-3 px-8 py-3.5 rounded-2xl font-bold text-white text-base transition-all duration-300 ${
+              isComplete
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 hover:scale-[1.03] hover:shadow-xl shadow-lg shadow-purple-500/25'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            <span>Generar Prompt</span>
+            <Send className={`w-5 h-5 ${isComplete ? 'group-hover:translate-x-1' : ''} transition-transform`} />
+          </button>
+        </div>
       </div>
 
-      <div className="flex gap-4 justify-end items-center mt-auto">
-        <button
-          onClick={handleSubmit}
-          disabled={!isComplete}
-          className={`
-              group flex items-center gap-3 px-8 py-3 rounded-xl font-bold text-white transition-all
-              ${
-                isComplete
-                  ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-105 shadow-lg shadow-purple-900/20"
-                  : "bg-gray-800 text-gray-500 cursor-not-allowed"
-              }
-            `}
-        >
-          <span>Generar Prompt</span>
-          <Zap
-            className={`w-5 h-5 ${isComplete ? "group-hover:translate-x-1" : ""} transition-transform`}
-          />
-        </button>
-      </div>
+      {/* Back button */}
+      <button
+        onClick={() => setMode('intro')}
+        className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors self-start px-2 py-1"
+      >
+        <ChevronLeft className="w-4 h-4" />
+        <span className="text-sm">Volver</span>
+      </button>
     </div>
   );
 };

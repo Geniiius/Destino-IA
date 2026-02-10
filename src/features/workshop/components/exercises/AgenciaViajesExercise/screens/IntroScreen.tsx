@@ -98,8 +98,8 @@ export const IntroScreen: React.FC<IntroScreenProps> = ({
 
         {/* Footer info */}
         <div className="mt-10 pt-8 border-t border-white/10 text-center">
-          <p className="text-sm text-gray-500">
-            💡 <span className="text-gray-400">Consejo:</span> Si es tu primera vez, te recomendamos empezar con el tutorial
+          <p className="text-sm text-amber-300/90 bg-amber-400/10 border border-amber-400/20 rounded-xl px-4 py-3 inline-flex items-center gap-2">
+            💡 <span className="font-semibold text-amber-200">Consejo:</span> Si es tu primera vez, te recomendamos empezar con el tutorial
           </p>
         </div>
 

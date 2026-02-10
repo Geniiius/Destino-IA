@@ -24,7 +24,9 @@ import {
   BookOpen,
   Rocket,
   User,
-} from "lucide-react";
+  Eye,
+  Send,
+} from 'lucide-react';
 import { useCopyToClipboard } from "../../../../../hooks";
 
 // --- DATOS GLOBALES ---
@@ -37,40 +39,6 @@ const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   int: Layers,
   est: Palette,
   sal: Box,
-};
-
-// Estilos de color para la UI refinada
-const COLOR_STYLES: Record<string, any> = {
-  indigo: {
-    bg: "bg-indigo-500/20",
-    border: "border-indigo-500/30",
-    text: "text-indigo-400",
-  },
-  emerald: {
-    bg: "bg-emerald-500/20",
-    border: "border-emerald-500/30",
-    text: "text-emerald-400",
-  },
-  amber: {
-    bg: "bg-amber-500/20",
-    border: "border-amber-500/30",
-    text: "text-amber-400",
-  },
-  rose: {
-    bg: "bg-rose-500/20",
-    border: "border-rose-500/30",
-    text: "text-rose-400",
-  },
-  purple: {
-    bg: "bg-purple-500/20",
-    border: "border-purple-500/30",
-    text: "text-purple-400",
-  },
-  cyan: {
-    bg: "bg-cyan-500/20",
-    border: "border-cyan-500/30",
-    text: "text-cyan-400",
-  },
 };
 
 const tutorialSteps = [
@@ -539,12 +507,12 @@ interface PracticeScreenProps {
 const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
   ({ setMode, onGenerate }) => {
     const [inputs, setInputs] = useState({
-      rol: "",
-      obj: "",
-      esc: "",
-      int: "",
-      est: "",
-      sal: "",
+      rol: '',
+      obj: '',
+      esc: '',
+      int: '',
+      est: '',
+      sal: '',
     });
 
     const handleChange = (id: string, value: string) => {
@@ -556,146 +524,141 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
       (v) => v.trim().length > 0,
     ).length;
 
+    // Light-theme per-field config
+    const fieldStyles: Record<string, {
+      iconBg: string; labelColor: string;
+      cardBg: string; filledBg: string;
+      cardBorder: string; focusRing: string;
+    }> = {
+      rol: { iconBg: 'bg-indigo-500',  labelColor: 'text-indigo-700',  cardBg: 'bg-indigo-50',  filledBg: 'bg-indigo-100',  cardBorder: 'border-indigo-200',  focusRing: 'focus:ring-indigo-400' },
+      obj: { iconBg: 'bg-emerald-500', labelColor: 'text-emerald-700', cardBg: 'bg-emerald-50', filledBg: 'bg-emerald-100', cardBorder: 'border-emerald-200', focusRing: 'focus:ring-emerald-400' },
+      esc: { iconBg: 'bg-amber-500',   labelColor: 'text-amber-700',   cardBg: 'bg-amber-50',   filledBg: 'bg-amber-100',   cardBorder: 'border-amber-200',   focusRing: 'focus:ring-amber-400' },
+      int: { iconBg: 'bg-rose-500',    labelColor: 'text-rose-700',    cardBg: 'bg-rose-50',    filledBg: 'bg-rose-100',    cardBorder: 'border-rose-200',    focusRing: 'focus:ring-rose-400' },
+      est: { iconBg: 'bg-purple-500',  labelColor: 'text-purple-700',  cardBg: 'bg-purple-50',  filledBg: 'bg-purple-100',  cardBorder: 'border-purple-200',  focusRing: 'focus:ring-purple-400' },
+      sal: { iconBg: 'bg-cyan-500',    labelColor: 'text-cyan-700',    cardBg: 'bg-cyan-50',    filledBg: 'bg-cyan-100',    cardBorder: 'border-cyan-200',    focusRing: 'focus:ring-cyan-400' },
+    };
+
     return (
-      <div className="w-full max-w-6xl mx-auto h-full flex flex-col justify-center">
-        {/* Header Compacto */}
-        <div className="flex items-center justify-between mb-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-md">
-          <button
-            onClick={() => setMode("intro")}
-            className="text-gray-500 hover:text-white text-sm"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-              Define tu Integración
-              <span className="text-sm font-normal text-gray-400 bg-white/10 px-2 py-1 rounded-full">
-                {completedCount}/{FIELDS.length}
-              </span>
-            </h1>
-            <p className="text-gray-400 text-sm hidden md:block">
-              Rellena los 6 pilares de branding
-            </p>
-          </div>
+      <div className="w-full max-w-5xl mx-auto flex flex-col gap-5">
+        <div
+          className="relative rounded-3xl overflow-hidden shadow-2xl"
+          style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(255,245,248,0.95) 50%, rgba(255,248,240,0.95) 100%)' }}
+        >
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-rose-500 via-orange-500 to-amber-400" />
 
-          {/* Progress Bar Compacta */}
-          <div className="flex gap-1">
-            {FIELDS.map((f, index) => (
-              <div
-                key={index}
-                className={`w-6 h-2 rounded-full transition-all ${
-                  index < completedCount
-                    ? "bg-" +
-                      f.color +
-                      "-500 shadow-[0_0_10px_rgba(200,200,200,0.5)]"
-                    : "bg-white/10"
-                }`}
-                style={{
-                  backgroundColor: index < completedCount ? "" : undefined,
-                  opacity: index < completedCount ? 1 : 0.2,
-                }}
-              >
-                {/* Tailwind dynamic colors note: ensure safelist if needed, otherwise use style for dynamic colors if generic class names fail */}
-                <div
-                  className={`w-full h-full rounded-full bg-${f.color}-500`}
-                  style={{ display: index < completedCount ? "block" : "none" }}
-                ></div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Formulario en Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {FIELDS.map((field) => {
-            const value = inputs[field.id as keyof typeof inputs] || "";
-            const isFilled = value.trim().length > 0;
-
-            const colorStyle = COLOR_STYLES[field.color] || COLOR_STYLES.indigo;
-            const Icon = ICON_MAP[field.id] || Sparkles;
-
-            return (
-              <div
-                key={field.id}
-                className={`
-                  relative group transition-all duration-300
-                  bg-black/20 backdrop-blur-sm border rounded-xl p-4
-                  ${isFilled ? colorStyle.border : "border-white/5 hover:border-white/20"}
-                  ${isFilled ? colorStyle.bg.replace("/20", "/10") : ""}
-                `}
-              >
-                <div className="flex gap-3">
-                  {/* Icono */}
-                  <div
-                    className={`
-                      flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-all
-                      ${isFilled ? colorStyle.bg : "bg-white/5 group-hover:bg-white/10"}
-                      ${isFilled ? colorStyle.text : "text-gray-500 group-hover:text-gray-300"}
-                    `}
-                  >
-                    <Icon className="w-5 h-5" />
-                  </div>
-
-                  {/* Input Area */}
-                  <div className="flex-1 min-w-0">
-                    <label
-                      htmlFor={field.id}
-                      className={`
-                        block text-xs font-bold uppercase tracking-wider mb-1.5
-                        ${colorStyle.text}
-                      `}
-                    >
-                      {field.label}
-                    </label>
-
-                    <textarea
-                      id={field.id}
-                      value={value}
-                      onChange={(e) => handleChange(field.id, e.target.value)}
-                      placeholder={field.ex} // Usando el ejemplo como placeholder
-                      rows={2} // Altura fija pequeña
-                      className={`
-                        w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white 
-                        placeholder-gray-600 focus:outline-none focus:ring-1 focus:bg-black/60 transition-all resize-none
-                        ${isFilled ? "border-white/20" : ""}
-                        focus:ring-${field.color}-500
-                      `}
-                    />
-                  </div>
+          {/* Header */}
+          <div className="px-8 pt-7 pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <button onClick={() => setMode('intro')} className="text-gray-400 hover:text-gray-600">
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <div>
+                  <h1 className="text-2xl font-extrabold text-gray-800 flex items-center gap-3">
+                    <span className="text-3xl">🎨</span>
+                    Define tu Integración
+                    <span className="text-sm font-semibold text-gray-500 bg-gray-200 px-3 py-1 rounded-full">
+                      {completedCount}/{FIELDS.length}
+                    </span>
+                  </h1>
+                  <p className="text-gray-500 text-sm mt-1 hidden md:block">Rellena los 6 pilares de branding</p>
                 </div>
               </div>
-            );
-          })}
-        </div>
-
-        {/* Helper Note / Preview */}
-        {!isComplete && (
-          <div className="text-center text-sm text-gray-500 mb-6 font-mono">
-            💡 Completa los {FIELDS.length} campos para generar el prompt
-            perfecto.
+              <div className="flex gap-1.5">
+                {FIELDS.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-5 h-2.5 rounded-full transition-all duration-300 ${
+                      index < completedCount
+                        ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]'
+                        : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
-        )}
 
-        {/* Botones de acción */}
-        <div className="flex gap-4 justify-end items-center mt-auto">
-          <button
-            onClick={() => onGenerate(inputs)}
-            disabled={!isComplete}
-            className={`
-              group flex items-center gap-3 px-8 py-3 rounded-xl font-bold text-white transition-all
-              ${
+          {/* Field grid */}
+          <div className="px-8 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {FIELDS.map((field) => {
+              const value = inputs[field.id as keyof typeof inputs] || '';
+              const isFilled = value.trim().length > 0;
+              const s = fieldStyles[field.id] ?? fieldStyles.rol;
+              if (!s) return null;
+              const Icon = ICON_MAP[field.id] || Sparkles;
+
+              return (
+                <div
+                  key={field.id}
+                  className={`relative rounded-2xl border p-5 transition-all duration-300 hover:shadow-md ${
+                    isFilled ? `${s.filledBg} ${s.cardBorder}` : `${s.cardBg} border-transparent`
+                  }`}
+                >
+                  {isFilled && <Sparkles className={`absolute top-3 right-3 w-4 h-4 ${s.labelColor} opacity-60`} />}
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className={`w-9 h-9 rounded-xl ${s.iconBg} flex items-center justify-center shadow-md`}>
+                      <Icon className="w-4 h-4 text-white" />
+                    </div>
+                    <span className={`text-xs font-extrabold uppercase tracking-widest ${s.labelColor}`}>
+                      {field.label}
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    id={field.id}
+                    value={value}
+                    onChange={(e) => handleChange(field.id, e.target.value)}
+                    placeholder={field.ex}
+                    className={`w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 ${s.focusRing} focus:border-transparent transition-all duration-200 shadow-sm`}
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Vista Previa */}
+          <div className="px-8 pb-6">
+            <div className="flex items-start gap-4 rounded-2xl p-5 bg-gradient-to-r from-rose-50 to-orange-50 border border-rose-200">
+              <div className="w-10 h-10 rounded-xl bg-rose-500 flex items-center justify-center shadow-md flex-shrink-0">
+                <Eye className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-xs font-extrabold text-rose-700 uppercase tracking-widest mb-1">Vista Previa</h3>
+                <p className="text-gray-600 text-sm leading-relaxed truncate">
+                  {isComplete
+                    ? `Rol: ${inputs.rol}. Objetivo: ${inputs.obj}. Escena: ${inputs.esc}. Integración: ${inputs.int}. Estilo: ${inputs.est}. Salida: ${inputs.sal}.`
+                    : 'Completa los 6 campos para generar el prompt perfecto.'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Submit */}
+          <div className="px-8 pb-7 flex justify-end">
+            <button
+              onClick={() => onGenerate(inputs)}
+              disabled={!isComplete}
+              className={`group flex items-center gap-3 px-8 py-3.5 rounded-2xl font-bold text-white text-base transition-all duration-300 ${
                 isComplete
-                  ? "bg-gradient-to-r from-rose-600 to-orange-600 hover:scale-105 shadow-lg shadow-rose-900/20"
-                  : "bg-gray-800 text-gray-500 cursor-not-allowed"
-              }
-            `}
-          >
-            <span>Generar Prompt de Branding</span>
-            <Zap
-              className={`w-5 h-5 ${isComplete ? "group-hover:translate-x-1" : ""} transition-transform`}
-            />
-          </button>
+                  ? 'bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-400 hover:to-orange-400 hover:scale-[1.03] hover:shadow-xl shadow-lg shadow-rose-500/25'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              <span>Generar Prompt de Branding</span>
+              <Send className={`w-5 h-5 ${isComplete ? 'group-hover:translate-x-1' : ''} transition-transform`} />
+            </button>
+          </div>
         </div>
+
+        {/* Back button */}
+        <button
+          onClick={() => setMode('intro')}
+          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors self-start px-2 py-1"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          <span className="text-sm">Volver</span>
+        </button>
       </div>
     );
   },

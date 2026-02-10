@@ -1,30 +1,159 @@
 /**
  * @file PracticeScreen.tsx
- * @description Pantalla de práctica con formulario y timer
+ * @description Pantalla de práctica — diseño moderno con tarjetas coloridas
  */
 
-import React from "react";
-import { 
-  Send, 
-  LogOut, 
-  Sparkles, 
-  User, 
-  Target, 
-  MapPin, 
-  Heart, 
-  Palette, 
-  FileText 
-} from "lucide-react";
-import type { PracticeScreenProps } from "../types";
-import { UI_TEXTS, COLOR_STYLES } from "../constants";
+import React from 'react';
+import {
+  Send,
+  LogOut,
+  Sparkles,
+  User,
+  Target,
+  MapPin,
+  Heart,
+  Palette,
+  Hash,
+  Eye,
+} from 'lucide-react';
+import type { PracticeScreenProps } from '../types';
+import { UI_TEXTS } from '../constants';
 
-const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
-  rol: User,
-  objetivo: Target,
-  escena: MapPin,
-  emocion: Heart,
-  estilo: Palette,
-  salida: FileText,
+// Configuración visual por campo
+const FIELD_CONFIG: Record<
+  string,
+  {
+    icon: React.FC<{ className?: string }>;
+    iconBg: string;
+    labelColor: string;
+    cardBg: string;
+    cardBorder: string;
+    focusRing: string;
+    filledBg: string;
+  }
+> = {
+  rol: {
+    icon: User,
+    iconBg: 'bg-blue-500',
+    labelColor: 'text-blue-700',
+    cardBg: 'bg-blue-50',
+    cardBorder: 'border-blue-200',
+    focusRing: 'focus:ring-blue-400',
+    filledBg: 'bg-blue-100',
+  },
+  objetivo: {
+    icon: Target,
+    iconBg: 'bg-green-500',
+    labelColor: 'text-green-700',
+    cardBg: 'bg-green-50',
+    cardBorder: 'border-green-200',
+    focusRing: 'focus:ring-green-400',
+    filledBg: 'bg-green-100',
+  },
+  escena: {
+    icon: MapPin,
+    iconBg: 'bg-amber-500',
+    labelColor: 'text-amber-700',
+    cardBg: 'bg-amber-50',
+    cardBorder: 'border-amber-200',
+    focusRing: 'focus:ring-amber-400',
+    filledBg: 'bg-amber-100',
+  },
+  emocion: {
+    icon: Heart,
+    iconBg: 'bg-red-500',
+    labelColor: 'text-red-600',
+    cardBg: 'bg-red-50',
+    cardBorder: 'border-red-200',
+    focusRing: 'focus:ring-red-400',
+    filledBg: 'bg-red-100',
+  },
+  estilo: {
+    icon: Palette,
+    iconBg: 'bg-indigo-500',
+    labelColor: 'text-indigo-700',
+    cardBg: 'bg-indigo-50',
+    cardBorder: 'border-indigo-200',
+    focusRing: 'focus:ring-indigo-400',
+    filledBg: 'bg-indigo-100',
+  },
+  salida: {
+    icon: Hash,
+    iconBg: 'bg-pink-500',
+    labelColor: 'text-pink-600',
+    cardBg: 'bg-pink-50',
+    cardBorder: 'border-pink-200',
+    focusRing: 'focus:ring-pink-400',
+    filledBg: 'bg-pink-100',
+  },
+};
+
+// ── Composant carte-champ individuel ──
+interface FieldCardProps {
+  fieldKey: string;
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange: (_val: string) => void;
+}
+
+const FieldCard: React.FC<FieldCardProps> = ({
+  fieldKey,
+  label,
+  placeholder,
+  value,
+  onChange,
+}) => {
+  const config = FIELD_CONFIG[fieldKey] ?? FIELD_CONFIG.rol;
+  if (!config) return null;
+  const Icon = config.icon;
+  const isFilled = value.trim().length > 0;
+
+  return (
+    <div
+      className={`
+        relative rounded-2xl border p-5 transition-all duration-300
+        ${isFilled ? config.filledBg : config.cardBg}
+        ${isFilled ? config.cardBorder : 'border-transparent'}
+        hover:shadow-md
+      `}
+    >
+      {isFilled && (
+        <Sparkles
+          className={`absolute top-3 right-3 w-4 h-4 ${config.labelColor} opacity-60`}
+        />
+      )}
+
+      <div className="flex items-center gap-2.5 mb-3">
+        <div
+          className={`w-9 h-9 rounded-xl ${config.iconBg} flex items-center justify-center shadow-md`}
+        >
+          <Icon className="w-4.5 h-4.5 text-white" />
+        </div>
+        <span
+          className={`text-xs font-extrabold uppercase tracking-widest ${config.labelColor}`}
+        >
+          {label.split(' - ')[0]}
+        </span>
+      </div>
+
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={`
+          w-full bg-white border border-gray-200 rounded-xl
+          px-4 py-3 text-sm text-gray-800
+          placeholder-gray-400
+          focus:outline-none focus:ring-2 ${config.focusRing}
+          focus:border-transparent
+          transition-all duration-200
+          shadow-sm
+        `}
+      />
+    </div>
+  );
 };
 
 const PracticeScreenComponent: React.FC<PracticeScreenProps> = ({
@@ -35,7 +164,6 @@ const PracticeScreenComponent: React.FC<PracticeScreenProps> = ({
 }) => {
   const { practice } = UI_TEXTS;
 
-  // Verificar si todos los campos están completos
   const isComplete = Object.values(answers).every(
     (value) => value && value.trim().length > 0,
   );
@@ -44,153 +172,136 @@ const PracticeScreenComponent: React.FC<PracticeScreenProps> = ({
   ).length;
 
   return (
-    <div className="w-full max-w-6xl mx-auto h-full flex flex-col justify-center">
-      {/* Header Compacto */}
-      <div className="flex items-center justify-between mb-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-md">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            {practice.title}
-            <span className="text-sm font-normal text-gray-400 bg-white/10 px-2 py-1 rounded-full">
-              {completedCount}/{practice.fields.length}
-            </span>
-          </h1>
-          <p className="text-gray-400 text-sm hidden md:block">{practice.subtitle}</p>
+    <div className="w-full max-w-5xl mx-auto flex flex-col gap-5">
+      {/* ═══ Carte principale ═══ */}
+      <div
+        className="relative rounded-3xl overflow-hidden shadow-2xl"
+        style={{
+          background:
+            'linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(240,238,255,0.95) 50%, rgba(255,240,245,0.95) 100%)',
+        }}
+      >
+        {/* Bandeau décoratif supérieur */}
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+
+        {/* ── Header ── */}
+        <div className="px-8 pt-7 pb-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-extrabold text-gray-800 flex items-center gap-3">
+                <span className="text-3xl">✍️</span>
+                {practice.title}
+                <span
+                  className="text-sm font-semibold text-gray-500
+                    bg-gray-200 px-3 py-1 rounded-full"
+                >
+                  {completedCount}/{practice.fields.length}
+                </span>
+              </h1>
+              <p className="text-gray-500 text-sm mt-1 hidden md:block">
+                {practice.subtitle}
+              </p>
+            </div>
+
+            {/* Progress dots */}
+            <div className="flex gap-1.5">
+              {practice.fields.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-5 h-2.5 rounded-full transition-all duration-300 ${
+                    index < completedCount
+                      ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
+                      : 'bg-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
-        
-        {/* Progress Bar Compacta */}
-        <div className="flex gap-1">
-          {practice.fields.map((_, index) => (
-            <div
-              key={index}
-              className={`w-6 h-2 rounded-full transition-all ${
-                index < completedCount ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" : "bg-white/10"
-              }`}
+
+        {/* ── Grille de champs ── */}
+        <div className="px-8 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {practice.fields.map((field) => (
+            <FieldCard
+              key={field.key}
+              fieldKey={field.key}
+              label={field.label}
+              placeholder={field.placeholder}
+              value={answers[field.key as keyof typeof answers] || ''}
+              onChange={(val) =>
+                onAnswerChange(
+                  field.key as keyof typeof answers,
+                  val,
+                )
+              }
             />
           ))}
         </div>
-      </div>
 
-      {/* Formulario en Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {practice.fields.map((field) => {
-          const value = answers[field.key as keyof typeof answers] || "";
-          const isFilled = value.trim().length > 0;
-          
-          // Mapeo seguro de color
-          const colorKey =
-            field.key === "rol"
-              ? "blue"
-              : field.key === "objetivo"
-                ? "emerald"
-                : field.key === "escena" || field.key === "emocion"
-                  ? "amber"
-                  : field.key === "estilo"
-                    ? "purple"
-                    : "pink";
-          
-          const colorStyle = COLOR_STYLES[colorKey];
-          const Icon = ICON_MAP[field.key] || Sparkles;
-
-          return (
-            <div
-              key={field.key}
-              className={`
-                relative group transition-all duration-300
-                bg-black/20 backdrop-blur-sm border rounded-xl p-4
-                ${isFilled ? colorStyle.border : "border-white/5 hover:border-white/20"}
-                ${isFilled ? colorStyle.bg.replace('/20', '/10') : ""}
-              `}
-            >
-              <div className="flex gap-3">
-                {/* Icono */}
-                <div
-                  className={`
-                    flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-all
-                    ${isFilled ? colorStyle.bg : "bg-white/5 group-hover:bg-white/10"}
-                    ${isFilled ? colorStyle.text : "text-gray-500 group-hover:text-gray-300"}
-                  `}
-                >
-                  <Icon className="w-5 h-5" />
-                </div>
-
-                {/* Input Area */}
-                <div className="flex-1 min-w-0">
-                  <label
-                    htmlFor={field.key}
-                    className={`
-                      block text-xs font-bold uppercase tracking-wider mb-1.5
-                      ${colorStyle.text}
-                    `}
-                  >
-                    {field.label.split("-")[0]} {/* Solo mostramos el nombre corto */}
-                  </label>
-
-                  <textarea
-                    id={field.key}
-                    value={value}
-                    onChange={(e) =>
-                      onAnswerChange(field.key as any, e.target.value)
-                    }
-                    placeholder={field.placeholder}
-                    rows={2} // Altura fija pequeña
-                    className={`
-                      w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white 
-                      placeholder-gray-600 focus:outline-none focus:ring-1 focus:bg-black/60 transition-all resize-none
-                      ${isFilled ? "border-white/20" : ""}
-                      focus:${colorStyle.border.replace('border-', 'ring-')}
-                    `}
-                  />
-                </div>
-              </div>
+        {/* ── Vista Previa ── */}
+        <div className="px-8 pb-6">
+          <div
+            className="flex items-start gap-4 rounded-2xl p-5
+              bg-gradient-to-r from-teal-50 to-cyan-50
+              border border-teal-200"
+          >
+            <div className="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center shadow-md flex-shrink-0">
+              <Eye className="w-5 h-5 text-white" />
             </div>
-          );
-        })}
-      </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-xs font-extrabold text-teal-700 uppercase tracking-widest mb-1">
+                Vista Previa
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed truncate">
+                {isComplete
+                  ? `Actúa como ${answers.rol}. ${answers.objetivo}. La escena es ${answers.escena}. Transmite ${answers.emocion}. Estilo: ${answers.estilo}. Formato: ${answers.salida}.`
+                  : 'Actúa como... La escena es...'}
+              </p>
+            </div>
+          </div>
+        </div>
 
-      {/* Vista previa del prompt (si está completo o casi completo) */}
-      <div className={`transition-all duration-500 overflow-hidden ${isComplete ? "max-h-40 opacity-100 mb-6" : "max-h-0 opacity-0"}`}>
-        <div className="bg-gradient-to-r from-emerald-900/30 to-blue-900/30 border border-emerald-500/20 rounded-xl p-4 flex items-start gap-4">
-          <div className="bg-emerald-500/20 p-2 rounded-lg">
-             <Sparkles className="w-5 h-5 text-emerald-400" />
-          </div>
-          <div>
-            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">
-              Vista Previa
-            </h3>
-            <p className="text-gray-300 text-sm leading-relaxed line-clamp-2">
-              Actúa como {answers.rol}. {answers.objetivo}. La escena es {answers.escena}...
-            </p>
-          </div>
+        {/* ── Bouton Generar ── */}
+        <div className="px-8 pb-7 flex justify-end">
+          <button
+            onClick={onSubmit}
+            disabled={!isComplete}
+            className={`
+              group flex items-center gap-3 px-8 py-3.5 rounded-2xl
+              font-bold text-white text-base transition-all duration-300
+              ${
+                isComplete
+                  ? `bg-gradient-to-r from-teal-500 to-blue-500
+                     hover:from-teal-400 hover:to-blue-400
+                     hover:scale-[1.03] hover:shadow-xl
+                     shadow-lg shadow-teal-500/25`
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }
+            `}
+          >
+            <span>{practice.submitButton}</span>
+            <Send
+              className={`w-5 h-5 ${
+                isComplete
+                  ? 'group-hover:translate-x-1'
+                  : ''
+              } transition-transform`}
+            />
+          </button>
         </div>
       </div>
 
-      {/* Botones de acción */}
-      <div className="flex gap-4 justify-between items-center mt-auto">
-        <button
-          onClick={onExit}
-          className="flex items-center gap-2 px-6 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"
-        >
-          <LogOut className="w-5 h-5" />
-          <span className="hidden sm:inline">{practice.exitButton}</span>
-        </button>
-
-        <button
-          onClick={onSubmit}
-          disabled={!isComplete}
-          className={`
-            group flex items-center gap-3 px-8 py-3 rounded-xl font-bold text-white transition-all
-            ${isComplete 
-              ? "bg-gradient-to-r from-emerald-500 to-blue-500 hover:scale-105 shadow-lg shadow-emerald-500/20" 
-              : "bg-gray-800 text-gray-500 cursor-not-allowed"}
-          `}
-        >
-          <span>{practice.submitButton}</span>
-          <Send className={`w-5 h-5 ${isComplete ? "group-hover:translate-x-1" : ""} transition-transform`} />
-        </button>
-      </div>
+      {/* ── Bouton Salir (extérieur) ── */}
+      <button
+        onClick={onExit}
+        className="flex items-center gap-2 text-gray-400 hover:text-white
+          transition-colors self-start px-2 py-1"
+      >
+        <LogOut className="w-4 h-4" />
+        <span className="text-sm">{practice.exitButton}</span>
+      </button>
     </div>
   );
 };
 
-// Exportar con React.memo para evitar re-renders innecesarios
 export const PracticeScreen = React.memo(PracticeScreenComponent);
