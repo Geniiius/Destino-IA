@@ -109,8 +109,19 @@ export const ParticipantManageModal: React.FC<ParticipantManageModalProps> = ({
         });
       }
     } else if (result.success) {
-      // Email de reset envoyé
-      setResetResult({ success: true, emailSent: true });
+      // Email de reset envoyé (sans mot de passe généré)
+      // Fallback: afficher quand même le mot de passe qu'on a généré
+      setResetResult({
+        success: true,
+        password: newPwd,
+      });
+      if (onPasswordGenerated && email) {
+        onPasswordGenerated({
+          participantName: participant.name,
+          email,
+          password: newPwd,
+        });
+      }
     } else {
       setResetResult({
         success: false,

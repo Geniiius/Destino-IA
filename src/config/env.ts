@@ -12,6 +12,7 @@ interface EnvConfig {
   // Supabase
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
+  SUPABASE_SERVICE_ROLE_KEY: string;
 
   // App
   APP_ENV: "development" | "staging" | "production";
@@ -52,6 +53,7 @@ export const env: EnvConfig = {
   // Supabase
   SUPABASE_URL: getEnvVar("VITE_SUPABASE_URL", ""),
   SUPABASE_ANON_KEY: getEnvVar("VITE_SUPABASE_ANON_KEY", ""),
+  SUPABASE_SERVICE_ROLE_KEY: getEnvVar("VITE_SUPABASE_SERVICE_ROLE_KEY", ""),
 
   // App
   APP_ENV: getEnvVar("VITE_APP_ENV", "development") as EnvConfig["APP_ENV"],
@@ -68,7 +70,7 @@ export function validateEnv(): void {
   // Supabase est optionnel
   if (!env.SUPABASE_URL && env.ENABLE_REALTIME) {
     console.warn(
-      "⚠️ Supabase non configuré - Les fonctionnalités realtime seront désactivées."
+      "⚠️ Supabase non configuré - Les fonctionnalités realtime seront désactivées.",
     );
   }
 }
