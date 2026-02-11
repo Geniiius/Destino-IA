@@ -67,12 +67,10 @@ BEGIN
     );
   END IF;
 
-  -- 4. Mettre à jour le mot de passe via la fonction interne de Supabase
-  -- La colonne encrypted_password utilise bcrypt (extension pgcrypto)
+  -- 4. Mettre à jour le mot de passe via bcrypt (extension pgcrypto)
   UPDATE auth.users
   SET
     encrypted_password = crypt(new_password, gen_salt('bf')),
-    password_hash = NULL,
     updated_at = now()
   WHERE id = target_user_id;
 
