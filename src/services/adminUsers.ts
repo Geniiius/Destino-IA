@@ -143,16 +143,17 @@ export function generatePassword(length = 10): string {
 }
 
 /**
- * Réinitialise le mot de passe d'un participant via Supabase Admin API.
+ * Réinitialise le mot de passe d'un participant via Supabase.
  *
- * IMPORTANT : Cette fonction utilise l'API client. Pour une vraie
- * réinitialisation côté serveur, il faudrait une Edge Function avec
- * le service_role key. Ici, on envoie un email de réinitialisation
- * OU on génère un nouveau mot de passe si possible.
+ * Approche 1 (prioritaire) : Database RPC « admin_reset_user_password »
+ *   → fonction PL/pgSQL SECURITY DEFINER, pas besoin de service_role
+ * Approche 2 (fallback)    : Edge Function « admin-reset-password »
+ *   → côté serveur avec service_role key
+ * Approche 3 (fallback)    : API Admin REST directe
+ *   → nécessite VITE_SUPABASE_SERVICE_ROLE_KEY dans l'env
+ * Approche 4 (sans newPassword) : Envoyer un email de reset
  *
- * Option 1 (par défaut) : Envoyer un email de reset
- * Option 2 (newPassword fourni) : Mettre à jour directement
- *   → nécessite une Edge Function ou accès admin
+ * IMPORTANT : Si aucune approche ne réussit, on retourne success: false.
  */
 export async function adminResetPassword(
   email: string,
@@ -164,85 +165,25 @@ export async function adminResetPassword(
 }> {
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return { success: false, error: "Supabase non configuré" };
+    return { success: false, error: 'Supabase non configuré' };
   }
 
   try {
     if (newPassword) {
-      // ─── Approche 1 : API Admin REST avec service_role key ───
-      if (env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY) {
-        try {
-          // D'abord, trouver le user ID par email
-          const listRes = await fetch(
-            `${env.SUPABASE_URL}/auth/v1/admin/users?page=1&per_page=50`,
-            {
-              headers: {
-                Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-                apikey: env.SUPABASE_SERVICE_ROLE_KEY,
-              },
-            },
-          );
-
-          if (listRes.ok) {
-            const listData = await listRes.json();
-            const users = listData.users || listData;
-            const targetUser = (Array.isArray(users) ? users : []).find(
-              (u: { email?: string }) =>
-                u.email?.toLowerCase() === email.toLowerCase().trim(),
-            );
-
-            if (targetUser) {
-              // Mettre à jour le mot de passe via l'API Admin
-              const updateRes = await fetch(
-                `${env.SUPABASE_URL}/auth/v1/admin/users/${targetUser.id}`,
-                {
-                  method: "PUT",
-                  headers: {
-                    Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-                    apikey: env.SUPABASE_SERVICE_ROLE_KEY,
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({ password: newPassword }),
-                },
-              );
-
-              if (updateRes.ok) {
-                console.log(
-                  "[AdminUsers] Mot de passe mis à jour via Admin API",
-                );
-                return {
-                  success: true,
-                  generatedPassword: newPassword,
-                  error: null,
-                };
-              }
-
-              console.warn(
-                "[AdminUsers] Admin API update failed:",
-                updateRes.status,
-              );
-            } else {
-              console.warn(
-                "[AdminUsers] Utilisateur non trouvé par email:",
-                email,
-              );
-            }
-          }
-        } catch (adminErr) {
-          console.warn("[AdminUsers] Admin API non dispo, fallback:", adminErr);
-        }
-      }
-
-      // ─── Approche 2 : Edge Function (si déployée) ───
+      // ─── Approche 1 : Database RPC (la plus simple et sécurisée) ───
       try {
-        const { error } = await supabase.functions.invoke(
-          "admin-reset-password",
+        const { data, error } = await supabase.rpc(
+          'admin_reset_user_password',
           {
-            body: { email, newPassword },
+            target_email: email,
+            new_password: newPassword,
           },
         );
 
-        if (!error) {
+        if (!error && data?.success) {
+          console.log(
+            '[AdminUsers] Mot de passe mis à jour via RPC',
+          );
           return {
             success: true,
             generatedPassword: newPassword,
@@ -250,18 +191,85 @@ export async function adminResetPassword(
           };
         }
 
+        if (error) {
+          console.warn(
+            '[AdminUsers] RPC non dispo, tentative Edge Function:',
+            error.message,
+          );
+        } else if (data?.error) {
+          // La RPC existe mais a retourné une erreur métier
+          return {
+            success: false,
+            error: data.error,
+          };
+        }
+      } catch (rpcErr) {
         console.warn(
-          "[AdminUsers] Edge Function non dispo, fallback email:",
-          error,
-        );
-      } catch {
-        console.warn(
-          "[AdminUsers] Edge Function non dispo, fallback email reset",
+          '[AdminUsers] RPC non disponible:',
+          rpcErr,
         );
       }
+
+      // ─── Approche 2 : Edge Function (côté serveur) ───
+      try {
+        const { data, error } = await supabase.functions.invoke(
+          'admin-reset-password',
+          {
+            body: { email, newPassword },
+          },
+        );
+
+        if (!error && data?.success) {
+          console.log(
+            '[AdminUsers] Mot de passe mis à jour via Edge Function',
+          );
+          return {
+            success: true,
+            generatedPassword: newPassword,
+            error: null,
+          };
+        }
+
+        if (error) {
+          console.warn(
+            '[AdminUsers] Edge Function erreur:',
+            error,
+          );
+        }
+      } catch (edgeFnErr) {
+        console.warn(
+          '[AdminUsers] Edge Function non disponible:',
+          edgeFnErr,
+        );
+      }
+
+      // ─── Approche 3 : API Admin REST avec service_role key ───
+      if (env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY) {
+        const updated = await tryAdminApiPasswordUpdate(
+          email,
+          newPassword,
+        );
+        if (updated) {
+          return {
+            success: true,
+            generatedPassword: newPassword,
+            error: null,
+          };
+        }
+      }
+
+      // ─── Aucune approche n'a fonctionné ───
+      return {
+        success: false,
+        generatedPassword: newPassword,
+        error:
+          'Impossible de mettre à jour le mot de passe. ' +
+          'Exécutez la migration 006_admin_reset_password.sql ' +
+          'dans le SQL Editor de Supabase Dashboard.',
+      };
     }
 
-    // Fallback : envoyer un email de réinitialisation
+    // Sans newPassword : envoyer un email de réinitialisation
     const { error } = await supabase.auth.resetPasswordForEmail(
       email.toLowerCase().trim(),
       {
@@ -270,28 +278,73 @@ export async function adminResetPassword(
     );
 
     if (error) {
-      // Même si l'email échoue, retourner le mot de passe généré
-      // pour que l'admin puisse le communiquer manuellement
-      if (newPassword) {
-        return {
-          success: true,
-          generatedPassword: newPassword,
-          error: null,
-        };
-      }
       return { success: false, error: error.message };
     }
 
-    // Retourner le mot de passe généré même en fallback email
-    return {
-      success: true,
-      generatedPassword: newPassword || undefined,
-      error: null,
-    };
+    return { success: true, error: null };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Erreur inconnue";
-    console.error("[AdminUsers] Erreur reset password:", msg);
+    const msg = err instanceof Error ? err.message : 'Erreur inconnue';
+    console.error('[AdminUsers] Erreur reset password:', msg);
     return { success: false, error: msg };
+  }
+}
+
+/**
+ * Tentative de mise à jour du mot de passe via l'API Admin REST.
+ * Extraite pour réduire la complexité de adminResetPassword.
+ */
+async function tryAdminApiPasswordUpdate(
+  email: string,
+  newPassword: string,
+): Promise<boolean> {
+  try {
+    const listRes = await fetch(
+      `${env.SUPABASE_URL}/auth/v1/admin/users?page=1&per_page=50`,
+      {
+        headers: {
+          Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+          apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+        },
+      },
+    );
+
+    if (!listRes.ok) return false;
+
+    const listData = await listRes.json();
+    const users = listData.users || listData;
+    const targetUser = (Array.isArray(users) ? users : []).find(
+      (u: { email?: string }) =>
+        u.email?.toLowerCase() === email.toLowerCase().trim(),
+    );
+
+    if (!targetUser) {
+      console.warn('[AdminUsers] Utilisateur non trouvé:', email);
+      return false;
+    }
+
+    const updateRes = await fetch(
+      `${env.SUPABASE_URL}/auth/v1/admin/users/${targetUser.id}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+          apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password: newPassword }),
+      },
+    );
+
+    if (updateRes.ok) {
+      console.log('[AdminUsers] Mot de passe mis à jour via Admin API');
+      return true;
+    }
+
+    console.warn('[AdminUsers] Admin API update failed:', updateRes.status);
+    return false;
+  } catch (adminErr) {
+    console.warn('[AdminUsers] Admin API erreur:', adminErr);
+    return false;
   }
 }
 

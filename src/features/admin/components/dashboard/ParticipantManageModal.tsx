@@ -94,35 +94,43 @@ export const ParticipantManageModal: React.FC<ParticipantManageModalProps> = ({
 
     const newPwd = generatePassword(10);
 
-    // Toujours afficher le mot de passe immédiatement
-    setResetResult({
-      success: true,
-      password: newPwd,
-    });
-
-    // Notifier le dashboard pour garder un historique
-    if (onPasswordGenerated && email) {
-      onPasswordGenerated({
-        participantName: participant.name,
-        email,
-        password: newPwd,
-      });
-    }
-
-    // Tenter de mettre à jour côté serveur (en arrière-plan)
     try {
+      // Attendre la confirmation du serveur AVANT d'afficher le mot de passe
       const result = await adminResetPassword(email, newPwd);
-      if (!result.success) {
-        console.warn(
-          "[ParticipantManage] Server password update failed, but password is shown to admin:",
-          result.error,
-        );
+
+      if (result.success) {
+        // Le mot de passe a été réellement mis à jour dans Supabase Auth
+        setResetResult({
+          success: true,
+          password: newPwd,
+        });
+
+        // Notifier le dashboard pour garder un historique
+        if (onPasswordGenerated && email) {
+          onPasswordGenerated({
+            participantName: participant.name,
+            email,
+            password: newPwd,
+          });
+        }
+      } else {
+        // Échec de synchronisation — ne PAS afficher le mot de passe
+        // car il ne fonctionnera pas pour le login
+        setResetResult({
+          success: false,
+          error:
+            result.error ||
+            "Le mot de passe n'a pas pu être synchronisé avec l'authentification.",
+        });
       }
     } catch (err) {
-      console.warn(
-        "[ParticipantManage] Server error during password reset:",
-        err,
-      );
+      setResetResult({
+        success: false,
+        error:
+          err instanceof Error
+            ? err.message
+            : "Erreur lors de la réinitialisation du mot de passe.",
+      });
     }
 
     setIsResetting(false);
