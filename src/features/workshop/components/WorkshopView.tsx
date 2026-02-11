@@ -236,10 +236,10 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
       </header>
 
       {/* ── Contenu principal ────────────────────── */}
-      <main className="flex-1 flex flex-col min-h-0">
+      <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* MODE PRÉSENTATION */}
         {state.current_mode === "presentation" && (
-          <div className="w-full flex-1 p-4">
+          <div className="w-full flex-1 min-h-0 p-2 sm:p-3 md:p-4">
             <SlidePresenter
               slideIndex={state.current_slide_index}
               preloadAhead={5}

@@ -130,7 +130,7 @@ const App: React.FC = () => {
     <div
       className={`bg-[#050508] relative ${
         isFullScreenView
-          ? "h-full flex flex-col"
+          ? "h-full flex flex-col overflow-hidden"
           : "min-h-screen overflow-hidden flex flex-col items-center justify-center"
       }`}
     >

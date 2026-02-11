@@ -144,7 +144,7 @@ export const SlidePresenter: React.FC<SlidePresenterProps> = memo(
     // ── Mode normal (plein écran) ───────────────
 
     return (
-      <div className={`relative w-full h-full flex items-center justify-center ${className}`}>
+      <div className={`relative w-full h-full flex items-center justify-center overflow-hidden ${className}`}>
         {/* Loader pendant le chargement */}
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-2xl z-10">
@@ -163,12 +163,12 @@ export const SlidePresenter: React.FC<SlidePresenterProps> = memo(
           </div>
         )}
 
-        {/* Image du slide */}
+        {/* Image du slide — s'adapte automatiquement à l'écran */}
         {currentSrc && (
           <img
             src={currentSrc}
             alt={`Slide ${slideIndex}`}
-            className={`max-w-full max-h-full object-contain rounded-lg shadow-2xl border border-white/10 transition-opacity duration-300 ${
+            className={`w-full h-full object-contain rounded-lg shadow-2xl border border-white/10 transition-opacity duration-300 ${
               isLoading ? 'opacity-0' : 'opacity-100'
             }`}
             onLoad={handleImageLoad}
