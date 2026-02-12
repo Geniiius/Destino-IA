@@ -1,9 +1,9 @@
 /**
  * @file features/auth/components/JoinForm.tsx
- * @description Formulaire d'inscription/connexion pour participants
+ * @description Formulario de inscripción/inicio de sesión para participantes
  *
- * Utilise Supabase Auth pour créer un vrai compte.
- * Fallback vers l'ancien système si Supabase non configuré.
+ * Utiliza Supabase Auth para crear una cuenta real.
+ * Fallback al sistema antiguo si Supabase no está configurado.
  */
 
 import React, { useState } from "react";
@@ -63,32 +63,32 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
     const trimmedName = name.trim();
     const trimmedEmail = email.trim().toLowerCase();
 
-    // Validations communes
+    // Validaciones comunes
     if (mode === "signup" && trimmedName.length < LIMITS.MIN_NAME_LENGTH) {
       setError(
-        `Le nom doit contenir au moins ${LIMITS.MIN_NAME_LENGTH} caractères`,
+        `El nombre debe contener al menos ${LIMITS.MIN_NAME_LENGTH} caracteres`,
       );
       return;
     }
     if (mode === "signup" && trimmedName.length > LIMITS.MAX_NAME_LENGTH) {
       setError(
-        `Le nom ne peut pas dépasser ${LIMITS.MAX_NAME_LENGTH} caractères`,
+        `El nombre no puede superar ${LIMITS.MAX_NAME_LENGTH} caracteres`,
       );
       return;
     }
     if (!trimmedEmail) {
-      setError("L'email est obligatoire");
+      setError("El correo electrónico es obligatorio");
       return;
     }
     if (!validateEmail(trimmedEmail)) {
-      setError("Veuillez entrer un email valide");
+      setError("Por favor ingresa un correo electrónico válido");
       return;
     }
 
     if (useSupabaseAuth) {
-      // Validation mot de passe
+      // Validación contraseña
       if (!password || password.length < 6) {
-        setError("Le mot de passe doit contenir au moins 6 caractères");
+        setError("La contraseña debe contener al menos 6 caracteres");
         return;
       }
 
@@ -101,7 +101,7 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
           trimmedName,
         );
         if (!ok) {
-          setError(authError || "Erreur lors de l'inscription");
+          setError(authError || "Error al inscribirse");
           setIsLoading(false);
           return;
         }
@@ -117,7 +117,7 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
         } catch (e) {
           console.warn("Participant table sync:", e);
         }
-        setSuccess("Inscription réussie ! Redirection...");
+        setSuccess("¡Inscripción exitosa! Redirigiendo...");
         setTimeout(() => {
           onJoin(trimmedName, trimmedEmail, auth.user?.id, participantTableId);
         }, 800);
@@ -127,7 +127,7 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
           password,
         );
         if (!ok) {
-          setError(authError || "Erreur de connexion");
+          setError(authError || "Error de conexión");
           setIsLoading(false);
           return;
         }
@@ -199,12 +199,12 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-white">
-              {mode === "signup" ? "Rejoindre l'atelier" : "Se reconnecter"}
+              {mode === "signup" ? "Unirse al taller" : "Reconectarse"}
             </h2>
             <p className="text-gray-400 text-sm">
               {mode === "signup"
-                ? "Créez votre compte pour participer"
-                : "Retrouvez votre session"}
+                ? "Crea tu cuenta para participar"
+                : "Recupera tu sesión"}
             </p>
           </div>
         </div>
@@ -218,7 +218,7 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
                 htmlFor="name"
                 className="block text-sm font-medium text-gray-300 mb-2"
               >
-                Votre nom
+                Tu nombre
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-30" />
@@ -244,7 +244,7 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
               htmlFor="email"
               className="block text-sm font-medium text-gray-300 mb-2"
             >
-              Email
+              Correo electrónico
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-30" />
@@ -270,7 +270,7 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-300 mb-2"
               >
-                Mot de passe
+                Contraseña
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-30" />
@@ -283,8 +283,8 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
                   onBlur={() => setIsFocused(false)}
                   placeholder={
                     mode === "signup"
-                      ? "Minimum 6 caractères"
-                      : "Votre mot de passe"
+                      ? "Mínimo 6 caracteres"
+                      : "Tu contraseña"
                   }
                   className="input-elegant pl-11 pr-11 relative z-30 bg-black/80 backdrop-blur-md"
                   autoComplete={
@@ -306,7 +306,7 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
               </div>
               {mode === "signup" && (
                 <p className="mt-1.5 text-xs text-gray-500">
-                  Ce mot de passe vous permettra de vous reconnecter
+                  Esta contraseña te permitirá reconectarte
                 </p>
               )}
             </div>
@@ -332,7 +332,7 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
               disabled={isLoading}
               className="btn-elegant-secondary flex-1 py-4 disabled:opacity-50"
             >
-              Retour
+              Volver
             </button>
             <button
               type="submit"
@@ -342,11 +342,11 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  {mode === "signup" ? "Inscription..." : "Connexion..."}
+                  {mode === "signup" ? "Inscribiendo..." : "Conectando..."}
                 </>
               ) : (
                 <>
-                  {mode === "signup" ? "S'inscrire" : "Se connecter"}
+                  {mode === "signup" ? "Inscribirse" : "Conectarse"}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -362,8 +362,8 @@ export const JoinForm: React.FC<JoinFormProps> = ({ onJoin }) => {
                 className="text-gray-500 text-sm hover:text-emerald-400 transition-colors"
               >
                 {mode === "signup"
-                  ? "Déjà inscrit ? Se connecter"
-                  : "Pas encore de compte ? S'inscrire"}
+                  ? "¿Ya registrado? Conectarse"
+                  : "¿Aún no tienes cuenta? Inscribirse"}
               </button>
             </div>
           )}

@@ -1,10 +1,10 @@
 /**
  * @file features/admin/components/AdminAuth.tsx
- * @description Gate d'authentification admin via Supabase Auth
+ * @description Puerta de autenticación admin vía Supabase Auth
  *
- * Utilise Supabase Auth pour une vraie authentification.
- * Seuls les utilisateurs avec role='admin' peuvent accéder au dashboard.
- * Fallback vers mot de passe simple si Supabase non configuré.
+ * Utiliza Supabase Auth para una autenticación real.
+ * Solo los usuarios con role='admin' pueden acceder al dashboard.
+ * Fallback a contraseña simple si Supabase no está configurado.
  */
 
 import React, { useState, useEffect } from "react";
@@ -74,7 +74,7 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ children }) => {
       );
 
       if (!success) {
-        setError(authError || "Connexion échouée");
+        setError(authError || "Conexión fallida");
         setPassword("");
         setIsLoading(false);
         return;
@@ -90,7 +90,7 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ children }) => {
         sessionStorage.setItem(STORAGE_KEY, "true");
         setFallbackAuth(true);
       } else {
-        setError("Mot de passe incorrect");
+        setError("Contraseña incorrecta");
         setPassword("");
       }
       setIsLoading(false);
@@ -140,17 +140,17 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ children }) => {
             <ShieldCheck className="w-8 h-8 text-red-400" strokeWidth={1.5} />
           </div>
           <h2 className="text-xl font-semibold text-white mb-2">
-            Accès refusé
+            Acceso denegado
           </h2>
           <p className="text-gray-500 text-sm mb-6">
-            Ce compte n'a pas les droits administrateur.
+            Esta cuenta no tiene permisos de administrador.
           </p>
           <div className="flex gap-3">
             <button
               onClick={handleSignOut}
               className="flex-1 px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white text-sm transition-all"
             >
-              Se déconnecter
+              Cerrar sesión
             </button>
             <button
               onClick={() => {
@@ -158,7 +158,7 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ children }) => {
               }}
               className="flex-1 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 rounded-xl text-white text-sm transition-all"
             >
-              Aller à l'atelier
+              Ir al taller
             </button>
           </div>
         </div>
@@ -213,7 +213,7 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ children }) => {
             Administration
           </h1>
           <p className="text-gray-500 text-sm mt-2 font-light">
-            Accès sécurisé au panel de contrôle
+            Acceso seguro al panel de control
           </p>
         </div>
 
@@ -232,7 +232,7 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ children }) => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email administrateur"
+                placeholder="Correo electrónico del administrador"
                 autoFocus
                 disabled={isLoading}
                 className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/30 focus:bg-white/[0.05] transition-all duration-300 text-sm tracking-wide disabled:opacity-50 hover:border-white/10"
@@ -247,7 +247,7 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ children }) => {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Mot de passe"
+              placeholder="Contraseña"
               autoFocus={!useSupabaseAuth}
               disabled={isLoading}
               className={`w-full bg-white/[0.03] border rounded-xl pl-11 pr-12 py-3.5 text-white placeholder-gray-600 focus:outline-none transition-all duration-300 text-sm tracking-wide disabled:opacity-50 ${
@@ -294,7 +294,7 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ children }) => {
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <>
-                <span>Accéder au panel</span>
+                <span>Acceder al panel</span>
                 <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
               </>
             )}
@@ -313,7 +313,7 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ children }) => {
             }}
             className="text-gray-600 text-xs hover:text-gray-400 transition-colors duration-300 font-light tracking-wide"
           >
-            ← Retour à l'accueil
+            ← Volver al inicio
           </button>
         </div>
 
@@ -325,7 +325,7 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ children }) => {
         >
           <div className="w-1 h-1 rounded-full bg-emerald-500/40" />
           <span className="text-[10px] text-gray-700 font-light tracking-wider uppercase">
-            {useSupabaseAuth ? "Authentification Supabase" : "Mode local"}
+            {useSupabaseAuth ? "Autenticación Supabase" : "Modo local"}
           </span>
           <div className="w-1 h-1 rounded-full bg-emerald-500/40" />
         </div>
