@@ -140,9 +140,9 @@ const App: React.FC = () => {
       {/* Background Ambience (home/join uniquement) */}
       {!isFullScreenView && (
         <>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.04)_0%,transparent_70%)] pointer-events-none" />
-          <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-emerald-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
-          <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-emerald-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.03)_0%,transparent_70%)] pointer-events-none" />
+          <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-cyan-500/[0.02] rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-sky-500/[0.02] rounded-full blur-[120px] pointer-events-none" />
         </>
       )}
 

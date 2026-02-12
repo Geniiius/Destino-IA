@@ -1,0 +1,10 @@
+<svg width="283" height="160" viewBox="0 0 283 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Destino text in white italic -->
+  <text x="10" y="55" font-family="Arial, sans-serif" font-size="56" font-weight="900" font-style="italic" fill="white">Destino</text>
+  
+  <!-- IA text in emerald green -->
+  <text x="100" y="115" font-family="Arial, sans-serif" font-size="48" font-weight="900" font-style="italic" fill="#10b981">IA</text>
+  
+  <!-- Green line under IA -->
+  <line x1="100" y1="125" x2="205" y2="125" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
+</svg>
