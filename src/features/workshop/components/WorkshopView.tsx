@@ -1,13 +1,13 @@
 /**
  * @file features/workshop/components/WorkshopView.tsx
- * @description Vue participant - suit la session en temps réel
+ * @description Vista participante - sigue la sesión en tiempo real
  *
- * Fonctionnalités :
- * - Affiche le slide courant synchronisé par l'admin
- * - Switch automatique entre presentation / exercise / quiz
- * - Auto-reconnexion en cas de perte de connexion
- * - Indicateur de connexion / mode courant
- * - Persistance : à la reconnexion, retrouve l'état exact
+ * Funcionalidades:
+ * - Muestra la diapositiva actual sincronizada por el admin
+ * - Cambio automático entre presentación / ejercicio / quiz
+ * - Auto-reconexión en caso de pérdida de conexión
+ * - Indicador de conexión / modo actual
+ * - Persistencia: al reconectarse, recupera el estado exacto
  */
 
 import React, { useEffect, useMemo } from "react";
@@ -92,10 +92,10 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
 
   const { preloadAll } = useSlideManifest();
 
-  // Heartbeat de présence — signale la connexion et détecte la déconnexion
+  // Heartbeat de presencia — señala la conexión y detecta la desconexión
   useParticipantPresence(participantId);
 
-  // Précharger tous les slides à l'arrivée
+  // Precargar todas las diapositivas al llegar
   useEffect(() => {
     if (isReady) {
       preloadAll();
@@ -121,19 +121,19 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
     > = {
       presentation: {
         icon: Presentation,
-        label: "Présentation",
-        iconClass: "w-4 h-4 text-emerald-500",
-        textClass: "text-emerald-400 text-sm font-medium",
+        label: "Presentación",
+        iconClass: "w-4 h-4 text-cyan-500",
+        textClass: "text-cyan-400 text-sm font-medium",
       },
       exercise: {
         icon: BookOpen,
-        label: "Exercice en cours",
+        label: "Ejercicio en curso",
         iconClass: "w-4 h-4 text-amber-500",
         textClass: "text-amber-400 text-sm font-medium",
       },
       quiz: {
         icon: HelpCircle,
-        label: "Quiz en cours",
+        label: "Quiz en curso",
         iconClass: "w-4 h-4 text-purple-500",
         textClass: "text-purple-400 text-sm font-medium",
       },
@@ -146,10 +146,10 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
   if (!isReady) {
     return (
       <div className="h-full bg-[#050508] flex flex-col items-center justify-center">
-        <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mb-4" />
-        <p className="text-gray-400">Connexion à la session...</p>
+        <Loader2 className="w-12 h-12 text-cyan-500 animate-spin mb-4" />
+        <p className="text-gray-400">Conectando a la sesión...</p>
         <p className="text-gray-600 text-sm mt-2">
-          Bienvenue {participantName} !
+          Bienvenido/a, {participantName}
         </p>
       </div>
     );
@@ -159,45 +159,84 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
 
   if (!state.is_live) {
     return (
-      <div className="h-full bg-[#050508] flex flex-col items-center justify-center">
-        <div className="text-center max-w-md">
-          <div className="w-20 h-20 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <Presentation className="w-10 h-10 text-emerald-500" />
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-3">
-            Bienvenue, {participantName} !
-          </h2>
-          <p className="text-gray-400 mb-6">
-            La session va bientôt commencer. Restez sur cette page, le contenu
-            apparaîtra automatiquement quand le formateur lancera la
-            présentation.
-          </p>
+      <div className="h-full bg-[#050508] flex flex-col items-center justify-center relative overflow-hidden">
+        {/* Fondo ambiental */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[radial-gradient(circle,rgba(56,189,248,0.06)_0%,transparent_60%)]" />
+          <div className="absolute top-[-15%] right-[-5%] w-[400px] h-[400px] bg-cyan-500/[0.03] rounded-full blur-[140px] animate-pulse" style={{ animationDuration: '4s' }} />
+          <div className="absolute bottom-[-15%] left-[-5%] w-[400px] h-[400px] bg-sky-600/[0.03] rounded-full blur-[140px] animate-pulse" style={{ animationDuration: '5s' }} />
+        </div>
 
-          {/* Indicateur de connexion */}
-          <div className="flex items-center justify-center gap-2">
+        {/* Grilla sutil */}
+        <div
+          className="absolute inset-0 opacity-[0.015] pointer-events-none"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(56,189,248,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.3) 1px, transparent 1px)',
+            backgroundSize: '80px 80px',
+          }}
+        />
+
+        <div className="text-center max-w-lg relative z-10 px-6">
+          {/* Logo */}
+          <div className="mb-10">
+            <img
+              src="/assets/logo.png"
+              alt="Destino IA"
+              className="w-72 h-auto mx-auto drop-shadow-[0_0_60px_rgba(56,189,248,0.25)] animate-float"
+            />
+          </div>
+
+          {/* Card de bienvenida */}
+          <div className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-8 mb-6">
+            {/* Saludo */}
+            <p className="text-sm uppercase tracking-[0.3em] text-gray-500 font-medium mb-3">
+              Bienvenido/a al taller
+            </p>
+            <h2 className="text-4xl font-bold text-white mb-1">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-400 to-cyan-300 animate-gradient-x">
+                {participantName}
+              </span>
+            </h2>
+
+            <div className="h-px w-32 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent mx-auto my-6" />
+
+            <p className="text-gray-400 leading-relaxed text-[15px]">
+              La sesión comenzará pronto. Permanece en esta página,
+              el contenido aparecerá automáticamente cuando el formador
+              inicie la presentación.
+            </p>
+          </div>
+
+          {/* Indicador de conexión */}
+          <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm mb-4">
             {isConnected ? (
               <>
-                <Wifi className="w-4 h-4 text-emerald-500" />
-                <span className="text-emerald-400 text-sm">
-                  Connecté — En attente
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500 shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
+                </span>
+                <span className="text-cyan-400 text-sm font-medium tracking-wide">
+                  Conectado — En espera
                 </span>
               </>
             ) : (
               <>
-                <WifiOff className="w-4 h-4 text-amber-500" />
-                <span className="text-amber-400 text-sm">Reconnexion...</span>
+                <WifiOff className="w-4 h-4 text-amber-500 animate-pulse" />
+                <span className="text-amber-400 text-sm font-medium">Reconectando...</span>
               </>
             )}
           </div>
 
-          {/* Bouton quitter */}
+          {/* Botón salir */}
           {onLeave && (
-            <button
-              onClick={onLeave}
-              className="mt-8 px-6 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 text-sm transition-colors"
-            >
-              Quitter la session
-            </button>
+            <div className="mt-6">
+              <button
+                onClick={onLeave}
+                className="px-6 py-2.5 bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.05] hover:border-cyan-500/20 rounded-xl text-gray-600 hover:text-gray-300 text-xs uppercase tracking-[0.2em] transition-all duration-300"
+              >
+                Salir de la sesión
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -218,26 +257,26 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
           <span className={modeInfo.textClass}>{modeInfo.label}</span>
         </div>
 
-        {/* Slide courant */}
+        {/* Diapositiva actual */}
         {state.current_mode === "presentation" && (
           <span className="text-gray-500 text-xs">
-            Slide {state.current_slide_index} / {state.total_slides}
+            Diapositiva {state.current_slide_index} / {state.total_slides}
           </span>
         )}
 
-        {/* Connexion */}
+        {/* Conexión */}
         <div className="flex items-center gap-1">
           {isConnected ? (
-            <Wifi className="w-3 h-3 text-emerald-500" />
+            <Wifi className="w-3 h-3 text-cyan-500" />
           ) : (
             <WifiOff className="w-3 h-3 text-amber-500 animate-pulse" />
           )}
         </div>
       </header>
 
-      {/* ── Contenu principal ────────────────────── */}
+      {/* ── Contenido principal ────────────────────── */}
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        {/* MODE PRÉSENTATION */}
+        {/* MODO PRESENTACIÓN */}
         {state.current_mode === "presentation" && (
           <div className="w-full flex-1 min-h-0 p-2 sm:p-3 md:p-4">
             <SlidePresenter
@@ -277,7 +316,7 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
                 <div className="flex flex-col items-center justify-center h-full gap-4">
                   <BookOpen className="w-16 h-16 text-amber-500/30" />
                   <p className="text-gray-400">
-                    Exercice « {exerciseId} » en préparation...
+                    Ejercicio «{exerciseId}» en preparación...
                   </p>
                 </div>
               );
