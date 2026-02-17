@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Lightbulb,
   Zap,
   Check,
   Copy,
