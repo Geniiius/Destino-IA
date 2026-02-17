@@ -931,20 +931,20 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center p-4">
+      <main className="flex-1 flex items-center justify-center p-4 overflow-hidden">
         <div
-          className={`max-w-2xl w-full ${
+          className={`max-w-5xl w-full ${
             animateQuestion ? "animate-slide-up-strong" : ""
           }`}
         >
-          <div className="card-glass p-6 md:p-8">
+          <div className="card-glass p-4 md:p-6">
             {/* Question Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4 lg:mb-3">
               <div className="flex items-center gap-3">
                 <div
-                  className={`${categoryStyle?.bg ?? ""} ${categoryStyle?.text ?? ""} w-10 h-10 rounded-xl flex items-center justify-center`}
+                  className={`${categoryStyle?.bg ?? ""} ${categoryStyle?.text ?? ""} w-9 h-9 lg:w-8 lg:h-8 rounded-xl flex items-center justify-center`}
                 >
-                  <CategoryIcon className="w-5 h-5" />
+                  <CategoryIcon className="w-4 h-4" />
                 </div>
                 <div>
                   <span
@@ -973,7 +973,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
 
               {/* Timer */}
               <div
-                className={`flex items-center gap-2 px-5 py-3 rounded-full font-bold transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold transition-all ${
                   state.timeLeft <= 5
                     ? "bg-red-600 text-white scale-110 animate-bounce shadow-lg shadow-red-500/50"
                     : state.timeLeft <= 10
@@ -982,9 +982,9 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                 }`}
               >
                 <Clock
-                  className={`w-5 h-5 ${state.timeLeft <= 5 ? "animate-spin" : ""}`}
+                  className={`w-4 h-4 ${state.timeLeft <= 5 ? "animate-spin" : ""}`}
                 />
-                <span className="font-mono text-lg">
+                <span className="font-mono text-base">
                   {state.timeLeft <= 5 ? "⚠️ " : ""}
                   {state.timeLeft}s
                 </span>
@@ -999,13 +999,17 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
               </div>
             )}
             {/* Question */}
-            <h2 className="text-xl md:text-2xl font-bold text-white mb-8 leading-relaxed">
+            <h2 className="text-lg md:text-xl lg:text-lg font-bold text-white mb-4 lg:mb-3 leading-relaxed">
               {currentQ.question}
             </h2>
 
+            {/* Two-column layout: Options left, Feedback right */}
+            <div className={`${state.isAnswered ? "lg:grid lg:grid-cols-[1fr,auto] lg:gap-6" : ""}`}>
+              {/* Left: Options */}
+              <div>
             {/* Options - Layout especial para comparación de prompts (pregunta 1) */}
             {currentQ.id === 1 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 lg:mb-0">
                 {currentQ.options.map((option, idx) => {
                   const isSelected = state.selectedAnswer === idx;
                   const isCorrectOption = idx === currentQ.correctAnswer;
@@ -1017,7 +1021,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                       key={idx}
                       onClick={() => handleSelectAnswer(idx)}
                       disabled={state.isAnswered}
-                      className={`group relative flex flex-col h-full p-6 rounded-2xl transition-all duration-300 ${
+                      className={`group relative flex flex-col h-full p-4 lg:p-3 rounded-2xl transition-all duration-300 ${
                         showCorrect
                           ? "bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border-2 border-emerald-500 shadow-lg shadow-emerald-500/30"
                           : showWrong
@@ -1028,9 +1032,9 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                       } ${state.isAnswered ? "cursor-default" : "cursor-pointer"}`}
                     >
                       {/* Label Prompt A/B */}
-                      <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center justify-between mb-2 lg:mb-1">
                         <div
-                          className={`px-4 py-1.5 rounded-full text-sm font-bold ${
+                          className={`px-3 py-1 rounded-full text-xs font-bold ${
                             showCorrect
                               ? "bg-emerald-500 text-white"
                               : showWrong
@@ -1134,7 +1138,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
             ) : (
               /* Options - Layout normal para otras preguntas */
               <div
-                className={`mb-6 ${currentQ.options.length === 2 ? "grid grid-cols-2 gap-4" : "space-y-3"}`}
+                className={`mb-4 lg:mb-0 ${currentQ.options.length === 2 ? "grid grid-cols-2 gap-3" : "space-y-2"}`}
               >
               {currentQ.options.map((option, idx) => {
                 const isSelected = state.selectedAnswer === idx;
@@ -1155,7 +1159,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                     key={idx}
                     onClick={() => handleSelectAnswer(idx)}
                     disabled={state.isAnswered}
-                    className={`w-full p-6 rounded-xl ${isTrueFalse ? "text-center" : "text-left"} transition-all duration-300 flex ${isTrueFalse ? "flex-col" : "flex-row"} items-center gap-4 group ${
+                    className={`w-full p-4 lg:p-3 rounded-xl ${isTrueFalse ? "text-center" : "text-left"} transition-all duration-300 flex ${isTrueFalse ? "flex-col" : "flex-row"} items-center gap-3 group ${
                       showCorrect
                         ? "bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400 shadow-lg shadow-emerald-500/20"
                         : showWrong
@@ -1172,7 +1176,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                     }`}
                   >
                     <div
-                      className={`${isTrueFalse ? "w-16 h-16" : "w-8 h-8"} rounded-lg flex items-center justify-center font-bold text-sm ${
+                      className={`${isTrueFalse ? "w-14 h-14 lg:w-12 lg:h-12" : "w-8 h-8 lg:w-7 lg:h-7"} rounded-lg flex items-center justify-center font-bold text-sm ${
                         showCorrect
                           ? "bg-emerald-500 text-white"
                           : showWrong
@@ -1212,16 +1216,20 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
               })}
             </div>
             )}
+              </div>
+
+              {/* Right side: Explanation + Next Button (side by side on desktop) */}
+              {state.isAnswered && (
+                <div className="lg:w-72 lg:flex-shrink-0 flex flex-col justify-center gap-3">
             {/* Explanation (shown after answering) */}
-            {state.isAnswered && (
               <div
-                className={`p-4 rounded-xl mb-6 ${
+                className={`p-3 rounded-xl ${
                   isCorrect
                     ? "bg-emerald-500/10 border border-emerald-500/20"
                     : "bg-amber-500/10 border border-amber-500/20"
                 }`}
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-2">
                   {isCorrect ? (
                     <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
                   ) : (
@@ -1229,24 +1237,22 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                   )}
                   <div>
                     <p
-                      className={`font-medium mb-1 ${
+                      className={`font-medium mb-1 text-sm ${
                         isCorrect ? "text-emerald-400" : "text-amber-400"
                       }`}
                     >
                       {isCorrect ? "¡Correcto!" : "Respuesta incorrecta"}
                     </p>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-xs text-gray-400 leading-relaxed">
                       {currentQ.explanation}
                     </p>
                   </div>
                 </div>
               </div>
-            )}
             {/* Next Button */}
-            {state.isAnswered && (
               <button
                 onClick={handleNextQuestion}
-                className="w-full btn-elegant-primary py-4 flex items-center justify-center gap-2 group"
+                className="w-full btn-elegant-primary py-3 flex items-center justify-center gap-2 group text-sm"
               >
                 {state.currentQuestion >= QUIZ_QUESTIONS.length - 1 ? (
                   <>
@@ -1260,7 +1266,9 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                   </>
                 )}
               </button>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </main>
