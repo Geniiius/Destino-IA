@@ -3,7 +3,7 @@
  * @description Pantalla de práctica — diseño moderno con tarjetas coloridas
  */
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Send,
   LogOut,
@@ -15,9 +15,113 @@ import {
   Palette,
   Hash,
   Eye,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import type { PracticeScreenProps } from "../types";
 import { UI_TEXTS } from "../constants";
+
+// ============================================
+// EJEMPLOS PRE-CONSTRUIDOS
+// ============================================
+const PRESET_EXAMPLES = [
+  {
+    id: "bali",
+    emoji: "🏝️",
+    title: "Bali - Lujo",
+    color: "from-cyan-500 to-blue-500",
+    border: "border-cyan-300",
+    bg: "bg-cyan-50",
+    answers: {
+      rol: "Agente de viajes especializado en destinos asiáticos de lujo",
+      objetivo: "Vender un paquete turístico de 7 días a Bali para parejas",
+      escena: "Playa paradisíaca de Uluwatu al amanecer con templo en el acantilado",
+      emocion: "Paz, renovación espiritual y conexión con la naturaleza",
+      estilo: "Fotografía de revista de lujo tipo Condé Nast Traveler",
+      salida: "Descripción promocional para Instagram (200 palabras) con 5 hashtags",
+    },
+  },
+  {
+    id: "paris",
+    emoji: "🗼",
+    title: "París - Romance",
+    color: "from-pink-500 to-rose-500",
+    border: "border-pink-300",
+    bg: "bg-pink-50",
+    answers: {
+      rol: "Experto en viajes románticos por Europa",
+      objetivo: "Promocionar un escapada de fin de semana a París para San Valentín",
+      escena: "Cena con vista a la Torre Eiffel iluminada de noche, terraza con velas",
+      emocion: "Romance, elegancia y exclusividad parisina",
+      estilo: "Cinematográfico cálido, tonos dorados, estilo película francesa",
+      salida: "Post para Instagram con descripción emocional y 5 hashtags en español",
+    },
+  },
+  {
+    id: "safari",
+    emoji: "🦁",
+    title: "Safari - Aventura",
+    color: "from-amber-500 to-orange-500",
+    border: "border-amber-300",
+    bg: "bg-amber-50",
+    answers: {
+      rol: "Guía de safari y fotógrafo de naturaleza salvaje",
+      objetivo: "Atraer aventureros a un safari de 5 días en Kenia",
+      escena: "Sabana africana al atardecer con elefantes caminando hacia el horizonte",
+      emocion: "Asombro, libertad y conexión con la vida salvaje",
+      estilo: "Documental de National Geographic, colores tierra intensos",
+      salida: "Anuncio para Facebook Ads con llamada a la acción y precio",
+    },
+  },
+  {
+    id: "caribe",
+    emoji: "🌊",
+    title: "Caribe - Familiar",
+    color: "from-teal-500 to-emerald-500",
+    border: "border-teal-300",
+    bg: "bg-teal-50",
+    answers: {
+      rol: "Asesor de viajes familiares todo incluido",
+      objetivo: "Vender paquete vacacional familiar a Cancún para Semana Santa",
+      escena: "Familia jugando en playa de arena blanca con agua turquesa cristalina",
+      emocion: "Diversión, alegría familiar y recuerdos inolvidables",
+      estilo: "Colorido y vibrante, fotos tipo catálogo de resort premium",
+      salida: "Carrusel de 5 slides para Instagram con texto corto por slide",
+    },
+  },
+  {
+    id: "japon",
+    emoji: "🌸",
+    title: "Japón - Cultural",
+    color: "from-fuchsia-500 to-purple-500",
+    border: "border-fuchsia-300",
+    bg: "bg-fuchsia-50",
+    answers: {
+      rol: "Especialista en turismo cultural y experiencias auténticas en Asia",
+      objetivo: "Promocionar un tour de 10 días por Japón en temporada de cerezos",
+      escena: "Templo de Kioto rodeado de cerezos en flor con geishas caminando",
+      emocion: "Fascinación, serenidad y descubrimiento cultural milenario",
+      estilo: "Minimalista japonés, tonos pastel rosa y blanco, estilo zen",
+      salida: "Email marketing con itinerario resumido y botón de reserva",
+    },
+  },
+  {
+    id: "maldivas",
+    emoji: "🏖️",
+    title: "Maldivas - Premium",
+    color: "from-sky-500 to-indigo-500",
+    border: "border-sky-300",
+    bg: "bg-sky-50",
+    answers: {
+      rol: "Consultor de viajes de ultra-lujo y luna de miel",
+      objetivo: "Vender estadía de 5 noches en villa overwater en Maldivas",
+      escena: "Villa sobre el agua al atardecer con piscina infinita y océano turquesa",
+      emocion: "Exclusividad absoluta, intimidad y paraíso terrenal",
+      estilo: "Ultra premium, editorial de lujo, iluminación golden hour",
+      salida: "Landing page con descripción, 3 beneficios y formulario de contacto",
+    },
+  },
+];
 
 // Configuración visual por campo
 const FIELD_CONFIG: Record<
@@ -163,6 +267,8 @@ const PracticeScreenComponent: React.FC<PracticeScreenProps> = ({
   onExit,
 }) => {
   const { practice } = UI_TEXTS;
+  const [showExamples, setShowExamples] = useState(true);
+  const [selectedExample, setSelectedExample] = useState<string | null>(null);
 
   const isComplete = Object.values(answers).every(
     (value) => value && value.trim().length > 0,
@@ -170,6 +276,14 @@ const PracticeScreenComponent: React.FC<PracticeScreenProps> = ({
   const completedCount = Object.values(answers).filter(
     (value) => value && value.trim().length > 0,
   ).length;
+
+  const handleSelectExample = (example: typeof PRESET_EXAMPLES[0]) => {
+    setSelectedExample(example.id);
+    Object.entries(example.answers).forEach(([key, value]) => {
+      onAnswerChange(key as keyof typeof answers, value);
+    });
+    setShowExamples(false);
+  };
 
   return (
     <div className="w-full max-w-5xl mx-auto flex flex-col gap-5">
@@ -217,6 +331,43 @@ const PracticeScreenComponent: React.FC<PracticeScreenProps> = ({
               ))}
             </div>
           </div>
+        </div>
+
+        {/* ── Selector de Ejemplos ── */}
+        <div className="px-8 pb-3">
+          <button
+            onClick={() => setShowExamples(!showExamples)}
+            className="flex items-center gap-2 text-sm font-bold text-purple-600 hover:text-purple-800 transition-colors mb-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            {showExamples ? "Ocultar ejemplos" : "💡 ¿Necesitas inspiración? Elige un ejemplo"}
+            {showExamples ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+          
+          {showExamples && (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+              {PRESET_EXAMPLES.map((example) => (
+                <button
+                  key={example.id}
+                  onClick={() => handleSelectExample(example)}
+                  className={`
+                    relative p-3 rounded-xl border-2 transition-all duration-200
+                    hover:scale-[1.03] hover:shadow-md text-center
+                    ${selectedExample === example.id 
+                      ? `${example.bg} ${example.border} shadow-md` 
+                      : "bg-white border-gray-200 hover:border-gray-300"}
+                  `}
+                >
+                  <span className="text-2xl block mb-1">{example.emoji}</span>
+                  <span className={`text-xs font-bold block ${
+                    selectedExample === example.id ? "text-gray-800" : "text-gray-600"
+                  }`}>
+                    {example.title}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* ── Grille de champs ── */}
