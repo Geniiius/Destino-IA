@@ -471,7 +471,7 @@ const TextToVideoWorkflow: React.FC<TextToVideoWorkflowProps> = ({
               <div className="relative group">
                 <div className="absolute top-4 right-4">
                   <button
-                    onClick={() => copy(imagePrompt)}
+                    onClick={() => copy(`Optimízame el prompt para crear la imagen:\n\n${imagePrompt}`)}
                     className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-all shadow-lg"
                   >
                     {copied ? (
@@ -483,8 +483,8 @@ const TextToVideoWorkflow: React.FC<TextToVideoWorkflowProps> = ({
                   </button>
                 </div>
                 <div className="bg-black/50 border border-gray-800 rounded-xl p-6 font-mono text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
-                  <span className="text-gray-600 select-none">
-                    {"// Prompt para DALL-E:"}
+                  <span className="text-blue-400 font-semibold">
+                    Optimízame el prompt para crear la imagen:
                   </span>
                   <br />
                   <br />
@@ -509,7 +509,7 @@ const TextToVideoWorkflow: React.FC<TextToVideoWorkflowProps> = ({
 
   // 4. GENERAR PROMPT DE ANIMACIÓN
   if (step === "prompt_gen") {
-    const metaPrompt = `Actúa como un director creativo cinematográfico y experto en prompting para generación de video IA (Kling AI, Runway, Pika Labs).
+    const metaPrompt = `Actúa como un director creativo cinematográfico y experto en prompting para generación de video IA (Grok).
 
 Contexto del proyecto:
 - Industria: ${mission?.title || "[INDUSTRIA]"}
@@ -526,7 +526,7 @@ Intención creativa:
 
 Especificaciones técnicas:
 - Formato: ${inputs.salida || "[FORMATO]"}
-- Duración objetivo: 5-10s
+- Duración objetivo: 6s
 - Estilo visual: [cinematográfico / documental / comercial / artístico]
 - Referencias visuales: [opcional: "como anuncios de Apple" / "estilo Wes Anderson"]
 
@@ -537,7 +537,7 @@ Elementos de movimiento prioritarios:
 
 Entrega:
 - Prompt optimizado en inglés
-- Formato: [Kling AI / Runway Gen-3 / Pika 1.5]
+- Formato: Grok
 - Incluye: movimiento de cámara + atmósfera + tempo + detalles técnicos`;
 
     return (

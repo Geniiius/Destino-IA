@@ -29,7 +29,7 @@ const MISSIONS = {
         "Amanecer en terraza de arrozales, niebla mística, paz y conexión natural.",
       estilo:
         "Cinematográfico, slow motion suave, vuelo de dron bajo (FPV), colores vibrantes.",
-      salida: "Prompt de vídeo para Runway Gen-3, formato vertical 9:16.",
+      salida: "Prompt de vídeo para Grok, formato vertical 9:16, duración 6 segundos.",
     },
   },
   recruitment: {
@@ -354,53 +354,79 @@ Format requirements: ${inputs.salida}. Cinematic lighting, photorealistic render
                     Tu Prompt de Video
                   </h2>
                   <p className="text-emerald-200/70 mt-1">
-                    Listo para Runway, Kling o Sora.
+                    Listo para Grok.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="p-8 space-y-8">
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold text-gray-500 uppercase">
-                    Prompt Optimizado
-                  </label>
-                  <button
-                    onClick={() => copy(naturalPrompt)}
-                    className="text-emerald-400 text-xs hover:text-white flex items-center gap-1"
-                  >
-                    {copied ? (
-                      <Check className="w-3 h-3" />
-                    ) : (
-                      <Copy className="w-3 h-3" />
-                    )}{" "}
-                    Copiar
-                  </button>
+            <div className="p-6 md:p-8 space-y-5">
+              {/* Prompt Block */}
+              <div className="bg-black/30 rounded-2xl border border-emerald-500/30 overflow-hidden">
+                <div className="bg-emerald-500/10 px-4 py-2 border-b border-emerald-500/20 flex items-center justify-between">
+                  <span className="text-emerald-300 text-xs font-semibold uppercase tracking-wider">Tu Prompt Completo</span>
+                  <span className="text-emerald-400/60 text-[10px]">Listo para copiar</span>
                 </div>
-                <div className="bg-black/50 border border-gray-800 rounded-xl p-6 font-mono text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
-                  {naturalPrompt}
+                <div className="p-4 md:p-5 lg:max-h-[22vh] lg:overflow-y-auto">
+                  <p className="text-emerald-400 font-semibold text-sm mb-2">Optimízame el prompt para:</p>
+                  <p className="text-gray-300 leading-relaxed whitespace-pre-wrap text-sm">{naturalPrompt}</p>
                 </div>
               </div>
 
-              <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl flex items-start gap-3">
-                <Lightbulb className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-emerald-100">
-                  <strong className="block mb-1 text-emerald-300">
-                    Siguiente Paso:
-                  </strong>
-                  Copia este texto y pégalo en tu generador de vídeo favorito.
-                  No necesitas imagen base, el prompt describe todo desde cero.
+              {/* CTA Copy Button */}
+              <button
+                onClick={() => copy(`Optimízame el prompt para:\n\n${naturalPrompt}`)}
+                className={`w-full py-3 rounded-xl font-bold text-base flex items-center justify-center gap-3 transition-all duration-300 ${
+                  copied
+                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                    : "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.02] active:scale-[0.98]"
+                }`}
+              >
+                {copied ? (
+                  <><Check className="w-5 h-5" /> ¡Copiado al portapapeles!</>
+                ) : (
+                  <><Copy className="w-5 h-5" /> Copiar Prompt Completo</>
+                )}
+              </button>
+
+              {/* Steps Guide */}
+              <div className="bg-white/5 rounded-2xl border border-white/10 p-4">
+                <p className="text-white font-bold mb-3 text-center text-base">📌 Sigue estos 3 pasos:</p>
+                <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-3">
+                  {/* Step 1 */}
+                  <div className="flex lg:flex-col gap-3 lg:gap-2 items-start lg:items-center bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 lg:text-center">
+                    <div className="flex-shrink-0 w-9 h-9 lg:w-8 lg:h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-sm lg:text-xs shadow-lg shadow-emerald-500/40">1</div>
+                    <div className="pt-0.5 lg:pt-0">
+                      <p className="text-emerald-200 font-semibold mb-1 flex items-center lg:justify-center gap-2 text-sm lg:text-xs">📋 Copia tu prompt</p>
+                      <p className="text-gray-200/80 text-[13px] lg:text-[11px] leading-relaxed">Haz clic en el botón verde de arriba. Se copia <span className="text-emerald-300 font-medium">todo el bloque</span>, incluyendo la instrucción "Optimízame el prompt para:".</p>
+                    </div>
+                  </div>
+                  {/* Step 2 */}
+                  <div className="flex lg:flex-col gap-3 lg:gap-2 items-start lg:items-center bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 lg:text-center">
+                    <div className="flex-shrink-0 w-9 h-9 lg:w-8 lg:h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm lg:text-xs shadow-lg shadow-blue-500/40">2</div>
+                    <div className="pt-0.5 lg:pt-0">
+                      <p className="text-blue-200 font-semibold mb-1 flex items-center lg:justify-center gap-2 text-sm lg:text-xs">🤖 Pégalo en ChatGPT</p>
+                      <p className="text-gray-200/80 text-[13px] lg:text-[11px] leading-relaxed">Abre <span className="text-blue-300 font-medium">ChatGPT</span>, pega el texto y envía. Él te devolverá un <span className="text-blue-300 font-medium">prompt optimizado y profesional</span> para tu video.</p>
+                    </div>
+                  </div>
+                  {/* Step 3 */}
+                  <div className="flex lg:flex-col gap-3 lg:gap-2 items-start lg:items-center bg-purple-500/10 border border-purple-500/20 rounded-xl p-3 lg:text-center">
+                    <div className="flex-shrink-0 w-9 h-9 lg:w-8 lg:h-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold text-sm lg:text-xs shadow-lg shadow-purple-500/40">3</div>
+                    <div className="pt-0.5 lg:pt-0">
+                      <p className="text-purple-200 font-semibold mb-1 flex items-center lg:justify-center gap-2 text-sm lg:text-xs">🎬 Genera tu video en Grok</p>
+                      <p className="text-gray-200/80 text-[13px] lg:text-[11px] leading-relaxed">Copia el prompt que ChatGPT te dio, ve a <span className="text-purple-300 font-medium">Grok</span>, elige la opción <span className="text-purple-300 font-semibold">"Video"</span>, selecciona el formato que prefieras y <span className="text-purple-300 font-medium">pega el prompt</span> para generar tu video.</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex justify-center pt-4">
+              <div className="flex justify-center pt-2">
                 <button
                   onClick={() => {
                     setStep("intro");
                     setMission(null);
                   }}
-                  className="text-gray-500 hover:text-white transition-colors"
+                  className="px-5 py-2 rounded-xl border border-white/20 hover:bg-white/10 transition-colors text-gray-400 hover:text-white text-xs"
                 >
                   Crear otro video
                 </button>

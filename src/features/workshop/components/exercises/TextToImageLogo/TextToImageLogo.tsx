@@ -747,50 +747,86 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
   const { copied, copy } = useCopyToClipboard();
 
   return (
-    <div className="max-w-3xl mx-auto animate-fade-in py-12">
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center justify-center p-4 bg-green-500/20 rounded-full mb-4 border border-green-500/50">
-          <Rocket className="w-8 h-8 text-green-400" />
+    <div className="max-w-4xl mx-auto animate-fade-in lg:h-[calc(100vh-4rem)] lg:flex lg:items-center">
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8 lg:p-8 shadow-2xl w-full lg:overflow-hidden">
+        {/* Header */}
+        <div className="text-center mb-4 lg:mb-3">
+          <div className="inline-flex items-center justify-center p-3 lg:p-2 bg-green-500/20 rounded-full mb-2 lg:mb-1 border border-green-500/50">
+            <Rocket className="w-6 h-6 lg:w-5 lg:h-5 text-green-400" />
+          </div>
+          <h2 className="text-2xl md:text-3xl lg:text-2xl font-black text-white">
+            ¡Tu Prompt está Listo!
+          </h2>
+          <p className="text-gray-400 mt-1 text-sm lg:text-xs">
+            Solo falta copiarlo y pegarlo en ChatGPT.
+          </p>
         </div>
-        <h2 className="text-4xl font-black text-white">
-          ¡Tu Prompt está Listo!
-        </h2>
-        <p className="text-gray-400 mt-2">
-          Copia el resultado y llévalo a tu herramienta de IA favorita.
-        </p>
-      </div>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-3xl overflow-hidden shadow-2xl relative">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 via-orange-500 to-rose-500"></div>
-        <div className="p-8 space-y-6">
-          <div className="bg-black/30 rounded-2xl p-6 border border-gray-800">
-            <p className="text-gray-300 leading-relaxed font-mono text-sm">
+        {/* Prompt Block */}
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl relative mb-4 lg:mb-3">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 via-orange-500 to-rose-500"></div>
+          <div className="bg-rose-500/5 px-4 py-2 border-b border-gray-800 flex items-center justify-between">
+            <span className="text-rose-300 text-xs font-semibold uppercase tracking-wider">Tu Prompt Completo</span>
+            <span className="text-gray-500 text-[10px]">Listo para copiar</span>
+          </div>
+          <div className="p-4 lg:p-3 lg:max-h-[18vh] lg:overflow-y-auto">
+            <p className="text-gray-300 leading-relaxed whitespace-pre-line text-sm lg:text-[13px]">
               {generatedPrompt}
             </p>
           </div>
+        </div>
 
-          <div className="flex gap-4">
-            <button
-              onClick={() => setMode("practice")}
-              className="flex-1 py-4 text-gray-400 hover:text-white font-bold"
-            >
-              ← Editar
-            </button>
-            <button
-              onClick={() => copy(generatedPrompt)}
-              className="flex-[2] bg-white text-black hover:bg-gray-200 rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
-            >
-              {copied ? (
-                <>
-                  <Check className="w-5 h-5" /> ¡Copiado!
-                </>
-              ) : (
-                <>
-                  <Copy className="w-5 h-5" /> Copiar Prompt
-                </>
-              )}
-            </button>
+        {/* CTA Copy Button */}
+        <button
+          onClick={() => copy(generatedPrompt)}
+          className={`w-full py-3 lg:py-2.5 rounded-xl font-bold text-base lg:text-sm flex items-center justify-center gap-3 transition-all duration-300 mb-4 lg:mb-3 ${
+            copied
+              ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+              : "bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-400 hover:to-orange-400 text-white shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40 hover:scale-[1.02] active:scale-[0.98]"
+          }`}
+        >
+          {copied ? (
+            <><Check className="w-5 h-5" /> ¡Copiado al portapapeles!</>
+          ) : (
+            <><Copy className="w-5 h-5" /> Copiar Prompt Completo</>
+          )}
+        </button>
+
+        {/* Steps Guide */}
+        <div className="bg-white/5 rounded-2xl border border-white/10 p-4 lg:p-3">
+          <p className="text-white font-bold mb-3 lg:mb-2 text-center text-base lg:text-sm">📌 Sigue estos 3 pasos:</p>
+          <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-3">
+            <div className="flex lg:flex-col gap-3 lg:gap-2 items-start lg:items-center bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 lg:text-center">
+              <div className="flex-shrink-0 w-9 h-9 lg:w-8 lg:h-8 rounded-full bg-rose-500 flex items-center justify-center text-white font-bold text-sm lg:text-xs shadow-lg shadow-rose-500/40">1</div>
+              <div className="pt-0.5 lg:pt-0">
+                <p className="text-rose-200 font-semibold mb-1 flex items-center lg:justify-center gap-2 text-sm lg:text-xs">📋 Copia tu prompt</p>
+                <p className="text-gray-200/80 text-[13px] lg:text-[11px] leading-relaxed">Haz clic en el botón de arriba. Se copia <span className="text-rose-300 font-medium">todo el bloque</span>, incluyendo la instrucción para ChatGPT.</p>
+              </div>
+            </div>
+            <div className="flex lg:flex-col gap-3 lg:gap-2 items-start lg:items-center bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 lg:text-center">
+              <div className="flex-shrink-0 w-9 h-9 lg:w-8 lg:h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-sm lg:text-xs shadow-lg shadow-emerald-500/40">2</div>
+              <div className="pt-0.5 lg:pt-0">
+                <p className="text-emerald-200 font-semibold mb-1 flex items-center lg:justify-center gap-2 text-sm lg:text-xs">🤖 Pégalo en ChatGPT</p>
+                <p className="text-gray-200/80 text-[13px] lg:text-[11px] leading-relaxed">Abre <span className="text-emerald-300 font-medium">ChatGPT</span>, pega y envía. Te generará un <span className="text-emerald-300 font-medium">prompt profesional</span>.</p>
+              </div>
+            </div>
+            <div className="flex lg:flex-col gap-3 lg:gap-2 items-start lg:items-center bg-orange-500/10 border border-orange-500/20 rounded-xl p-3 lg:text-center">
+              <div className="flex-shrink-0 w-9 h-9 lg:w-8 lg:h-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold text-sm lg:text-xs shadow-lg shadow-orange-500/40">3</div>
+              <div className="pt-0.5 lg:pt-0">
+                <p className="text-orange-200 font-semibold mb-1 flex items-center lg:justify-center gap-2 text-sm lg:text-xs">🎨 Genera tu imagen</p>
+                <p className="text-gray-200/80 text-[13px] lg:text-[11px] leading-relaxed">Escribe: <span className="text-orange-300 font-semibold">"Créame esta imagen:"</span> y pega el prompt de ChatGPT.</p>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <div className="mt-4 lg:mt-2 flex justify-center">
+          <button
+            onClick={() => setMode("practice")}
+            className="px-5 py-2 rounded-xl border border-white/20 hover:bg-white/10 transition-colors text-gray-400 hover:text-white text-xs"
+          >
+            ← Volver a editar
+          </button>
         </div>
       </div>
     </div>
@@ -804,14 +840,13 @@ export const TextToImageLogo: React.FC = () => {
 
   const handleGenerate = useCallback((inputs: Record<string, string>) => {
     // Lógica de construcción del prompt
-    const prompt = `
+    const prompt = `Genérame y optimízame un prompt de alto impacto con estas especificaciones:
 Role: ${inputs.rol}
 Objective: ${inputs.obj}
 Scene/Context: ${inputs.esc}
 Integration Details: ${inputs.int}
 Visual Style: ${inputs.est}
-Output Format: ${inputs.sal}
-`.trim();
+Output Format: ${inputs.sal}`;
 
     setFinalPrompt(prompt);
     setMode("result");

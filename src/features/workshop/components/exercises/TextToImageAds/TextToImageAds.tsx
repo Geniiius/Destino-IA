@@ -96,74 +96,81 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
     (v) => v.trim().length > 0,
   ).length;
 
-  const generatedPrompt = `Actúa como ${answers.rol}. ${answers.objetivo}. ${answers.escena}. Usa un estilo ${answers.estilo}. ${answers.salida}.`;
+  const { copied, copy } = useCopyToClipboard();
+  const generatedPrompt = `Genérame y optimízame un prompt de alto impacto con estas especificaciones:\nActúa como ${answers.rol}.\nObjetivo: ${answers.objetivo}.\nEscena/Contexto: ${answers.escena}.\nEstilo visual: ${answers.estilo}.\nFormato de salida: ${answers.salida}.`;
 
   if (showResult) {
     return (
-      <div className="max-w-3xl mx-auto animate-fade-in">
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-12 text-center shadow-2xl">
-          <div className="text-8xl mb-6 animate-bounce">🎉</div>
-
-          <h1 className="text-5xl font-bold text-white mb-4 bg-gradient-to-r from-indigo-400 to-fuchsia-400 bg-clip-text text-transparent">
-            ¡Ejercicio Completado!
-          </h1>
-
-          <p className="text-2xl text-gray-300 mb-8">
-            Has creado tu prompt de anuncio
-          </p>
-
-          <div className="bg-white/5 rounded-2xl p-6 mb-8 text-left">
-            <p className="text-sm font-bold text-indigo-400 mb-3 uppercase tracking-wide">
-              Tu Prompt Final:
+      <div className="max-w-4xl mx-auto animate-fade-in lg:h-[calc(100vh-4rem)] lg:flex lg:items-center">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8 lg:p-8 shadow-2xl w-full lg:overflow-hidden">
+          {/* Header */}
+          <div className="text-center mb-4 lg:mb-3">
+            <div className="text-4xl lg:text-3xl mb-2 lg:mb-1">🎉</div>
+            <h1 className="text-2xl md:text-3xl lg:text-2xl font-bold text-white mb-1 bg-gradient-to-r from-indigo-400 to-fuchsia-400 bg-clip-text text-transparent">
+              ¡Ejercicio Completado!
+            </h1>
+            <p className="text-sm lg:text-xs text-gray-400">
+              Tu prompt de anuncio está listo. Solo falta copiarlo y pegarlo.
             </p>
-            <p className="text-gray-200 leading-relaxed">{generatedPrompt}</p>
           </div>
 
-          {/* Instrucciones para usar el prompt */}
-          <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-6 text-left">
-            <p className="text-indigo-400 font-bold mb-4 flex items-center gap-2 text-lg">
-              <span className="text-2xl">💡</span> ¿Qué hacer ahora?
-            </p>
-            <div className="space-y-4 text-gray-300">
-              <p className="leading-relaxed">
-                Ya has generado la idea de tu prompt.
-              </p>
-              <p className="leading-relaxed">
-                Ahora puedes ir a{" "}
-                <span className="text-fuchsia-400 font-semibold">ChatGPT</span>{" "}
-                y decirle:
-              </p>
-              <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                <p className="text-white font-medium italic">
-                  "Genérame un prompt para crear esto:"
-                </p>
-              </div>
-              <p className="leading-relaxed">
-                (pega tu prompt de arriba y envíalo)
-              </p>
-              <div className="mt-6 pt-6 border-t border-indigo-500/20">
-                <p className="leading-relaxed mb-3">
-                  Una vez que ChatGPT te haya generado el prompt final, puedes
-                  ir a la herramienta de generación de imágenes y decir:
-                </p>
-                <div className="bg-white/5 border border-white/10 rounded-lg p-4 mb-3">
-                  <p className="text-white font-medium italic">
-                    "Créame una imagen"
-                  </p>
+          {/* Prompt Block */}
+          <div className="bg-black/30 rounded-2xl border border-indigo-500/30 mb-4 lg:mb-3 overflow-hidden">
+            <div className="bg-indigo-500/10 px-4 py-2 border-b border-indigo-500/20 flex items-center justify-between">
+              <span className="text-indigo-300 text-xs font-semibold uppercase tracking-wider">Tu Prompt Completo</span>
+              <span className="text-indigo-400/60 text-[10px]">Listo para copiar</span>
+            </div>
+            <div className="p-4 lg:p-3 lg:max-h-[18vh] lg:overflow-y-auto">
+              <p className="text-gray-200 leading-relaxed whitespace-pre-line text-sm lg:text-[13px]">{generatedPrompt}</p>
+            </div>
+          </div>
+
+          {/* CTA Copy Button */}
+          <button
+            onClick={() => copy(generatedPrompt)}
+            className={`w-full py-3 lg:py-2.5 rounded-xl font-bold text-base lg:text-sm flex items-center justify-center gap-3 transition-all duration-300 mb-4 lg:mb-3 ${
+              copied
+                ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                : "bg-gradient-to-r from-indigo-500 to-fuchsia-500 hover:from-indigo-400 hover:to-fuchsia-400 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98]"
+            }`}
+          >
+            {copied ? "✅  ¡Copiado al portapapeles!" : "📋  Copiar Prompt Completo"}
+          </button>
+
+          {/* Steps Guide */}
+          <div className="bg-white/5 rounded-2xl border border-white/10 p-4 lg:p-3">
+            <p className="text-white font-bold mb-3 lg:mb-2 text-center text-base lg:text-sm">📌 Sigue estos 3 pasos:</p>
+            <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-3">
+              <div className="flex lg:flex-col gap-3 lg:gap-2 items-start lg:items-center bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-3 lg:text-center">
+                <div className="flex-shrink-0 w-9 h-9 lg:w-8 lg:h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-sm lg:text-xs shadow-lg shadow-indigo-500/40">1</div>
+                <div className="pt-0.5 lg:pt-0">
+                  <p className="text-indigo-200 font-semibold mb-1 flex items-center lg:justify-center gap-2 text-sm lg:text-xs">📋 Copia tu prompt</p>
+                  <p className="text-gray-200/80 text-[13px] lg:text-[11px] leading-relaxed">Haz clic en el botón de arriba. Se copia <span className="text-indigo-300 font-medium">todo el bloque</span>, incluyendo la instrucción para ChatGPT.</p>
                 </div>
-                <p className="leading-relaxed">
-                  y luego pegar el prompt que ChatGPT generó.
-                </p>
+              </div>
+              <div className="flex lg:flex-col gap-3 lg:gap-2 items-start lg:items-center bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 lg:text-center">
+                <div className="flex-shrink-0 w-9 h-9 lg:w-8 lg:h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-sm lg:text-xs shadow-lg shadow-emerald-500/40">2</div>
+                <div className="pt-0.5 lg:pt-0">
+                  <p className="text-emerald-200 font-semibold mb-1 flex items-center lg:justify-center gap-2 text-sm lg:text-xs">🤖 Pégalo en ChatGPT</p>
+                  <p className="text-gray-200/80 text-[13px] lg:text-[11px] leading-relaxed">Abre <span className="text-emerald-300 font-medium">ChatGPT</span>, pega y envía. Te generará un <span className="text-emerald-300 font-medium">prompt profesional</span>.</p>
+                </div>
+              </div>
+              <div className="flex lg:flex-col gap-3 lg:gap-2 items-start lg:items-center bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-xl p-3 lg:text-center">
+                <div className="flex-shrink-0 w-9 h-9 lg:w-8 lg:h-8 rounded-full bg-fuchsia-500 flex items-center justify-center text-white font-bold text-sm lg:text-xs shadow-lg shadow-fuchsia-500/40">3</div>
+                <div className="pt-0.5 lg:pt-0">
+                  <p className="text-fuchsia-200 font-semibold mb-1 flex items-center lg:justify-center gap-2 text-sm lg:text-xs">🎨 Genera tu imagen</p>
+                  <p className="text-gray-200/80 text-[13px] lg:text-[11px] leading-relaxed">Escribe: <span className="text-fuchsia-300 font-semibold">"Créame esta imagen:"</span> y pega el prompt de ChatGPT.</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-8 flex justify-center gap-4">
+          <div className="mt-4 lg:mt-2 flex justify-center">
             <button
               onClick={() => setMode("practice")}
-              className="px-6 py-3 rounded-xl border border-white/20 hover:bg-white/5 transition-colors text-white"
+              className="px-5 py-2 rounded-xl border border-white/20 hover:bg-white/10 transition-colors text-gray-400 hover:text-white text-xs"
             >
-              Editar Prompt
+              ← Volver a editar
             </button>
           </div>
         </div>
@@ -386,6 +393,13 @@ export const TextToImageAds: React.FC = () => {
       setShowResult(true);
     }
   }, [answers]);
+
+  const handleSetMode = useCallback((newMode: string) => {
+    if (newMode === "practice") {
+      setShowResult(false);
+    }
+    setMode(newMode);
+  }, []);
 
   // DATOS: Tema Ads (Neon/Nightlife)
   const tutorialSteps = [
@@ -719,7 +733,7 @@ export const TextToImageAds: React.FC = () => {
           handleAnswerChange={handleAnswerChange}
           handleSubmit={handleSubmit}
           showResult={showResult}
-          setMode={setMode}
+          setMode={handleSetMode}
         />
       )}
 

@@ -142,7 +142,7 @@ export const useExerciseState = () => {
   );
 
   const generatePrompt = useCallback((answers: ParticipantAnswers): string => {
-    return `Actúa como ${answers.rol}. ${answers.objetivo}. La escena es ${answers.escena} que transmite ${answers.emocion}. Usa un estilo ${answers.estilo}. ${answers.salida}.`;
+    return `Genérame y optimízame un prompt de alto impacto con estas especificaciones:\nActúa como ${answers.rol}.\nObjetivo: ${answers.objetivo}.\nEscena/Contexto: ${answers.escena} que transmite ${answers.emocion}.\nEstilo visual: ${answers.estilo}.\nFormato de salida: ${answers.salida}.`;
   }, []);
 
   return {
