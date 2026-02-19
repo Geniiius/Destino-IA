@@ -1,7 +1,7 @@
 /**
  * @file TextToImageAds.tsx
- * @description Ejercicio Text-to-Image: Publicidad Nocturna
- * Self-contained component - Nightlife/Urban Ads theme (Indigo/Fuchsia/Violet)
+ * @description Ejercicio Text-to-Image: Publicidad & Ads
+ * Self-contained component - Advertising theme (Indigo/Fuchsia/Violet)
  */
 
 import React, { useState, useCallback } from "react";
@@ -12,6 +12,7 @@ import {
   Zap,
   BookOpen,
   Check,
+  CheckCircle2,
   Copy,
   ChevronLeft,
   Camera,
@@ -24,8 +25,106 @@ import {
   FileText,
   Eye,
   Send,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useCopyToClipboard } from "../../../../../hooks";
+
+// ============================================
+// EJEMPLOS PRE-CONSTRUIDOS - TEMA PUBLICIDAD
+// ============================================
+const PRESET_EXAMPLES = [
+  {
+    id: "zapatillas",
+    emoji: "\ud83d\udc5f",
+    title: "Zapatillas Sport",
+    image: "/assets/examples/ads/zapatillas.webp",
+    border: "border-fuchsia-300",
+    bg: "bg-fuchsia-50",
+    answers: {
+      rol: "Director creativo de agencia de publicidad para marcas deportivas",
+      objetivo: "Crear visual impactante para lanzamiento de nueva l\u00ednea de zapatillas running",
+      escena: "Zapatilla flotando con explosi\u00f3n de part\u00edculas de color ne\u00f3n, fondo oscuro dram\u00e1tico, gotas de agua congeladas. Emoci\u00f3n: Energ\u00eda y velocidad",
+      estilo: "Product shot cin\u00e9tico, iluminaci\u00f3n ne\u00f3n, colores vibrantes sobre fondo oscuro, ultra detallado",
+      salida: "Prompt en ingl\u00e9s para Midjourney v6 --ar 4:5",
+    },
+  },
+  {
+    id: "cafe",
+    emoji: "\u2615",
+    title: "Caf\u00e9 Premium",
+    image: "/assets/examples/ads/cafe.webp",
+    border: "border-amber-300",
+    bg: "bg-amber-50",
+    answers: {
+      rol: "Fot\u00f3grafo gastron\u00f3mico especializado en bebidas premium",
+      objetivo: "Anuncio para redes sociales de marca de caf\u00e9 de especialidad artesanal",
+      escena: "Taza de caf\u00e9 latte art con vapor visible, granos tostados alrededor, luz de ma\u00f1ana entrando por ventana. Emoci\u00f3n: Calidez y ritual matutino",
+      estilo: "Fotograf\u00eda gastron\u00f3mica premium, tonos c\u00e1lidos marr\u00f3n y dorado, profundidad de campo corta",
+      salida: "Prompt en ingl\u00e9s para Ideogram, formato cuadrado 1:1",
+    },
+  },
+  {
+    id: "cosmetica",
+    emoji: "\ud83d\udc84",
+    title: "Cosm\u00e9tica",
+    image: "/assets/examples/ads/cosmetica.webp",
+    border: "border-rose-300",
+    bg: "bg-rose-50",
+    answers: {
+      rol: "Director de arte de campa\u00f1as de belleza para marcas de lujo",
+      objetivo: "Visual para campa\u00f1a digital de nueva l\u00ednea de skincare org\u00e1nica",
+      escena: "Productos de skincare entre flores frescas y gotas de roc\u00edo, texturas cremosas visibles, fondo m\u00e1rmol rosa. Emoci\u00f3n: Pureza y lujo natural",
+      estilo: "Editorial beauty, colores pastel rosa y dorado, iluminaci\u00f3n suave difusa, est\u00e9tica clean beauty",
+      salida: "Prompt en ingl\u00e9s para Midjourney v6 --ar 4:5",
+    },
+  },
+  {
+    id: "tech",
+    emoji: "\ud83d\udcf1",
+    title: "Tech Launch",
+    image: "/assets/examples/ads/tech.webp",
+    border: "border-indigo-300",
+    bg: "bg-indigo-50",
+    answers: {
+      rol: "Director creativo de Apple-style product launches",
+      objetivo: "Imagen hero para p\u00e1gina de producto de smartphone flagship",
+      escena: "Smartphone flotando en \u00e1ngulo din\u00e1mico con interfaz brillante, reflejos de luz esc\u00e9nica, part\u00edculas luminosas. Emoci\u00f3n: Innovaci\u00f3n y deseo",
+      estilo: "Minimalista tech, fondo gradiente oscuro, iluminaci\u00f3n de estudio precisa, ultra n\u00edtido 8k",
+      salida: "Prompt en ingl\u00e9s para Midjourney v6 --ar 16:9",
+    },
+  },
+  {
+    id: "food",
+    emoji: "\ud83c\udf54",
+    title: "Fast Food",
+    image: "/assets/examples/ads/food.webp",
+    border: "border-orange-300",
+    bg: "bg-orange-50",
+    answers: {
+      rol: "Fot\u00f3grafo publicitario de food styling para cadenas de restaurantes",
+      objetivo: "Imagen apetitosa para cartelera digital de nueva hamburguesa gourmet",
+      escena: "Hamburguesa gourmet con ingredientes volando en c\u00e1mara lenta, queso derritido, fondo de llamas suaves. Emoci\u00f3n: Antojo irresistible",
+      estilo: "Food photography din\u00e1mica, colores saturados, fondo oscuro con splash de salsa, macro detalle",
+      salida: "Prompt en ingl\u00e9s para Ideogram, formato vertical 3:4",
+    },
+  },
+  {
+    id: "viajes",
+    emoji: "\u2708\ufe0f",
+    title: "Viajes - Safari",
+    image: "/assets/examples/ads/viajes.webp",
+    border: "border-emerald-300",
+    bg: "bg-emerald-50",
+    answers: {
+      rol: "Gu\u00eda de safari y fot\u00f3grafo de naturaleza salvaje para agencia de viajes premium",
+      objetivo: "Vertical travel advertising poster for Facebook Ads. Atraer aventureros a un safari de 5 d\u00edas en Kenia con un anuncio visual cinematogr\u00e1fico",
+      escena: "African savannah in Kenya at sunset, herd of elephants walking toward the horizon, dramatic golden sky, Mount Kilimanjaro in the background, acacia trees silhouette, warm dusty atmosphere, cinematic wildlife documentary photography, ultra realistic, National Geographic style, intense earthy colors, golden hour lighting, high detail, depth of field, epic composition, sense of awe, freedom and connection with wild nature",
+      estilo: "Professional commercial layout with strong typography hierarchy. Top headline bold uppercase: \"EXPLORA EL CORAZ\u00d3N DE \u00c1FRICA\". Secondary headline: \"SAFARI DE 5 D\u00cdAS EN KENIA\". Italic script: \"\u00a1Vive la aventura de tu vida!\". Price banner: \"5 D\u00cdAS / TODO INCLUIDO - DESDE $1,490 USD\". Green CTA button: \"RESERVA AHORA\". Clean advertising poster layout, high contrast readable text, premium typography, cinematic color grading",
+      salida: "Prompt en ingl\u00e9s para Midjourney/Ideogram, formato vertical 4:5, professional marketing campaign design",
+    },
+  },
+];
 
 // --- DATOS GLOBALES ---
 
@@ -40,32 +139,42 @@ const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
 const FIELDS = [
   {
     key: "rol",
-    label: "1. ROL",
-    placeholder: "Ej: Director Creativo Agencia Digital...",
+    label: "ROL",
+    desc: "Define la perspectiva creativa para el anuncio",
+    placeholder: "Ej: Director Creativo de Agencia Digital especializado en campañas de producto",
+    example: "Fotógrafo publicitario de marcas de moda y lifestyle",
     color: "indigo",
   },
   {
     key: "objetivo",
-    label: "2. OBJETIVO",
-    placeholder: "Ej: Stories, paquete fiesta...",
+    label: "OBJETIVO",
+    desc: "Describe qué quieres lograr con el anuncio",
+    placeholder: "Ej: Stories para promocionar lanzamiento de nueva colección de zapatillas",
+    example: "Banner publicitario para campaña de Black Friday de una tienda online",
     color: "fuchsia",
   },
   {
     key: "escena",
-    label: "3. ESCENA + EMOCIÓN",
-    placeholder: "Ej: Luces Tokio, FOMO...",
+    label: "ESCENA + EMOCIÓN",
+    desc: "Describe el escenario y la emoción que transmite el anuncio",
+    placeholder: "Ej: Producto sobre fondo minimalista con iluminación dramática, sensación de deseo",
+    example: "Modelo usando el producto en un entorno urbano moderno, confianza y estilo",
     color: "violet",
   },
   {
     key: "estilo",
-    label: "4. ESTILO",
-    placeholder: "Ej: Vertical, bokeh, espacio arriba...",
+    label: "ESTILO VISUAL",
+    desc: "Define el estilo visual del anuncio",
+    placeholder: "Ej: Vertical, colores vibrantes, espacio arriba para texto publicitario",
+    example: "Minimalista con alto contraste, paleta monocromática y tipografía bold",
     color: "cyan",
   },
   {
     key: "salida",
-    label: "5. SALIDA",
-    placeholder: "Ej: Prompt inglés, 9:16...",
+    label: "SALIDA ESPERADA",
+    desc: "Describe el formato y uso final del anuncio",
+    placeholder: "Ej: Prompt en inglés para imagen 9:16 para Stories/Reels",
+    example: "Prompt para carrusel publicitario, 5 imágenes cuadradas para Instagram",
     color: "pink",
   },
 ];
@@ -95,6 +204,17 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
   const completedCount = Object.values(answers).filter(
     (v) => v.trim().length > 0,
   ).length;
+  const [showExamples, setShowExamples] = useState(true);
+  const [selectedExample, setSelectedExample] = useState<string | null>(null);
+  const [hoveredExample, setHoveredExample] = useState<string | null>(null);
+
+  const handleSelectExample = (example: typeof PRESET_EXAMPLES[0]) => {
+    setSelectedExample(example.id);
+    Object.entries(example.answers).forEach(([key, value]) => {
+      handleAnswerChange(key, value);
+    });
+    setShowExamples(false);
+  };
 
   const { copied, copy } = useCopyToClipboard();
   const generatedPrompt = `Genérame y optimízame un prompt de alto impacto con estas especificaciones:\nActúa como ${answers.rol}.\nObjetivo: ${answers.objetivo}.\nEscena/Contexto: ${answers.escena}.\nEstilo visual: ${answers.estilo}.\nFormato de salida: ${answers.salida}.`;
@@ -255,7 +375,7 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
               <div>
                 <h1 className="text-2xl font-extrabold text-gray-800 flex items-center gap-3">
                   <span className="text-3xl">🌃</span>
-                  Diseña tu Anuncio Nocturno
+                  Diseña tu Anuncio
                   <span className="text-sm font-semibold text-gray-500 bg-gray-200 px-3 py-1 rounded-full">
                     {completedCount}/{FIELDS.length}
                   </span>
@@ -277,7 +397,63 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
           </div>
         </div>
 
-        <div className="px-8 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Selector de Ejemplos */}
+        <div className="px-8 pb-3">
+          <button
+            onClick={() => setShowExamples(!showExamples)}
+            className="flex items-center gap-2 text-sm font-bold text-fuchsia-600 hover:text-fuchsia-800 transition-colors mb-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            {showExamples ? "Ocultar ejemplos" : "\ud83d\udca1 \u00bfNecesitas inspiraci\u00f3n? Elige un ejemplo"}
+            {showExamples ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+
+          {showExamples && (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+              {PRESET_EXAMPLES.map((example) => (
+                <div key={example.id} className="relative">
+                  <button
+                    onClick={() => handleSelectExample(example)}
+                    onMouseEnter={() => setHoveredExample(example.id)}
+                    onMouseLeave={() => setHoveredExample(null)}
+                    className={`
+                      relative w-full p-3 rounded-xl border-2 transition-all duration-200
+                      hover:scale-[1.03] hover:shadow-md text-center
+                      ${selectedExample === example.id
+                        ? `${example.bg} ${example.border} shadow-md`
+                        : "bg-white border-gray-200 hover:border-gray-300"}
+                    `}
+                  >
+                    <span className="text-2xl block mb-1">{example.emoji}</span>
+                    <span className={`text-xs font-bold block ${
+                      selectedExample === example.id ? "text-gray-800" : "text-gray-600"
+                    }`}>
+                      {example.title}
+                    </span>
+                  </button>
+                  {hoveredExample === example.id && example.image && (
+                    <div className="absolute z-50 top-full left-1/2 -translate-x-1/2 mt-3 pointer-events-none">
+                      <div className="w-3 h-3 bg-white border-t border-l border-gray-200 rotate-45 mx-auto -mb-1.5" />
+                      <div className="bg-white rounded-xl shadow-2xl border border-gray-200 p-2 w-64">
+                        <img
+                          src={example.image}
+                          alt={example.title}
+                          className="w-full max-h-64 object-contain rounded-lg"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                        <p className="text-xs text-center text-gray-500 mt-1.5 font-medium">
+                          Vista previa del resultado
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="px-8 pb-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {FIELDS.map((f) => {
             const value = answers[f.key as keyof typeof answers];
             const isFilled = value.trim().length > 0;
@@ -288,18 +464,18 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
             return (
               <div
                 key={f.key}
-                className={`relative rounded-2xl border p-5 transition-all duration-300 hover:shadow-md ${
+                className={`relative rounded-2xl border-2 p-5 transition-all duration-300 hover:shadow-lg hover:scale-[1.01] ${
                   isFilled
                     ? `${s.filledBg} ${s.cardBorder}`
                     : `${s.cardBg} border-transparent`
                 }`}
               >
                 {isFilled && (
-                  <Sparkles
-                    className={`absolute top-3 right-3 w-4 h-4 ${s.labelColor} opacity-60`}
-                  />
+                  <div className={`absolute top-3 right-3 w-6 h-6 rounded-full ${s.iconBg} flex items-center justify-center shadow-sm`}>
+                    <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                  </div>
                 )}
-                <div className="flex items-center gap-2.5 mb-3">
+                <div className="flex items-center gap-2.5 mb-1.5">
                   <div
                     className={`w-9 h-9 rounded-xl ${s.iconBg} flex items-center justify-center shadow-md`}
                   >
@@ -311,13 +487,21 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
                     {f.label}
                   </span>
                 </div>
-                <input
-                  type="text"
+                {f.desc && (
+                  <p className="text-xs text-gray-500 mb-3 ml-[46px]">{f.desc}</p>
+                )}
+                <textarea
                   value={value}
                   onChange={(e) => handleAnswerChange(f.key, e.target.value)}
                   placeholder={f.placeholder}
-                  className={`w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 ${s.focusRing} focus:border-transparent transition-all duration-200 shadow-sm`}
+                  rows={2}
+                  className={`w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 ${s.focusRing} focus:border-transparent transition-all duration-200 shadow-sm resize-none leading-relaxed`}
                 />
+                {f.example && !isFilled && (
+                  <p className={`text-xs mt-2 ${s.labelColor} opacity-70`}>
+                    <span className="font-semibold">Ejemplo:</span> {f.example}
+                  </p>
+                )}
               </div>
             );
           })}
@@ -332,10 +516,12 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
               <h3 className="text-xs font-extrabold text-indigo-700 uppercase tracking-widest mb-1">
                 Vista Previa
               </h3>
-              <p className="text-gray-600 text-sm leading-relaxed truncate">
+              <p className="text-gray-600 text-sm leading-relaxed">
                 {isComplete
-                  ? `Actúa como ${answers.rol}. ${answers.objetivo}. ${answers.escena}. Estilo: ${answers.estilo}. ${answers.salida}.`
-                  : "Actúa como... La escena es..."}
+                  ? <>
+                      Como <strong>{answers.rol}</strong>. {answers.objetivo}. La escena es <strong>{answers.escena}</strong>. El <strong>estilo</strong> visual es {answers.estilo}. Formato: {answers.salida}.
+                    </>
+                  : "Completa todos los campos para ver tu prompt generado aquí..."}
               </p>
             </div>
           </div>
@@ -401,7 +587,7 @@ export const TextToImageAds: React.FC = () => {
     setMode(newMode);
   }, []);
 
-  // DATOS: Tema Ads (Neon/Nightlife)
+  // DATOS: Tema Ads (Publicidad)
   const tutorialSteps = [
     {
       num: 1,
@@ -412,9 +598,9 @@ export const TextToImageAds: React.FC = () => {
       explanation:
         "Define quién eres para ajustar el tono. 'Influencer de moda' vs 'Director de Arte' da resultados distintos.",
       example:
-        "Actúa como un director creativo de una agencia de publicidad digital especializada en Instagram.",
+        "Actúa como un director creativo de una agencia de publicidad digital especializada en campañas de producto.",
       color: "indigo",
-      tip: "Súmale adjetivos como 'Experto' o 'Viral'.",
+      tip: "Súmale adjetivos como 'Experto', 'Viral' o 'Premium'.",
     },
     {
       num: 2,
@@ -423,9 +609,9 @@ export const TextToImageAds: React.FC = () => {
       icon: <Target className="w-6 h-6" />,
       question: "¿Qué quieres vender o lograr?",
       explanation:
-        "¿Es para stories? ¿Un post cuadrado? El formato es clave. Y, ¿quieres likes o ventas?",
+        "¿Es para stories? ¿Un post cuadrado? ¿Un banner web? El formato es clave. Y, ¿quieres likes o ventas?",
       example:
-        "Crear una imagen vertical atractiva (Instagram Story) para promocionar una 'Noche Neon' en un club exclusivo.",
+        "Crear una imagen vertical impactante (Instagram Story) para promocionar el lanzamiento de unas zapatillas deportivas.",
       color: "fuchsia",
       tip: "Usa 'Stop-scrolling' como modificador para pedir impacto visual.",
     },
@@ -436,11 +622,11 @@ export const TextToImageAds: React.FC = () => {
       icon: <Moon className="w-6 h-6" />,
       question: "¿Qué pasa en la imagen?",
       explanation:
-        "Describe el centro de atención. En publicidad nocturna, la iluminación es clave.",
+        "Describe el centro de atención. En publicidad, la composición y la iluminación son clave para captar miradas.",
       example:
-        "Primer plano de un cóctel humeante, luces de neón rosa y azul desenfocadas al fondo. Gente guapa bailando silueteada. Emoción: FOMO (Fear Of Missing Out) y diversión.",
+        "Primer plano del producto sobre un fondo degradado vibrante, iluminación de estudio perfecta. Emoción: Deseo, exclusividad y urgencia de compra.",
       color: "violet",
-      tip: "Palabras potentes: 'Vibrant nightlife', 'Neon glow', 'Cyberpunk vibes'.",
+      tip: "Palabras potentes: 'Hero shot', 'Product photography', 'Eye-catching composition'.",
     },
     {
       num: 4,
@@ -449,9 +635,9 @@ export const TextToImageAds: React.FC = () => {
       icon: <Palette className="w-6 h-6" />,
       question: "¿Cuál es el look?",
       explanation:
-        "La estética define la 'tribu' a la que te diriges. Cyberpunk, Vaporwave, elegante...",
+        "La estética define a quién te diriges. Minimalista, colorido, elegante, urbano...",
       example:
-        "Estilo Cyberpunk chic, alto contraste, saturación alta, luces volumétricas, fotografía de producto de alta gama.",
+        "Estilo publicitario premium, alto contraste, colores vibrantes, fotografía de producto de alta gama con espacio para texto.",
       color: "cyan",
       tip: "Para anuncios, deja 'Espacio Negativo' arriba para poner texto.",
     },
@@ -462,7 +648,7 @@ export const TextToImageAds: React.FC = () => {
       icon: <Box className="w-6 h-6" />,
       question: "¿Qué necesito?",
       explanation:
-        "El prompt técnico final. Pide formato vertical para móviles (9:16).",
+        "El prompt técnico final. Pide formato vertical para móviles (9:16) o cuadrado para feed (1:1).",
       example:
         "Genera el prompt en inglés para Midjourney v6 en formato vertical --ar 9:16.",
       color: "pink",
@@ -471,20 +657,20 @@ export const TextToImageAds: React.FC = () => {
   ];
 
   const completeExample = {
-    userPrompt: `ChatGPT, actúa como un experto en marketing digital (ROL).
+    userPrompt: `ChatGPT, actúa como un director creativo de una agencia de publicidad digital (ROL).
   
-  Necesito una imagen para una historia de Instagram promocionando zapatillas urbanas (OBJETIVO).
+  Necesito una imagen para una historia de Instagram promocionando unas zapatillas deportivas premium (OBJETIVO).
   
-  Escena: Calle de Tokio de noche y lloviendo. Reflejos de neón en el suelo mojado. Primer plano de las zapatillas pisando un charco colorido.
-  Emoción: Urbano, cool, moderno (ESCENA + EMOCIÓN).
+  Escena: Primer plano de las zapatillas sobre un podio minimalista con iluminación de estudio dramática. Colores vibrantes del producto contrastan con fondo oscuro degradado.
+  Emoción: Deseo, exclusividad y urgencia (ESCENA + EMOCIÓN).
   
-  Estilo: Fotografía callejera nocturna, estilo cyberpunk, colores neón, alta nitidez en el producto (ESTILO).
+  Estilo: Fotografía de producto publicitaria, alto contraste, colores saturados, nitidez perfecta en el producto, espacio negativo arriba para texto (ESTILO).
   
   Salida: Prompt en inglés para Midjourney v6 --ar 9:16 (SALIDA).`,
 
-    aiPrompt: `Close-up low angle shot of stylish urban sneakers stepping into a rain puddle acting as a mirror for neon signs, Tokyo street at night, raining, vibrant cyberpunk color palette (pink and cyan), moody atmosphere, high fashion street photography, sharp focus on shoes, bokeh background, cinematic lighting --ar 9:16 --v 6 --style raw`,
+    aiPrompt: `Premium sports sneakers on a minimalist pedestal with dramatic studio lighting, vibrant product colors contrasting against a dark gradient background, high-end advertising product photography, high contrast, saturated colors, razor sharp focus on shoes, negative space at top for text overlay, professional commercial aesthetic, 8k resolution --ar 9:16 --v 6 --style raw`,
 
-    finalCommand: `Imagine prompt: Close-up low angle shot...`,
+    finalCommand: `Imagine prompt: Premium sports sneakers on a minimalist pedestal...`,
   };
 
   // --- SCREENS ---

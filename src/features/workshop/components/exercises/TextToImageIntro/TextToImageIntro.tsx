@@ -12,6 +12,7 @@ import {
   Zap,
   BookOpen,
   Check,
+  CheckCircle2,
   Copy,
   ChevronLeft,
   Camera,
@@ -24,8 +25,91 @@ import {
   FileText,
   Eye,
   Send,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useCopyToClipboard } from "../../../../../hooks";
+
+// ============================================
+// EJEMPLOS PRE-CONSTRUIDOS - TEMA PLAYA
+// ============================================
+const PRESET_EXAMPLES = [
+  {
+    id: "tailandia",
+    emoji: "🏝️",
+    title: "Tailandia - Nómada",
+    image: "/assets/examples/beach/tailandia.webp",
+    border: "border-purple-300",
+    bg: "bg-purple-50",
+    answers: {
+      rol: "Fotógrafo de National Geographic especializado en estilo de vida y viajes",
+      objetivo: "Crear imagen aspiracional para campaña de Instagram sobre nómadas digitales",
+      escena: "Playa de Tailandia al atardecer, joven profesional trabajando con laptop en hamaca entre palmeras. Emoción: Libertad y paz financiera",
+      estilo: "Golden hour, colores cálidos vibrantes turquesa y naranja, fotografía premiada 8k",
+      salida: "Prompt en inglés para Midjourney v6 --ar 4:5",
+    },
+  },
+  {
+    id: "bali",
+    emoji: "🌺",
+    title: "Bali - Wellness",
+    image: "/assets/examples/beach/bali.webp",
+    border: "border-pink-300",
+    bg: "bg-pink-50",
+    answers: {
+      rol: "Director de arte de revista de bienestar y lifestyle",
+      objetivo: "Imagen para portada de artículo sobre retiros de yoga en playas",
+      escena: "Terraza de bambú frente al océano en Bali, mujer meditando al amanecer con incienso. Emoción: Serenidad y renovación espiritual",
+      estilo: "Minimalista zen, tonos pastel suaves, luz natural difusa, editorial premium",
+      salida: "Prompt en inglés para Ideogram, formato vertical 3:4",
+    },
+  },
+  {
+    id: "maldivas",
+    emoji: "🚤",
+    title: "Maldivas - Lujo",
+    image: "/assets/examples/beach/maldivas.webp",
+    border: "border-cyan-300",
+    bg: "bg-cyan-50",
+    answers: {
+      rol: "Fotógrafo de hoteles de ultra-lujo para Condé Nast Traveler",
+      objetivo: "Imagen hero para landing page de resort overwater exclusivo",
+      escena: "Villa sobre el agua con piscina infinita al atardecer, océano turquesa cristalino. Emoción: Exclusividad y paraíso terrenal",
+      estilo: "Ultra premium, iluminación golden hour, colores satúnados, alta definición 8k",
+      salida: "Prompt en inglés para Midjourney v6 --ar 16:9",
+    },
+  },
+  {
+    id: "surf",
+    emoji: "🏄",
+    title: "Surf - Aventura",
+    image: "/assets/examples/beach/surf.webp",
+    border: "border-amber-300",
+    bg: "bg-amber-50",
+    answers: {
+      rol: "Fotógrafo deportivo de acción para Red Bull Media",
+      objetivo: "Visual dinámico para campaña de escuela de surf en Hawaií",
+      escena: "Surfista atrapando una ola gigante al amanecer, spray de agua dorado. Emoción: Adrenalina, libertad y conexión con el océano",
+      estilo: "Fotografía de acción congelada, alto contraste, colores vibrantes, ángulo dramático",
+      salida: "Prompt en inglés para Midjourney v6 --ar 4:5 --style raw",
+    },
+  },
+  {
+    id: "caribe",
+    emoji: "🌴",
+    title: "Caribe - Familiar",
+    image: "/assets/examples/beach/caribe.webp",
+    border: "border-teal-300",
+    bg: "bg-teal-50",
+    answers: {
+      rol: "Fotógrafo de familias y momentos especiales",
+      objetivo: "Crear imagen emocional para promoción de vacaciones familiares en Caribe",
+      escena: "Familia construyendo castillos de arena en playa de agua turquesa, niños riendo. Emoción: Alegría pura y recuerdos inolvidables",
+      estilo: "Colorido y cálido, estilo catálogo de resort premium, luz natural",
+      salida: "Prompt en inglés para Ideogram, formato cuadrado 1:1",
+    },
+  },
+];
 
 // --- DATOS GLOBALES ---
 
@@ -40,32 +124,42 @@ const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
 const FIELDS = [
   {
     key: "rol",
-    label: "1. ROL",
-    placeholder: "Ej: Fotógrafo de National Geographic...",
+    label: "ROL",
+    desc: "Define desde qué perspectiva se construye la imagen",
+    placeholder: "Ej: Fotógrafo de National Geographic especializado en paisajes tropicales",
+    example: "Director de arte para revista de viajes premium",
     color: "purple",
   },
   {
     key: "objetivo",
-    label: "2. OBJETIVO",
-    placeholder: "Ej: Campaña Instagram...",
+    label: "OBJETIVO",
+    desc: "Describe qué quieres lograr con la imagen",
+    placeholder: "Ej: Campaña Instagram para promover trabajo remoto en playas",
+    example: "Crear post viral mostrando el estilo de vida nómada digital",
     color: "pink",
   },
   {
     key: "escena",
-    label: "3. ESCENA + EMOCIÓN",
-    placeholder: "Ej: Playa Tailandia, libertad...",
+    label: "ESCENA + EMOCIÓN",
+    desc: "Describe el escenario y la emoción que quieres transmitir",
+    placeholder: "Ej: Playa de Tailandia al atardecer, sensación de libertad y productividad",
+    example: "Café junto al mar con laptop, tranquilidad y enfoque creativo",
     color: "purple",
   },
   {
     key: "estilo",
-    label: "4. ESTILO",
-    placeholder: "Ej: Golden hour, vibrante...",
+    label: "ESTILO VISUAL",
+    desc: "Define el estilo visual que tendrá la imagen",
+    placeholder: "Ej: Golden hour, tonos cálidos vibrantes, estilo editorial",
+    example: "Minimalista y luminoso, colores pastel naturales",
     color: "pink",
   },
   {
     key: "salida",
-    label: "5. SALIDA",
-    placeholder: "Ej: Prompt en inglés...",
+    label: "SALIDA ESPERADA",
+    desc: "Describe el formato y fin esperado",
+    placeholder: "Ej: Prompt en inglés para Ideogram, formato 16:9",
+    example: "Prompt detallado para Midjourney, aspecto cuadrado 1:1",
     color: "purple",
   },
 ];
@@ -95,6 +189,17 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
   const completedCount = Object.values(answers).filter(
     (v) => v.trim().length > 0,
   ).length;
+  const [showExamples, setShowExamples] = useState(true);
+  const [selectedExample, setSelectedExample] = useState<string | null>(null);
+  const [hoveredExample, setHoveredExample] = useState<string | null>(null);
+
+  const handleSelectExample = (example: typeof PRESET_EXAMPLES[0]) => {
+    setSelectedExample(example.id);
+    Object.entries(example.answers).forEach(([key, value]) => {
+      handleAnswerChange(key, value);
+    });
+    setShowExamples(false);
+  };
 
   const { copied, copy } = useCopyToClipboard();
   const generatedPrompt = `Genérame y optimízame un prompt de alto impacto con estas especificaciones:\nActúa como ${answers.rol}.\nObjetivo: ${answers.objetivo}.\nEscena/Contexto: ${answers.escena}.\nEstilo visual: ${answers.estilo}.\nFormato de salida: ${answers.salida}.`;
@@ -289,8 +394,64 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
           </div>
         </div>
 
+        {/* Selector de Ejemplos */}
+        <div className="px-8 pb-3">
+          <button
+            onClick={() => setShowExamples(!showExamples)}
+            className="flex items-center gap-2 text-sm font-bold text-purple-600 hover:text-purple-800 transition-colors mb-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            {showExamples ? "Ocultar ejemplos" : "💡 ¿Necesitas inspiración? Elige un ejemplo"}
+            {showExamples ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+
+          {showExamples && (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+              {PRESET_EXAMPLES.map((example) => (
+                <div key={example.id} className="relative">
+                  <button
+                    onClick={() => handleSelectExample(example)}
+                    onMouseEnter={() => setHoveredExample(example.id)}
+                    onMouseLeave={() => setHoveredExample(null)}
+                    className={`
+                      relative w-full p-3 rounded-xl border-2 transition-all duration-200
+                      hover:scale-[1.03] hover:shadow-md text-center
+                      ${selectedExample === example.id
+                        ? `${example.bg} ${example.border} shadow-md`
+                        : "bg-white border-gray-200 hover:border-gray-300"}
+                    `}
+                  >
+                    <span className="text-2xl block mb-1">{example.emoji}</span>
+                    <span className={`text-xs font-bold block ${
+                      selectedExample === example.id ? "text-gray-800" : "text-gray-600"
+                    }`}>
+                      {example.title}
+                    </span>
+                  </button>
+                  {hoveredExample === example.id && example.image && (
+                    <div className="absolute z-50 top-full left-1/2 -translate-x-1/2 mt-3 pointer-events-none">
+                      <div className="w-3 h-3 bg-white border-t border-l border-gray-200 rotate-45 mx-auto -mb-1.5" />
+                      <div className="bg-white rounded-xl shadow-2xl border border-gray-200 p-2 w-64">
+                        <img
+                          src={example.image}
+                          alt={example.title}
+                          className="w-full max-h-64 object-contain rounded-lg"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                        <p className="text-xs text-center text-gray-500 mt-1.5 font-medium">
+                          Vista previa del resultado
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Field grid */}
-        <div className="px-8 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="px-8 pb-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {FIELDS.map((f) => {
             const value = answers[f.key as keyof typeof answers];
             const isFilled = value.trim().length > 0;
@@ -301,18 +462,18 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
             return (
               <div
                 key={f.key}
-                className={`relative rounded-2xl border p-5 transition-all duration-300 hover:shadow-md ${
+                className={`relative rounded-2xl border-2 p-5 transition-all duration-300 hover:shadow-lg hover:scale-[1.01] ${
                   isFilled
                     ? `${s.filledBg} ${s.cardBorder}`
                     : `${s.cardBg} border-transparent`
                 }`}
               >
                 {isFilled && (
-                  <Sparkles
-                    className={`absolute top-3 right-3 w-4 h-4 ${s.labelColor} opacity-60`}
-                  />
+                  <div className={`absolute top-3 right-3 w-6 h-6 rounded-full ${s.iconBg} flex items-center justify-center shadow-sm`}>
+                    <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                  </div>
                 )}
-                <div className="flex items-center gap-2.5 mb-3">
+                <div className="flex items-center gap-2.5 mb-1.5">
                   <div
                     className={`w-9 h-9 rounded-xl ${s.iconBg} flex items-center justify-center shadow-md`}
                   >
@@ -324,13 +485,21 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
                     {f.label}
                   </span>
                 </div>
-                <input
-                  type="text"
+                {f.desc && (
+                  <p className="text-xs text-gray-500 mb-3 ml-[46px]">{f.desc}</p>
+                )}
+                <textarea
                   value={value}
                   onChange={(e) => handleAnswerChange(f.key, e.target.value)}
                   placeholder={f.placeholder}
-                  className={`w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 ${s.focusRing} focus:border-transparent transition-all duration-200 shadow-sm`}
+                  rows={2}
+                  className={`w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 ${s.focusRing} focus:border-transparent transition-all duration-200 shadow-sm resize-none leading-relaxed`}
                 />
+                {f.example && !isFilled && (
+                  <p className={`text-xs mt-2 ${s.labelColor} opacity-70`}>
+                    <span className="font-semibold">Ejemplo:</span> {f.example}
+                  </p>
+                )}
               </div>
             );
           })}
@@ -346,10 +515,12 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
               <h3 className="text-xs font-extrabold text-purple-700 uppercase tracking-widest mb-1">
                 Vista Previa
               </h3>
-              <p className="text-gray-600 text-sm leading-relaxed truncate">
+              <p className="text-gray-600 text-sm leading-relaxed">
                 {isComplete
-                  ? `Actúa como ${answers.rol}. ${answers.objetivo}. ${answers.escena}. Estilo: ${answers.estilo}. ${answers.salida}.`
-                  : "Actúa como... La escena es..."}
+                  ? <>
+                      Como <strong>{answers.rol}</strong>. {answers.objetivo}. La escena es <strong>{answers.escena}</strong>. El <strong>estilo</strong> visual es {answers.estilo}. Formato: {answers.salida}.
+                    </>
+                  : "Completa todos los campos para ver tu prompt generado aquí..."}
               </p>
             </div>
           </div>

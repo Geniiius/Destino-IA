@@ -3,8 +3,8 @@
  * @description Panneau de messages pour les participants
  */
 
-import React, { useEffect, useRef } from "react";
-import { X, Bot, Clock } from "lucide-react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { X, Bot, Clock, Copy, Check } from "lucide-react";
 import type { DirectMessage } from "@/types";
 
 interface MessagePanelProps {
@@ -29,6 +29,114 @@ const formatTime = (dateString: string): string => {
     hour: "2-digit",
     minute: "2-digit",
   });
+};
+
+/** Inline copy button for credential values */
+const CopyableValue: React.FC<{ value: string; label: string }> = ({ value, label }) => {
+  const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = value;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    setCopied(true);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => setCopied(false), 2000);
+  }, [value]);
+
+  return (
+    <button
+      onClick={handleCopy}
+      title={`Copiar ${label}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm font-mono font-semibold transition-all duration-200 cursor-pointer ${
+        copied
+          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+          : "bg-white/10 text-white hover:bg-purple-500/20 hover:text-purple-200 border border-white/10 hover:border-purple-500/30"
+      }`}
+    >
+      {copied ? (
+        <Check className="w-3.5 h-3.5 text-emerald-400" />
+      ) : (
+        <Copy className="w-3.5 h-3.5 opacity-60" />
+      )}
+      <span>{value}</span>
+      {copied && <span className="text-[10px] text-emerald-400 ml-1">¡Copiado!</span>}
+    </button>
+  );
+};
+
+/**
+ * Parse a message and replace credential lines with clickable copy buttons.
+ * Detects patterns like:
+ *   📧 Usuario: value
+ *   🔑 Contraseña: value
+ */
+/** Render a single line, replacing URLs with clickable links and credentials with copy buttons */
+const renderLine = (line: string): React.ReactNode[] => {
+  const credentialPattern = /^(📧\s*Usuario:\s*|🔑\s*Contraseña:\s*)(.+)$/;
+  const credMatch = line.match(credentialPattern);
+  if (credMatch) {
+    const prefix = credMatch[1];
+    const value = credMatch[2].trim();
+    const label = prefix.includes("Usuario") ? "usuario" : "contraseña";
+    return [
+      <span key="prefix">{prefix}</span>,
+      <CopyableValue key="val" value={value} label={label} />,
+    ];
+  }
+
+  // Split line by URLs and render links
+  const urlPattern = /(https?:\/\/[^\s]+)/g;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let urlMatch: RegExpExecArray | null;
+
+  while ((urlMatch = urlPattern.exec(line)) !== null) {
+    if (urlMatch.index > lastIndex) {
+      parts.push(line.slice(lastIndex, urlMatch.index));
+    }
+    const url = urlMatch[0];
+    parts.push(
+      <a
+        key={`link-${urlMatch.index}`}
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 text-purple-400 hover:text-purple-300 underline underline-offset-2 decoration-purple-400/40 hover:decoration-purple-300 transition-colors font-medium"
+      >
+        {url}
+        <svg className="w-3 h-3 inline-block opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+      </a>
+    );
+    lastIndex = urlMatch.index + url.length;
+  }
+
+  if (lastIndex < line.length) {
+    parts.push(line.slice(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : [line];
+};
+
+const renderMessageContent = (text: string) => {
+  const lines = text.split("\n");
+
+  return lines.map((line, i) => (
+    <React.Fragment key={i}>
+      {renderLine(line)}
+      {i < lines.length - 1 && "\n"}
+    </React.Fragment>
+  ));
 };
 
 export const MessagePanel: React.FC<MessagePanelProps> = ({
@@ -104,7 +212,7 @@ export const MessagePanel: React.FC<MessagePanelProps> = ({
 
                 {/* Contenu du message */}
                 <div className="text-gray-200 text-sm whitespace-pre-wrap leading-relaxed">
-                  {msg.message}
+                  {renderMessageContent(msg.message)}
                 </div>
 
                 {/* Badge non lu */}

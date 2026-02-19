@@ -26,8 +26,96 @@ import {
   User,
   Eye,
   Send,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useCopyToClipboard } from "../../../../../hooks";
+
+// ============================================
+// EJEMPLOS PRE-CONSTRUIDOS - UNIVERSO DE MARCA
+// ============================================
+const PRESET_EXAMPLES = [
+  {
+    id: "corporate-lifestyle",
+    emoji: "🏢",
+    title: "Corporate Lifestyle",
+    image: "/assets/examples/logo/corporate-lifestyle.webp",
+    border: "border-amber-300",
+    bg: "bg-amber-50",
+    answers: {
+      rol: "Director de arte corporativo especializado en branding aspiracional de alto nivel",
+      obj: "Imagen hero corporativa donde la marca esté integrada en un entorno ejecutivo premium, transmitiendo liderazgo y posicionamiento de élite",
+      esc: "Oficina ejecutiva con vista panorámica a skyline urbano al atardecer, iluminación golden hour entrando por ventanales de piso a techo, escritorio de madera oscura noble",
+      int: "Logo de la marca integrado de forma elegante en pantalla de laptop, pared del fondo y taza sobre el escritorio — branding discreto pero omnipresente, dorado sobre oscuro",
+      est: "Composición cinematográfica con profundidad de campo, tonos cálidos dorados y negros, iluminación volumétrica, estética de revista de negocios premium",
+      sal: "Horizontal 16:9 para hero banner web y presentaciones corporativas, resolución 4K",
+    },
+  },
+  {
+    id: "experiencia-destino",
+    emoji: "🏝️",
+    title: "Experiencia Destino",
+    image: "/assets/examples/logo/experiencia-destino.webp",
+    border: "border-emerald-300",
+    bg: "bg-emerald-50",
+    answers: {
+      rol: "Director creativo de marketing experiencial para marca de viajes de lujo",
+      obj: "Escena de resort donde la marca aparezca integrada de forma natural y emocional, evocando deseo de vivir esa experiencia",
+      esc: "Resort tropical al atardecer con piscina infinity, palapas de madera, hamacas, palmeras y vegetación exuberante, cielo con degradado naranja-púrpura",
+      int: "Logo de la marca grabado sutilmente en señalética de madera junto a la piscina, integración orgánica y no invasiva, tipografía en tono arena-dorado",
+      est: "Fotografía de viajes editorial, profundidad de campo con enfoque en el letrero y desenfoque suave del entorno, paleta cálida tropical, sensación aspiracional",
+      sal: "Vertical 9:16 para Stories de Instagram y contenido de redes, alta resolución",
+    },
+  },
+  {
+    id: "identidad-movimiento",
+    emoji: "🚢",
+    title: "Identidad en Movimiento",
+    image: "/assets/examples/logo/identidad-movimiento.webp",
+    border: "border-rose-300",
+    bg: "bg-rose-50",
+    answers: {
+      rol: "Fotógrafo de lifestyle especializado en personal branding y narrativa aspiracional",
+      obj: "Escena de transformación personal donde la marca aparece como firma sutil en vestuario, asociada a libertad y logro",
+      esc: "Cubierta de crucero al atardecer, persona de espaldas con brazos abiertos mirando el horizonte del mar infinito, luz dorada envolvente",
+      int: "Marca bordada o impresa en la espalda de camisa de lino del personaje, tipografía elegante y orgánica, integración natural como firma personal",
+      est: "Fotografía emocional cinematográfica, contraluz dorado, silueta parcial, sensación de libertad y logro, tonos cálidos ámbar y azul profundo",
+      sal: "Vertical 4:5 para Instagram feed y campaña de branding personal, alta resolución",
+    },
+  },
+  {
+    id: "contexto-cultural",
+    emoji: "🏛️",
+    title: "Contexto Cultural",
+    image: "/assets/examples/logo/contexto-cultural.webp",
+    border: "border-blue-300",
+    bg: "bg-blue-50",
+    answers: {
+      rol: "Director de branding internacional especializado en integración de marca en escenarios icónicos globales",
+      obj: "Integrar la marca en un contexto arquitectónico internacional relevante, mostrando presencia global y escala premium",
+      esc: "Plaza histórica europea (Grand Place de Bruselas o similar), arquitectura gótica monumental, luz de golden hour, adoquines, perspectiva desde atrás del personaje",
+      int: "Logo bordado en dorado sobre mochila negra premium del personaje de espaldas, marca visible y elegante, integración física creíble en accesorio real",
+      est: "Fotografía de viajes con composición cinematográfica, perspectiva arquitectónica, bokeh sutil, contraste entre personaje y monumentalidad del edificio",
+      sal: "Vertical 4:5 para Instagram y portfolio de marca internacional, resolución alta",
+    },
+  },
+  {
+    id: "comunidad-experiencia",
+    emoji: "👥",
+    title: "Comunidad y Experiencia",
+    image: "/assets/examples/logo/comunidad-experiencia.webp",
+    border: "border-orange-300",
+    bg: "bg-orange-50",
+    answers: {
+      rol: "Director de campaña de marca enfocado en storytelling social y experiencias compartidas",
+      obj: "Grupo de personas viviendo una experiencia memorable donde la marca aparece como facilitador y catalizador social",
+      esc: "Playa tropical al atardecer, grupo de 4 amigos riendo y planificando viaje, maleta vintage, mapa abierto, cámara fotográfica, ambiente de aventura compartida",
+      int: "Logo de la marca visible en maleta de viaje retro en primer plano, stickers y detalle de marca en equipaje, integración secundaria pero memorable — marca como compañero de viaje",
+      est: "Fotografía lifestyle grupal, emociones auténticas, luz dorada de golden hour, composición dinámica con profundidad, paleta cálida y vibrante",
+      sal: "Horizontal 16:9 para hero de campaña web y redes sociales, resolución 4K",
+    },
+  },
+];
 
 // --- DATOS GLOBALES ---
 
@@ -459,42 +547,48 @@ const FIELDS = [
     id: "rol",
     label: "ROL / PERSPECTIVA",
     desc: "¿Quién cuenta la historia?",
-    ex: "Ej: Fotógrafo de Producto...",
+    ex: "Ej: Fotógrafo de Producto para marcas de lujo",
+    example: "Director de arte de agencia de branding premium",
     color: "indigo",
   },
   {
     id: "obj",
     label: "OBJETIVO",
     desc: "¿Qué buscas lograr?",
-    ex: "Ej: Campaña de Instagram...",
+    ex: "Ej: Campaña de Instagram para lanzamiento de marca",
+    example: "Crear mockup profesional para presentación a cliente",
     color: "emerald",
   },
   {
     id: "esc",
     label: "ESCENA + ENTORNO",
     desc: "¿Dónde está el objeto?",
-    ex: "Ej: Mesa de madera, luz de mañana...",
+    ex: "Ej: Mesa de madera artesanal, luz de mañana natural",
+    example: "Estantería minimalista con plantas, fondo blanco difuso",
     color: "amber",
   },
   {
     id: "int",
     label: "DETALLES DE INTEGRACIÓN",
     desc: "¿Dónde y cómo va el logo?",
-    ex: "Ej: En la etiqueta, bordado, relieve...",
+    ex: "Ej: En la etiqueta del producto, bordado, relieve",
+    example: "Grabado láser en superficie de cuero, textura sutil",
     color: "rose",
   },
   {
     id: "est",
     label: "ESTILO VISUAL",
     desc: "Look & Feel",
-    ex: "Ej: Minimalista, macro, bokeh...",
+    ex: "Ej: Minimalista, macro, bokeh suave",
+    example: "Editorial premium, luz cenital, sombras definidas",
     color: "purple",
   },
   {
     id: "sal",
     label: "SALIDA / FORMATO",
     desc: "Resolución y uso",
-    ex: "Ej: Vertical para Stories, 4k...",
+    ex: "Ej: Vertical para Stories, 4K para web",
+    example: "Cuadrado 1:1 para Instagram feed, alta resolución",
     color: "cyan",
   },
 ];
@@ -523,6 +617,17 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
     const completedCount = Object.values(inputs).filter(
       (v) => v.trim().length > 0,
     ).length;
+    const [showExamples, setShowExamples] = useState(true);
+    const [selectedExample, setSelectedExample] = useState<string | null>(null);
+    const [hoveredExample, setHoveredExample] = useState<string | null>(null);
+
+    const handleSelectExample = (example: typeof PRESET_EXAMPLES[0]) => {
+      setSelectedExample(example.id);
+      Object.entries(example.answers).forEach(([key, value]) => {
+        handleChange(key, value);
+      });
+      setShowExamples(false);
+    };
 
     // Light-theme per-field config
     const fieldStyles: Record<
@@ -635,8 +740,64 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
             </div>
           </div>
 
+          {/* Selector de Ejemplos */}
+          <div className="px-8 pb-3">
+            <button
+              onClick={() => setShowExamples(!showExamples)}
+              className="flex items-center gap-2 text-sm font-bold text-rose-600 hover:text-rose-800 transition-colors mb-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              {showExamples ? "Ocultar ejemplos" : "💡 ¿Necesitas inspiración? Elige un ejemplo"}
+              {showExamples ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+
+            {showExamples && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+                {PRESET_EXAMPLES.map((example) => (
+                  <div key={example.id} className="relative">
+                    <button
+                      onClick={() => handleSelectExample(example)}
+                      onMouseEnter={() => setHoveredExample(example.id)}
+                      onMouseLeave={() => setHoveredExample(null)}
+                      className={`
+                        relative w-full p-3 rounded-xl border-2 transition-all duration-200
+                        hover:scale-[1.03] hover:shadow-md text-center
+                        ${selectedExample === example.id
+                          ? `${example.bg} ${example.border} shadow-md`
+                          : "bg-white border-gray-200 hover:border-gray-300"}
+                      `}
+                    >
+                      <span className="text-2xl block mb-1">{example.emoji}</span>
+                      <span className={`text-xs font-bold block ${
+                        selectedExample === example.id ? "text-gray-800" : "text-gray-600"
+                      }`}>
+                        {example.title}
+                      </span>
+                    </button>
+                    {hoveredExample === example.id && example.image && (
+                      <div className="absolute z-50 top-full left-1/2 -translate-x-1/2 mt-3 pointer-events-none">
+                        <div className="w-3 h-3 bg-white border-t border-l border-gray-200 rotate-45 mx-auto -mb-1.5" />
+                        <div className="bg-white rounded-xl shadow-2xl border border-gray-200 p-2 w-64">
+                          <img
+                            src={example.image}
+                            alt={example.title}
+                            className="w-full max-h-64 object-contain rounded-lg"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                          <p className="text-xs text-center text-gray-500 mt-1.5 font-medium">
+                            Vista previa del resultado
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Field grid */}
-          <div className="px-8 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="px-8 pb-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {FIELDS.map((field) => {
               const value = inputs[field.id as keyof typeof inputs] || "";
               const isFilled = value.trim().length > 0;
@@ -647,18 +808,18 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
               return (
                 <div
                   key={field.id}
-                  className={`relative rounded-2xl border p-5 transition-all duration-300 hover:shadow-md ${
+                  className={`relative rounded-2xl border-2 p-5 transition-all duration-300 hover:shadow-lg hover:scale-[1.01] ${
                     isFilled
                       ? `${s.filledBg} ${s.cardBorder}`
                       : `${s.cardBg} border-transparent`
                   }`}
                 >
                   {isFilled && (
-                    <Sparkles
-                      className={`absolute top-3 right-3 w-4 h-4 ${s.labelColor} opacity-60`}
-                    />
+                    <div className={`absolute top-3 right-3 w-6 h-6 rounded-full ${s.iconBg} flex items-center justify-center shadow-sm`}>
+                      <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                    </div>
                   )}
-                  <div className="flex items-center gap-2.5 mb-3">
+                  <div className="flex items-center gap-2.5 mb-1.5">
                     <div
                       className={`w-9 h-9 rounded-xl ${s.iconBg} flex items-center justify-center shadow-md`}
                     >
@@ -670,14 +831,22 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
                       {field.label}
                     </span>
                   </div>
-                  <input
-                    type="text"
+                  {field.desc && (
+                    <p className="text-xs text-gray-500 mb-3 ml-[46px]">{field.desc}</p>
+                  )}
+                  <textarea
                     id={field.id}
                     value={value}
                     onChange={(e) => handleChange(field.id, e.target.value)}
                     placeholder={field.ex}
-                    className={`w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 ${s.focusRing} focus:border-transparent transition-all duration-200 shadow-sm`}
+                    rows={2}
+                    className={`w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 ${s.focusRing} focus:border-transparent transition-all duration-200 shadow-sm resize-none leading-relaxed`}
                   />
+                  {(field as Record<string, string>).example && !isFilled && (
+                    <p className={`text-xs mt-2 ${s.labelColor} opacity-70`}>
+                      <span className="font-semibold">Ejemplo:</span> {(field as Record<string, string>).example}
+                    </p>
+                  )}
                 </div>
               );
             })}
@@ -693,9 +862,11 @@ const PracticeScreen: React.FC<PracticeScreenProps> = React.memo(
                 <h3 className="text-xs font-extrabold text-rose-700 uppercase tracking-widest mb-1">
                   Vista Previa
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed truncate">
+                <p className="text-gray-600 text-sm leading-relaxed">
                   {isComplete
-                    ? `Rol: ${inputs.rol}. Objetivo: ${inputs.obj}. Escena: ${inputs.esc}. Integración: ${inputs.int}. Estilo: ${inputs.est}. Salida: ${inputs.sal}.`
+                    ? <>
+                        <strong>Rol:</strong> {inputs.rol}. <strong>Objetivo:</strong> {inputs.obj}. <strong>Escena:</strong> {inputs.esc}. <strong>Integración:</strong> {inputs.int}. <strong>Estilo:</strong> {inputs.est}. <strong>Salida:</strong> {inputs.sal}.
+                      </>
                     : "Completa los 6 campos para generar el prompt perfecto."}
                 </p>
               </div>

@@ -28,7 +28,7 @@ export const SendMessageModal: React.FC<SendMessageModalProps> = ({
     {
       label: "Identifiants",
       icon: Key,
-      template: `Hola ${participant.name},\n\nTus credenciales de acceso:\n\n📧 Usuario: \n🔑 Contraseña: \n\n¡No las compartas con nadie!`,
+      template: `Hola ${participant.name},\n\nTus credenciales de acceso para Grok: https://grok.com/\n\n📧 Usuario: \n🔑 Contraseña: \n\n¡No las compartas con nadie!`,
     },
     {
       label: "Instrucciones",

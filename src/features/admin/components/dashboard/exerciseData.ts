@@ -81,7 +81,7 @@ export const EXERCISES: Exercise[] = [
     emoji: "🌃",
     title: "Text to Image: Ads",
     description:
-      "Genera anuncios visuales impactantes para publicidad nocturna.",
+      "Genera anuncios visuales impactantes para publicidad.",
     category: "Imagen",
     duration: "8-10 min",
     gradient:
