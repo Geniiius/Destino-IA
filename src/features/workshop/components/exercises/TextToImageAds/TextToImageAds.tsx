@@ -12,7 +12,6 @@ import {
   Zap,
   BookOpen,
   Check,
-  CheckCircle2,
   Copy,
   ChevronLeft,
   Camera,

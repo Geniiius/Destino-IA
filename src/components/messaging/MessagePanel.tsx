@@ -83,7 +83,7 @@ const CopyableValue: React.FC<{ value: string; label: string }> = ({ value, labe
 const renderLine = (line: string): React.ReactNode[] => {
   const credentialPattern = /^(📧\s*Usuario:\s*|🔑\s*Contraseña:\s*)(.+)$/;
   const credMatch = line.match(credentialPattern);
-  if (credMatch) {
+  if (credMatch && credMatch[1] && credMatch[2]) {
     const prefix = credMatch[1];
     const value = credMatch[2].trim();
     const label = prefix.includes("Usuario") ? "usuario" : "contraseña";
