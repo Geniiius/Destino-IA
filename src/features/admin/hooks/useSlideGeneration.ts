@@ -66,7 +66,8 @@ export function useSlideGeneration(
     const fontVersion = (pdfjs as any).version || "3.11.174";
     const pdf = await pdfjs.getDocument({ 
       data: arrayBuffer,
-      standardFontDataUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${fontVersion}/standard_fonts/`
+      standardFontDataUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${fontVersion}/standard_fonts/`,
+      disableFontFace: true // Éviter les erreurs CORS sur les polices système
     }).promise;
     const pages: PDFPage[] = [];
 
