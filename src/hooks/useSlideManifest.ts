@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { getManifestUrl, getSlidesBaseUrl } from "@/services/slidesStorage";
 
 // ─── Types ─────────────────────────────────────────────────────
 
@@ -45,7 +46,7 @@ interface UseSlideManifestReturn {
 
 // ─── Constantes ────────────────────────────────────────────────
 
-const MANIFEST_URL = "/slides/slides-manifest.json";
+const DEFAULT_MANIFEST_URL = "/slides/slides-manifest.json";
 const SLIDES_BASE_URL = "/slides";
 const DEFAULT_PRELOAD_AHEAD = 3;
 
@@ -68,7 +69,9 @@ const preloadedImages = new Set<string>();
 
 /** Effectue le fetch réseau du manifest et met en cache */
 async function fetchAndCacheManifest(): Promise<SlideManifest> {
-  const response = await fetch(MANIFEST_URL);
+  // Use "destino-ia-workshop" as session ID to match auth default
+  const manifestUrl = getManifestUrl("destino-ia-workshop") || DEFAULT_MANIFEST_URL;
+  const response = await fetch(manifestUrl);
 
   if (!response.ok) {
     throw new Error(`Manifest introuvable (HTTP ${response.status})`);
@@ -122,13 +125,14 @@ function getSlideByIndex(index: number): SlideInfo | undefined {
 
 /** Construit l'URL CDN d'un slide (1-based index) */
 function buildSlideUrl(index: number): string {
+  const baseUrl = getSlidesBaseUrl("destino-ia-workshop") || SLIDES_BASE_URL;
   const slide = getSlideByIndex(index);
   if (slide) {
-    return `${SLIDES_BASE_URL}/${slide.file}`;
+    return `${baseUrl}/${slide.file}`;
   }
   // Fallback convention-based
   const padded = index.toString().padStart(3, "0");
-  return `${SLIDES_BASE_URL}/slide-${padded}.webp`;
+  return `${baseUrl}/slide-${padded}.webp`;
 }
 
 // ─── Hook ──────────────────────────────────────────────────────
@@ -216,8 +220,9 @@ export function useSlideManifest(): UseSlideManifestReturn {
     let loaded = 0;
     const total = m.totalSlides;
 
+    const baseUrl = getSlidesBaseUrl("destino-ia-workshop") || SLIDES_BASE_URL;
     for (const slide of m.slides) {
-      const url = `${SLIDES_BASE_URL}/${slide.file}`;
+      const url = `${baseUrl}/${slide.file}`;
       if (preloadedImages.has(url)) {
         loaded++;
         continue;

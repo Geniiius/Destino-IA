@@ -47,6 +47,8 @@ import { useSlideManifest } from "@/hooks/useSlideManifest";
 import { SlidePresenter, SlideThumbnail } from "@/components/SlidePresenter";
 import { useAuth } from "@/hooks/useAuth";
 import { isAuthConfigured } from "@/services/auth";
+import { useSlideGeneration } from "@/features/admin/hooks/useSlideGeneration";
+import { uploadPresentation } from "@/services/slidesStorage";
 
 // Vue participant (pour preview admin)
 import { WorkshopView } from "@/features/workshop/components/WorkshopView";
@@ -78,6 +80,7 @@ import {
   KeyRound,
   Copy,
   Check,
+  Upload,
 } from "lucide-react";
 import type { Participant, ActiveTab } from "@/types";
 import { useParticipants } from "@/hooks/useParticipants";
@@ -190,6 +193,35 @@ export const AdminDashboard: React.FC = () => {
     { participantName: string; email: string; password: string; time: string }[]
   >([]);
   const [showPasswordLog, setShowPasswordLog] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const { processDocument, isProcessing, error: genError } = useSlideGeneration({
+    onSuccess: async (slides) => {
+      setIsUploading(true);
+      try {
+        const sid = liveState.session_id || "destino-ia-workshop";
+        const result = await uploadPresentation(slides, sid);
+        if (result.success) {
+           window.location.reload();
+        } else {
+           alert("Erreur: " + result.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erreur upload");
+      } finally {
+        setIsUploading(false);
+      }
+    }
+  });
+
+  const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processDocument(file);
+    }
+    e.target.value = "";
+  };
 
   // ── Auto-switch to exercises tab when exercise is active ──
   useEffect(() => {
@@ -823,14 +855,28 @@ export const AdminDashboard: React.FC = () => {
         {/* VOLET DROIT - Playlist des Slides (compact) */}
         {/* ============================================ */}
         <aside className="w-64 flex-shrink-0 border-l border-white/10 bg-black/20 flex flex-col">
-          <div className="p-3 border-b border-white/10">
-            <div className="flex items-center gap-2">
-              <Presentation className="w-4 h-4 text-emerald-500" />
-              <h2 className="text-white font-semibold text-sm">Slides</h2>
-              <span className="text-gray-500 text-xs ml-auto">
+          <div className="p-3 border-b border-white/10 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Presentation className="w-4 h-4 text-emerald-500" />
+                <h2 className="text-white font-semibold text-sm">Slides</h2>
+              </div>
+              <span className="text-gray-500 text-xs">
                 {totalSlides}
               </span>
             </div>
+            
+            {/* Upload Button */}
+            <label className="flex items-center justify-center gap-2 w-full px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg cursor-pointer transition-colors text-xs font-medium">
+              {isProcessing || isUploading ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Upload className="w-3.5 h-3.5" />
+              )}
+              <span>{isProcessing ? "Conversion..." : isUploading ? "Upload..." : "Importer PDF"}</span>
+              <input type="file" accept=".pdf" className="hidden" onChange={handlePdfUpload} disabled={isProcessing || isUploading} />
+            </label>
+            {genError && <p className="text-red-400 text-xs">{genError}</p>}
           </div>
 
           {/* Liste des slides avec miniatures */}

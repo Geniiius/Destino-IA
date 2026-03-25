@@ -179,7 +179,7 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
     const {
       data: { user },
       error: userError,
-    } = await withTimeout(supabase.auth.getUser(), 3000, "getUser");
+    } = await withTimeout(supabase.auth.getUser(), 10000, "getUser");
     if (userError || !user) {
       if (userError) {
         console.warn("[Auth] getUser error:", userError.message);
@@ -197,7 +197,7 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
       return null;
     }
 
-    const profile = await withTimeout(getProfile(user.id), 3000, "getProfile");
+    const profile = await withTimeout(getProfile(user.id), 10000, "getProfile");
 
     // Si le profil n'existe pas encore (trigger pas encore exécuté), créer un profil minimal
     if (!profile) {
@@ -401,7 +401,7 @@ export function onAuthStateChange(
       try {
         const profile = await withTimeout(
           getProfile(session.user.id),
-          3000,
+          10000,
           "onAuthChange:getProfile",
         );
         callback(profile);
@@ -415,7 +415,7 @@ export function onAuthStateChange(
       try {
         const profile = await withTimeout(
           getProfile(session.user.id),
-          3000,
+          10000,
           "onAuthChange:tokenRefresh",
         );
         callback(profile);

@@ -8,8 +8,10 @@
 import { useState, useCallback } from "react";
 import type { Slide, SlideType } from "@/types";
 
+export type GeneratedSlide = Slide & { blob: Blob };
+
 interface UseSlideGenerationOptions {
-  onSuccess?: (slides: Slide[]) => void;
+  onSuccess?: (slides: GeneratedSlide[]) => void;
   onError?: (error: Error) => void;
 }
 
@@ -23,7 +25,8 @@ interface UseSlideGenerationReturn {
 interface PDFPage {
   title: string;
   content: string;
-  imageUrl: string; // Data URL de l'image de la page
+  imageUrl: string; // URL object local
+  blob: Blob;
 }
 
 // Constantes para evitar números mágicos
@@ -77,7 +80,11 @@ export function useSlideGeneration(
           viewport: viewport,
         }).promise;
 
-        const imageUrl = canvas.toDataURL("image/jpeg", 0.85); // Convertir en JPEG avec 85% qualité
+        // Convertir en WebP (beaucoup plus léger que JPEG)
+        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.8));
+        if (!blob) throw new Error("Erreur de conversion WebP sur la page " + i);
+        
+        const imageUrl = URL.createObjectURL(blob);
 
         // Extraer título (primera línea con contenido significativo)
         const lines = pageText
@@ -89,7 +96,7 @@ export function useSlideGeneration(
           .join(" ")
           .substring(0, MAX_CONTENT_LENGTH);
 
-        pages.push({ title, content, imageUrl });
+        pages.push({ title, content, imageUrl, blob });
       }
     }
 
@@ -143,7 +150,7 @@ export function useSlideGeneration(
         }
 
         // 2. Crear slides desde las páginas extraídas
-        const slides: Slide[] = pages.map((page, idx) => ({
+        const slides: GeneratedSlide[] = pages.map((page, idx) => ({
           id: `pdf-${Date.now()}-${idx}`,
           title: page.title,
           subtitle: `Página ${idx + 1} de ${pages.length}`,
@@ -152,6 +159,7 @@ export function useSlideGeneration(
           order_index: idx,
           is_active: idx === 0,
           imageUrl: page.imageUrl, // Ajouter l'image de la page
+          blob: page.blob,         // Ajouter le blob pour l'upload
         }));
 
         options.onSuccess?.(slides);

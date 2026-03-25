@@ -53,7 +53,7 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ children }) => {
   // Vérification fallback
   useEffect(() => {
     if (!useSupabaseAuth) {
-      const stored = sessionStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === "true") setFallbackAuth(true);
       setFallbackChecking(false);
     }
@@ -87,7 +87,7 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ children }) => {
       // Fallback
       await new Promise((resolve) => setTimeout(resolve, 400));
       if (password === FALLBACK_PASSWORD) {
-        sessionStorage.setItem(STORAGE_KEY, "true");
+        localStorage.setItem(STORAGE_KEY, "true");
         setFallbackAuth(true);
       } else {
         setError("Contraseña incorrecta");
@@ -101,7 +101,7 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ children }) => {
     if (useSupabaseAuth) {
       await auth.signOut();
     } else {
-      sessionStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_KEY);
       setFallbackAuth(false);
     }
     window.location.hash = "";

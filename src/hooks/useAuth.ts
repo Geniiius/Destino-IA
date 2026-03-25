@@ -113,7 +113,7 @@ export function useAuth(): UseAuthReturn {
           return prev;
         });
       }
-    }, 3000);
+    }, 10000);
 
     init().finally(() => clearTimeout(safetyTimeout));
 
