@@ -18,6 +18,18 @@ export async function uploadPresentation(
     const uploadedSlides = [];
     let totalSize = 0;
 
+    // Vérifier si le bucket existe (ou au moins tester la connexion au storage)
+    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+    if (bucketsError) {
+      console.warn("Could not list buckets (expected if no admin API key):", bucketsError.message);
+    } else {
+      const slidesBucket = buckets.find(b => b.name === "slides");
+      if (!slidesBucket) {
+        console.error("CRITICAL: Bucket 'slides' not found in Supabase Storage. Please create it.");
+        return { success: false, error: "Le bucket 'slides' n'existe pas dans Supabase Storage." };
+      }
+    }
+
     // 1. Upload all WebP blobs
     for (let i = 0; i < slides.length; i++) {
       const slide = slides[i];
@@ -34,6 +46,7 @@ export async function uploadPresentation(
         });
 
       if (error) {
+        console.error("Storage upload error details:", error);
         throw new Error(`Error uploading slide ${fileName}: ${error.message}`);
       }
 
@@ -75,6 +88,7 @@ export async function uploadPresentation(
       });
 
     if (manifestError) {
+      console.error("Manifest upload error details:", manifestError);
       throw new Error(`Error uploading manifest: ${manifestError.message}`);
     }
 

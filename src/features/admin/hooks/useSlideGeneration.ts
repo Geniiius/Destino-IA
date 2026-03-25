@@ -55,8 +55,19 @@ export function useSlideGeneration(
       throw new Error("PDF.js no está cargado. Verifica el CDN en index.html");
     }
 
+    // Configuer le worker et les polices pour éviter les avertissements
+    if (!pdfjs.GlobalWorkerOptions) pdfjs.GlobalWorkerOptions = {};
+    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+      const version = (pdfjs as any).version || "3.11.174";
+      pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.js`;
+    }
+
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+    const fontVersion = (pdfjs as any).version || "3.11.174";
+    const pdf = await pdfjs.getDocument({ 
+      data: arrayBuffer,
+      standardFontDataUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${fontVersion}/standard_fonts/`
+    }).promise;
     const pages: PDFPage[] = [];
 
     for (let i = 1; i <= pdf.numPages; i++) {
