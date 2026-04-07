@@ -13,6 +13,9 @@ export type GeneratedSlide = Slide & { blob: Blob };
 interface UseSlideGenerationOptions {
   onSuccess?: (slides: GeneratedSlide[]) => void;
   onError?: (error: Error) => void;
+  /** Called with the concatenated raw text from all PDF pages (before truncation).
+   *  Use this to trigger quiz generation without re-reading the PDF. */
+  onTextExtracted?: (fullText: string) => void;
 }
 
 interface UseSlideGenerationReturn {
@@ -25,6 +28,7 @@ interface UseSlideGenerationReturn {
 interface PDFPage {
   title: string;
   content: string;
+  rawText: string; // Full untruncated page text — used for quiz generation
   imageUrl: string; // URL object local
   blob: Blob;
 }
@@ -108,7 +112,7 @@ export function useSlideGeneration(
           .join(" ")
           .substring(0, MAX_CONTENT_LENGTH);
 
-        pages.push({ title, content, imageUrl, blob });
+        pages.push({ title, content, rawText: pageText, imageUrl, blob });
       }
     }
 
@@ -159,6 +163,16 @@ export function useSlideGeneration(
 
         if (pages.length === 0) {
           throw new Error("No se pudo extraer contenido del PDF");
+        }
+
+        // 1b. Expose full raw text for quiz generation (uses untruncated rawText)
+        if (options.onTextExtracted) {
+          const MAX_RAW_TEXT = 12_000; // ~2,000 words — enough for Claude Haiku
+          const fullText = pages
+            .map((p) => p.rawText)
+            .join("\n\n")
+            .slice(0, MAX_RAW_TEXT);
+          options.onTextExtracted(fullText);
         }
 
         // 2. Crear slides desde las páginas extraídas

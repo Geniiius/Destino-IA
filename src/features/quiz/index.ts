@@ -4,3 +4,4 @@
  */
 
 export { GamifiedQuiz } from "./components/GamifiedQuiz";
+export type { QuizQuestion } from "./components/GamifiedQuiz";

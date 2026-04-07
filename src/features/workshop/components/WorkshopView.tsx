@@ -10,12 +10,14 @@
  * - Persistencia: al reconectarse, recupera el estado exacto
  */
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLiveSession } from "@/hooks/useLiveSession";
 import { useSlideManifest } from "@/hooks/useSlideManifest";
 import { useParticipantPresence } from "@/hooks/useParticipantPresence";
 import { SlidePresenter } from "@/components/SlidePresenter";
 import { GamifiedQuiz } from "@/features/quiz";
+import type { QuizQuestion } from "@/features/quiz";
+import { loadQuizFromStorage } from "@/services/quizGeneration";
 import { AgenciaViajesExercise } from "@/features/workshop/components/exercises/AgenciaViajesExercise";
 import { TextToImageIntro } from "@/features/workshop/components/exercises/TextToImageIntro";
 import { TextToImageCorporate } from "@/features/workshop/components/exercises/TextToImageCorporate";
@@ -91,6 +93,18 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
   });
 
   const { preloadAll } = useSlideManifest();
+
+  // Generated quiz — loaded from Storage when quiz mode becomes active
+  const [generatedQuestions, setGeneratedQuestions] = useState<QuizQuestion[] | null>(null);
+
+  useEffect(() => {
+    if (state.is_quiz_active && !generatedQuestions) {
+      const sid = state.session_id || sessionId || "destino-ia-workshop";
+      loadQuizFromStorage(sid).then((q) => {
+        if (q) setGeneratedQuestions(q);
+      });
+    }
+  }, [state.is_quiz_active, state.session_id, sessionId, generatedQuestions]);
 
   // Heartbeat de presencia — señala la conexión y detecta la desconexión
   useParticipantPresence(participantId);
@@ -328,6 +342,7 @@ export const WorkshopView: React.FC<WorkshopViewProps> = ({
         {state.current_mode === "quiz" && state.is_quiz_active && (
           <GamifiedQuiz
             participantName={participantName}
+            questions={generatedQuestions ?? undefined}
             onClose={() => {
               // Le quiz se ferme quand l'admin change le mode
               // Ne rien faire ici, l'admin contrôle

@@ -32,7 +32,7 @@ import {
 // TYPES
 // ============================================
 
-interface QuizQuestion {
+export interface QuizQuestion {
   id: number;
   question: string;
   options: string[];
@@ -247,12 +247,18 @@ const INITIAL_STATE: QuizState = {
 interface GamifiedQuizProps {
   onClose?: () => void;
   participantName?: string;
+  /** Optional AI-generated questions from PDF. Falls back to built-in questions if not provided. */
+  questions?: QuizQuestion[];
 }
 
 export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
   onClose,
   participantName = "Participante",
+  questions: propQuestions,
 }) => {
+  // Use AI-generated questions if provided and non-empty, else fall back to built-in quiz
+  const questions = propQuestions && propQuestions.length > 0 ? propQuestions : QUIZ_QUESTIONS;
+
   const [state, setState] = useState<QuizState>(INITIAL_STATE);
   const [showIntro, setShowIntro] = useState(true);
   const [animateQuestion, setAnimateQuestion] = useState(false);
@@ -296,8 +302,8 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
     };
   }, []);
 
-  const currentQ = QUIZ_QUESTIONS[state.currentQuestion];
-  const progress = ((state.currentQuestion + 1) / QUIZ_QUESTIONS.length) * 100;
+  const currentQ = questions[state.currentQuestion];
+  const progress = ((state.currentQuestion + 1) / questions.length) * 100;
 
   // Timer effect with proper cleanup
   useEffect(() => {
@@ -420,7 +426,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
   );
 
   const handleNextQuestion = () => {
-    if (state.currentQuestion >= QUIZ_QUESTIONS.length - 1) {
+    if (state.currentQuestion >= questions.length - 1) {
       setState((prev) => ({ ...prev, showResult: true }));
     } else {
       setState((prev) => ({
@@ -440,10 +446,10 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
   };
 
   const correctAnswers = state.answers.filter(
-    (answer, idx) => answer === QUIZ_QUESTIONS[idx]?.correctAnswer,
+    (answer, idx) => answer === questions[idx]?.correctAnswer,
   ).length;
 
-  const percentage = Math.round((correctAnswers / QUIZ_QUESTIONS.length) * 100);
+  const percentage = Math.round((correctAnswers / questions.length) * 100);
 
   // ============================================
   // RENDER: INTRO SCREEN
@@ -489,7 +495,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
             <div className="grid grid-cols-3 gap-4 mb-8">
               <div className="bg-white/5 rounded-xl p-4 text-center">
                 <div className="text-3xl font-bold text-emerald-400">
-                  {QUIZ_QUESTIONS.length}
+                  {questions.length}
                 </div>
                 <div className="text-xs text-gray-500 uppercase tracking-wide">
                   Preguntas
@@ -666,7 +672,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                 </div>
                 <div>
                   <div className="text-4xl font-black text-blue-400">
-                    {correctAnswers}/{QUIZ_QUESTIONS.length}
+                    {correctAnswers}/{questions.length}
                   </div>
                   <div className="text-xs text-gray-500 uppercase tracking-wide">
                     Correctas
@@ -684,7 +690,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                   <div className="text-4xl font-black text-amber-400">
                     {Math.max(
                       ...state.answers.reduce((acc, ans, idx) => {
-                        if (ans === QUIZ_QUESTIONS[idx]?.correctAnswer) {
+                        if (ans === questions[idx]?.correctAnswer) {
                           acc.push((acc[acc.length - 1] || 0) + 1);
                         } else {
                           acc.push(0);
@@ -707,11 +713,11 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
               </h3>
               <div className="space-y-3">
                 {["R", "C", "T", "F", "General"].map((cat) => {
-                  const catQuestions = QUIZ_QUESTIONS.filter(
+                  const catQuestions = questions.filter(
                     (q) => q.category === cat,
                   );
                   const catCorrect = catQuestions.filter((q, _i) => {
-                    const globalIdx = QUIZ_QUESTIONS.findIndex(
+                    const globalIdx = questions.findIndex(
                       (gq) => gq.id === q.id,
                     );
                     return state.answers[globalIdx] === q.correctAnswer;
@@ -899,7 +905,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                 <span className="text-white font-bold">
                   {state.currentQuestion + 1}
                 </span>{" "}
-                de {QUIZ_QUESTIONS.length}
+                de {questions.length}
               </span>
             </div>
 
@@ -1254,7 +1260,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                 onClick={handleNextQuestion}
                 className="w-full btn-elegant-primary py-3 flex items-center justify-center gap-2 group text-sm"
               >
-                {state.currentQuestion >= QUIZ_QUESTIONS.length - 1 ? (
+                {state.currentQuestion >= questions.length - 1 ? (
                   <>
                     <Trophy className="w-5 h-5" />
                     Ver Resultados

@@ -40,13 +40,20 @@ import {
 
 import { sendDirectMessage } from "@/services/directMessages";
 import { forceDisconnectAll } from "@/services/adminUsers";
+import {
+  generateQuizFromText,
+  saveQuizToStorage,
+  loadQuizFromStorage,
+} from "@/services/quizGeneration";
+import type { QuizQuestion } from "@/features/quiz";
 
 // Hooks temps réel
 import { useLiveSession } from "@/hooks/useLiveSession";
-import { useSlideManifest } from "@/hooks/useSlideManifest";
+import { useSlideManifest, setLocalManifest } from "@/hooks/useSlideManifest";
 import { SlidePresenter, SlideThumbnail } from "@/components/SlidePresenter";
 import { useAuth } from "@/hooks/useAuth";
 import { isAuthConfigured } from "@/services/auth";
+import { isSupabaseConfigured } from "@/services/supabase/client";
 import { useSlideGeneration } from "@/features/admin/hooks/useSlideGeneration";
 import { uploadPresentation } from "@/services/slidesStorage";
 
@@ -195,8 +202,31 @@ export const AdminDashboard: React.FC = () => {
   const [showPasswordLog, setShowPasswordLog] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
+  // ── Quiz generation state ─────────────────────
+  type QuizGenStatus = "idle" | "generating" | "ready" | "error";
+  const [quizGenStatus, setQuizGenStatus] = useState<QuizGenStatus>("idle");
+  const [generatedQuestions, setGeneratedQuestions] = useState<QuizQuestion[] | null>(null);
+  const [quizGenError, setQuizGenError] = useState<string | null>(null);
+
+  // Load any previously generated quiz on mount
+  useEffect(() => {
+    const sid = liveState.session_id || "destino-ia-workshop";
+    if (!isSupabaseConfigured()) return;
+    loadQuizFromStorage(sid).then((q) => {
+      if (q) {
+        setGeneratedQuestions(q);
+        setQuizGenStatus("ready");
+      }
+    });
+  }, [liveState.session_id]);
+
   const { processDocument, isProcessing, error: genError } = useSlideGeneration({
     onSuccess: async (slides) => {
+      if (!isSupabaseConfigured()) {
+        // Local mode: inject manifest directly into the cache (no Supabase needed)
+        setLocalManifest(slides.filter((s) => !!s.imageUrl) as Array<{ imageUrl: string; blob: Blob }>);
+        return;
+      }
       setIsUploading(true);
       try {
         const sid = liveState.session_id || "destino-ia-workshop";
@@ -212,7 +242,24 @@ export const AdminDashboard: React.FC = () => {
       } finally {
         setIsUploading(false);
       }
-    }
+    },
+    onTextExtracted: async (fullText) => {
+      if (!isSupabaseConfigured()) return;
+      const sid = liveState.session_id || "destino-ia-workshop";
+      setQuizGenStatus("generating");
+      setQuizGenError(null);
+      try {
+        const questions = await generateQuizFromText(fullText);
+        await saveQuizToStorage(questions, sid);
+        setGeneratedQuestions(questions);
+        setQuizGenStatus("ready");
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Error generando quiz";
+        setQuizGenError(msg);
+        setQuizGenStatus("error");
+        console.error("[QuizGen]", msg);
+      }
+    },
   });
 
   const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -645,11 +692,30 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <div>
                       <h2 className="text-lg font-bold text-white">
-                        Quiz 5 Pasos
+                        {quizGenStatus === "ready" && generatedQuestions
+                          ? "Quiz Generado del PDF"
+                          : "Quiz 5 Pasos"}
                       </h2>
                       <p className="text-gray-400 text-xs">
-                        🎭 ROL · 🎯 OBJETIVO · 🎬 ESCENA · 🎨 ESTILO · 📐
-                        FORMATO
+                        {quizGenStatus === "generating" && (
+                          <span className="flex items-center gap-1 text-purple-400 animate-pulse">
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            Generando quiz con IA...
+                          </span>
+                        )}
+                        {quizGenStatus === "ready" && generatedQuestions && (
+                          <span className="text-emerald-400">
+                            ✓ {generatedQuestions.length} preguntas listas
+                          </span>
+                        )}
+                        {quizGenStatus === "error" && (
+                          <span className="text-red-400">
+                            ✗ {quizGenError ?? "Error al generar"} — usando quiz base
+                          </span>
+                        )}
+                        {quizGenStatus === "idle" && (
+                          <span>Sube un PDF para generar quiz automático</span>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -681,7 +747,13 @@ export const AdminDashboard: React.FC = () => {
                 <div className="grid grid-cols-4 gap-3 mb-4">
                   <div className="bg-white/5 rounded-xl p-3 text-center">
                     <Target className="w-6 h-6 text-blue-400 mx-auto mb-1" />
-                    <div className="text-xl font-bold text-white">15</div>
+                    <div className="text-xl font-bold text-white">
+                      {quizGenStatus === "generating" ? (
+                        <Loader2 className="w-5 h-5 animate-spin mx-auto text-purple-400" />
+                      ) : (
+                        generatedQuestions?.length ?? 15
+                      )}
+                    </div>
                     <div className="text-xs text-gray-500 uppercase tracking-wide">
                       Preguntas
                     </div>
@@ -965,6 +1037,7 @@ export const AdminDashboard: React.FC = () => {
 
             <GamifiedQuiz
               participantName="Vista Previa"
+              questions={generatedQuestions ?? undefined}
               onClose={() => setShowQuizPreview(false)}
             />
           </div>
